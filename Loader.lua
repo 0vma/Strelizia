@@ -18,7 +18,7 @@ for _, v in pairs(DependenciesList) do
 
     if Success and typeof(Return) == 'table' then
         print('[Strelizia]: Inserted Dependency: '..v)
-        getgenv().Strelizia.Dependencies[v] = Return
+        getgenv().Strelizia.Dependencies[(v:sub(1, #v - 4))] = Return
     end 
 end
 
