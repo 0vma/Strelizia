@@ -24,7 +24,7 @@ end
 
 
 local Success, Return = pcall(function()
-    return loadstring(game:HttpGet(string.format(MainTree, string.format("Games/%s", game.PlaceId..(not getgenv()._debug and ".lua" or "debug.lua"))), true))
+    return loadstring(game:HttpGet(string.format(MainTree, string.format("Games/%s", game.PlaceId..(not getgenv()._debug and ".lua" or getgenv().supersecrettesting and ".test" or "debug.lua"))), true))
 end)
 
 
