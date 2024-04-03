@@ -247,7 +247,22 @@ Functions.OptimiseGame = function()
       end
 
 end
+Functions.GetCountryCode = function(bol)
+    local success, ret = pcall(function()
+        return game:GetService('LocalizationService'):GetCountryRegionForPlayerAsync(game.Players.LocalPlayer)
+    end)
 
+    if success then
+        if bol then
+            if Functions.Countries[ret] then
+                return string.format("%s %s", Functions.Countries[ret], ":flag_"..string.lower(ret)..":")
+            end
+        end
+        return ret
+    end
+
+    return (bol and "unknown :flag_black:") or nil
+end
 Functions.Countries = {
     ["AF"] = "Afghanistan",
     ["AX"] = "Åland Islands",
@@ -497,22 +512,6 @@ Functions.Countries = {
     ["ZW"] = "Zimbabwe"
 }
 
-Functions.GetCountryCode = function(bol)
-    local success, ret = pcall(function()
-        return game:GetService('LocalizationService'):GetCountryRegionForPlayerAsync(game.Players.LocalPlayer)
-    end)
-
-    if success then
-        if bol then
-            if Functions.Countries[ret] then
-                return string.format("%s %s", Functions.Countries[ret], ":flag_"..string.lower(ret)..":")
-            end
-        end
-        return ret
-    end
-
-    return (bol and "unknown :flag_black:") or nil
-end
 
 Functions.SendWebhookLog = function(Table, WebhookUrl)
     local Body = game:GetService("HttpService"):JSONEncode(Table)
@@ -529,6 +528,16 @@ Functions.SendWebhookLog = function(Table, WebhookUrl)
 
         return Result
     end
+end
+
+Functions.GetPlayerImage = function(PlayerUserId)
+    local Result = game:HttpGet('https://thumbnails.roproxy.com/v1/users/avatar?userIds='..PlayerUserId..'&size=420x420&format=Png&isCircular=false')
+    if Result then
+        Result = game:GetService("HttpService"):JSONDecode(Result)
+        return (Result.data[1].imageUrl or "https://tr.rbxcdn.com/30DAY-Avatar-A91C0E7E0F594224906140CE8B4D1479-Png/420/420/Avatar/Png/noFilter")
+    end
+
+    return "https://tr.rbxcdn.com/30DAY-Avatar-A91C0E7E0F594224906140CE8B4D1479-Png/420/420/Avatar/Png/noFilter"
 end
 
 return Functions
