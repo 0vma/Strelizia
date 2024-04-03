@@ -247,22 +247,7 @@ Functions.OptimiseGame = function()
       end
 
 end
-Functions.GetCountryCode = function(bol)
-    local success, ret = pcall(function()
-        return game:GetService('LocalizationService'):GetCountryRegionForPlayerAsync(game.Players.LocalPlayer)
-    end)
 
-    if success then
-        if bol then
-            if Functions.Countries[ret] then
-                return string.format("%s %s", Functions.Countries[ret], ":flag_"..string.lower(ret)..":")
-            end
-        end
-        return ret
-    end
-
-    return (bol and "unknown :flag_black:") or nil
-end
 Functions.Countries = {
     ["AF"] = "Afghanistan",
     ["AX"] = "Åland Islands",
@@ -512,6 +497,22 @@ Functions.Countries = {
     ["ZW"] = "Zimbabwe"
 }
 
+Functions.GetCountryCode = function(bol)
+    local success, ret = pcall(function()
+        return game:GetService('LocalizationService'):GetCountryRegionForPlayerAsync(game.Players.LocalPlayer)
+    end)
+
+    if success then
+        if bol then
+            if Functions.Countries[ret] then
+                return string.format("%s %s", Functions.Countries[ret], ":flag_"..string.lower(ret)..":")
+            end
+        end
+        return ret
+    end
+
+    return (bol and "unknown :flag_black:") or nil
+end
 
 Functions.SendWebhookLog = function(Table, WebhookUrl)
     local Body = game:GetService("HttpService"):JSONEncode(Table)
