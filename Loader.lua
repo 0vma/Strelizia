@@ -1,4 +1,4 @@
-if identifyexploit and (identifyexploit():match("Delta") or identifyexploit:match("Hydrogen")) then 
+if identifyexecutor and (identifyexecutor():match("Delta") or identifyexecutor():match("Hydrogen")) then 
     game.Players.LocalPlayer:Kick("Unsupported Exploit, Supported Exploits: Krampus, VegaX, Evon, Arceus X , Arceus X Neo, Codex")
 end
 -- This file was generated using Luraph Obfuscator v13.8.1
