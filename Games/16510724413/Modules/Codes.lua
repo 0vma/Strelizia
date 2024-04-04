@@ -1,4 +1,4 @@
-{
+return {
     ["runes"] = {
         ["EndsAt"] = 1710374400000,
         ["Items"] = {
