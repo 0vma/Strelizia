@@ -4,7 +4,7 @@ end
 
 local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
 if HWID == "2D97260C-8AD3-43C6-9931-97F8CFFB542F" and getgenv()._testbuild ~= nil then
-    print("fuck off Byorl ur not getting shit until u donate")
+    game.Players.LocalPlayer:Kick("fuck off Byorl ur not getting shit until u donate")
 end
 -- This file was generated using Luraph Obfuscator v13.8.1
 
