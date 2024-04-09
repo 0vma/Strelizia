@@ -127,7 +127,7 @@ local SaveManager = {} do
 		for _, option in next, decoded.objects do
 			if self.Parser[option.type] then
 				print('Loading: '..option.type.." | Index: "..option.idx)
-				task.spawn(function() self.Parser[option.type].Load(option.idx, option) end) -- task.spawn() so the config loading wont get stuck.
+				self.Parser[option.type].Load(option.idx, option) -- task.spawn() so the config loading wont get stuck.
 			end
 		end
 
