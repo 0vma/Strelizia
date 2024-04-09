@@ -141,7 +141,9 @@ local aa = {
             GUI = w
         }
         function x.SafeCallback(y, z, ...)
-            return
+            if not z then return end
+            local A, B = pcall(z, ...)
+            return 
         end
         function x.Round(y, z, A)
             if A == 0 then
