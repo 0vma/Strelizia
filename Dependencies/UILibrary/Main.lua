@@ -141,22 +141,7 @@ local aa = {
             GUI = w
         }
         function x.SafeCallback(y, z, ...)
-            if not z then
-                return
-            end
-            local A, B = pcall(z, ...)
-            if not A then
-                local C, D = B:find ":%d+: "
-                if not D then
-                    return x:Notify {Title = "Interface", Content = "Callback error", SubContent = B, Duration = 5}
-                end
-                return x:Notify {
-                    Title = "Interface",
-                    Content = "Callback error",
-                    SubContent = B:sub(D + 1),
-                    Duration = 5
-                }
-            end
+            return
         end
         function x.Round(y, z, A)
             if A == 0 then
