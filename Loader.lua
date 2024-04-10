@@ -1,7 +1,3 @@
-if identifyexecutor and (identifyexecutor():match("Delta") or identifyexecutor():match("Hydrogen")) then 
-    game.Players.LocalPlayer:Kick("Unsupported Executor, Supported Executor: Krampus, VegaX, Evon, Arceus X , Arceus X Neo, Codex")
-end
-
 local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
 if HWID == "2D97260C-8AD3-43C6-9931-97F8CFFB542F" and getgenv()._testbuild ~= nil then
     game.Players.LocalPlayer:Kick("fuck off Byorl ur not getting shit until u donate")
