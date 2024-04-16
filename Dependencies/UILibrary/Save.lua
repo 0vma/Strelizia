@@ -69,7 +69,7 @@ local SaveManager = {} do
 				return { type = "Other", idx = idx, value = object.Value }
 			end,
 			Load = function(idx, data)
-				self.Library.Options[idx] = data
+				SaveManager.Options[idx] = data
           			return true
 			end,
 		},
