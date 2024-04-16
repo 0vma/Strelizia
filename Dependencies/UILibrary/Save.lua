@@ -66,11 +66,10 @@ local SaveManager = {} do
 		},
    		Other = {
 			Save = function(idx, object)
-				return { type = "Other", idx = idx, value = object.Value }
+				return {type = "Other", idx = idx, value = object.Value}
 			end,
 			Load = function(idx, data)
-				SaveManager.Options[idx] = data
-          			return true
+				SaveManager.Options[idx] = {Value = data.value or ""}
 			end,
 		},
 	}
