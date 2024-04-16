@@ -54,7 +54,6 @@ local SaveManager = {} do
 				end
 			end,
 		},
-
 		Input = {
 			Save = function(idx, object)
 				return { type = "Input", idx = idx, text = object.Value }
@@ -65,12 +64,13 @@ local SaveManager = {} do
 				end
 			end,
 		},
-    Other = {
+   		Other = {
 			Save = function(idx, object)
-				return { type = "Other", idx = idx, text = object.Value }
+				return { type = "Other", idx = idx, value = object.Value }
 			end,
 			Load = function(idx, data)
-          return true
+				self.Library.Options[idx] = data
+          			return true
 			end,
 		},
 	}
