@@ -3511,23 +3511,25 @@ local aa = {
                 n(h.Value)
             end
             function h.SetValue(m, n)
-                n = not (not n)
-                h.Value = n
-                ah.OverrideTag(k, {Color = h.Value and "Accent" or "ToggleSlider"})
-                ah.OverrideTag(j, {ImageColor3 = h.Value and "ToggleToggled" or "ToggleSlider"})
-                af:Create(
-                    j,
-                    TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-                    {Position = UDim2.new(0, h.Value and 19 or 2, 0.5, 0)}
-                ):Play()
-                af:Create(
-                    l,
-                    TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-                    {BackgroundTransparency = h.Value and 0 or 1}
-                ):Play()
-                j.ImageTransparency = h.Value and 0 or 0.5
-                g:SafeCallback(h.Callback, h.Value)
-                g:SafeCallback(h.Changed, h.Value)
+                coroutine.wrap(function()
+                    n = not (not n)
+                    h.Value = n
+                    ah.OverrideTag(k, {Color = h.Value and "Accent" or "ToggleSlider"})
+                    ah.OverrideTag(j, {ImageColor3 = h.Value and "ToggleToggled" or "ToggleSlider"})
+                    af:Create(
+                        j,
+                        TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+                        {Position = UDim2.new(0, h.Value and 19 or 2, 0.5, 0)}
+                    ):Play()
+                    af:Create(
+                        l,
+                        TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+                        {BackgroundTransparency = h.Value and 0 or 1}
+                    ):Play()
+                    j.ImageTransparency = h.Value and 0 or 0.5
+                    g:SafeCallback(h.Callback, h.Value)
+                    g:SafeCallback(h.Changed, h.Value)
+                end)()
             end
             function h.Destroy(m)
                 i:Destroy()
