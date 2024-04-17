@@ -3511,7 +3511,6 @@ local aa = {
                 n(h.Value)
             end
             function h.SetValue(m, n)
-                coroutine.wrap(function()
                     n = not (not n)
                     h.Value = n
                     ah.OverrideTag(k, {Color = h.Value and "Accent" or "ToggleSlider"})
@@ -3529,7 +3528,6 @@ local aa = {
                     j.ImageTransparency = h.Value and 0 or 0.5
                     g:SafeCallback(h.Callback, h.Value)
                     g:SafeCallback(h.Changed, h.Value)
-                end)()
             end
             function h.Destroy(m)
                 i:Destroy()
