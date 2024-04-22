@@ -3347,6 +3347,11 @@ function Library:CreateWindow(...)
                 ZIndex = 5;
                 Parent = BoxInner;
             });
+            if type(Properties) == 'table' then
+                for _, v in pairs(Properties) do
+                    GroupboxLabel[_] = v
+                end
+            end
 
             local Container = Library:Create('Frame', {
                 BackgroundTransparency = 1;
@@ -3385,12 +3390,12 @@ function Library:CreateWindow(...)
             return Groupbox;
         end;
 
-        function Tab:AddLeftGroupbox(Name)
-            return Tab:AddGroupbox({ Side = 1; Name = Name; });
+        function Tab:AddLeftGroupbox(Name, Properties)
+            return Tab:AddGroupbox({ Side = 1; Name = Name; Properties = Properties; });
         end;
 
-        function Tab:AddRightGroupbox(Name)
-            return Tab:AddGroupbox({ Side = 2; Name = Name; });
+        function Tab:AddRightGroupbox(Name, Properties)
+            return Tab:AddGroupbox({ Side = 2; Name = Name; Properties = Properties; });
         end;
 
         function Tab:AddTabbox(Info)
