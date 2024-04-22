@@ -15,6 +15,7 @@ local ScreenGui = Instance.new('ScreenGui');
 ProtectGui(ScreenGui);
 
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global;
+ScreenGui.Name = "Linoria"
 ScreenGui.Parent = CoreGui;
 
 local Toggles = {};
@@ -203,8 +204,8 @@ function Library:AddToolTip(InfoStr, HoverInstance)
         Visible = false,
     })
 
-    Library:Create('UIStroke', {
-        Color = Color3.fromRGB(219, 68, 103),
+    local TooltipStroke = Library:Create('UIStroke', {
+        Color = Library.AccentColor,
         Parent = Tooltip
     })
 
@@ -218,6 +219,11 @@ function Library:AddToolTip(InfoStr, HoverInstance)
         ZIndex = Tooltip.ZIndex + 1,
 
         Parent = Tooltip;
+    });
+
+
+    Library:AddToRegistry(TooltipStroke, {
+        Color = 'AccentColor'
     });
 
     Library:AddToRegistry(Tooltip, {
@@ -1537,7 +1543,7 @@ do
                     if clicked then
                         Library:SafeCallback(Button.Func)
                         local a = TweenService:Create(Button.Inner, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                            BackgroundColor3 = Color3.fromRGB(219, 68, 103)
+                            BackgroundColor3 = Library.AccentColor
                         })
                         a:Play()
                         a.Completed:Wait()
@@ -1551,7 +1557,7 @@ do
 
                 Library:SafeCallback(Button.Func);
                 local a = TweenService:Create(Button.Inner, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                    BackgroundColor3 = Color3.fromRGB(219, 68, 103)
+                    BackgroundColor3 = Library.AccentColor
                 })
                 a:Play()
                 a.Completed:Wait()
@@ -2981,6 +2987,8 @@ function Library:CreateWindow(...)
     if type(Config.Title) ~= 'string' then Config.Title = 'No title' end
     if type(Config.TabPadding) ~= 'number' then Config.TabPadding = 0 end
     if type(Config.MenuFadeTime) ~= 'number' then Config.MenuFadeTime = 0.2 end
+    if type(Config.StrokeHighlightSize) ~= 'number' then Config.StrokeHighlightSize = 1 end
+    if type(Config.FrameRoundOffset) ~= 'number' then Config.FrameRoundOffset = 0 end;
 
     if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(175, 50) end
     if typeof(Config.Size) ~= 'UDim2' then Config.Size = UDim2.fromOffset(550, 600) end
@@ -3018,13 +3026,13 @@ function Library:CreateWindow(...)
     Library:MakeDraggable(Inner, 25);
 
     Library:Create('UICorner', {
-        CornerRadius = UDim.new(0, 4),
+        CornerRadius = UDim.new(0, Config.FrameRoundOffset),
         Parent = Inner
     })
 
-    Library:Create("UIStroke", {
-        Color = Color3.fromRGB(219, 68, 103),
-        Thickness = 1,
+    local WindowInnerStroke = Library:Create("UIStroke", {
+        Color = Library.AccentColor,
+        Thickness = Config.StrokeHighlightSize,
         Parent = Inner
     })
 
@@ -3032,6 +3040,10 @@ function Library:CreateWindow(...)
         BackgroundColor3 = 'MainColor';
         BorderColor3 = 'AccentColor';
     });
+
+    Library:AddToRegistry(WindowInnerStroke, {
+        Color = 'AccentColor'
+    })
 
     local WindowLabel = Library:CreateLabel({
         Position = UDim2.new(0, 7, 0, 0);
@@ -3055,14 +3067,18 @@ function Library:CreateWindow(...)
     });
 
     Library:Create('UICorner', {
-        CornerRadius = UDim.new(0, 2),
+        CornerRadius = UDim.new(0, Config.FrameRoundOffset),
         Parent = MainSectionInner
     })
 
-    Library:Create("UIStroke", {
-        Color = Color3.fromRGB(219, 68, 103),
-        Thickness = 1,
+    local MainInnerStroke = Library:Create("UIStroke", {
+        Color = Library.AccentColor,
+        Thickness = Config.StrokeHighlightSize,
         Parent = MainSectionInner
+    })
+
+    Library:AddToRegistry(MainInnerStroke, {
+        Color = 'AccentColor'
     })
     
     Library:AddToRegistry(MainSectionInner, {
@@ -3074,20 +3090,33 @@ function Library:CreateWindow(...)
         BackgroundColor3 = 'BackgroundColor';
     });
 
-    local TabArea = Library:Create('Frame', {
+    local TabArea = Library:Create('ScrollingFrame', {
         BackgroundTransparency = 1;
-        Position = UDim2.new(0, 8, 0, 8);
-        Size = UDim2.new(1, -16, 0, 21);
+        ScrollingDirection = "X";
+        ScrollBarThickness = 0;
+        BorderSizePixel = 0;
+        ScrollBarImageTransparency = 0.7;
+        ScrollBarImageColor3 = Library.AccentColor,
+        CanvasSize = UDim2.new(1, 0, 0, 0),
+        Position = UDim2.new(0, 7, 0, 7);
+        Size = UDim2.new(1, -16, 0, 27);
         ZIndex = 1;
         Parent = MainSectionInner;
     });
 
+
     local TabListLayout = Library:Create('UIListLayout', {
         Padding = UDim.new(0, Config.TabPadding);
         FillDirection = Enum.FillDirection.Horizontal;
+        VerticalAlignment = "Center";
         SortOrder = Enum.SortOrder.LayoutOrder;
         Parent = TabArea;
     });
+
+    Library:Create("UIPadding", {
+        Parent = TabArea,
+        PaddingLeft = UDim.new(0, 1);
+    })
 
     local TabContainer = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
@@ -3100,14 +3129,18 @@ function Library:CreateWindow(...)
     });
 
     Library:Create('UICorner', {
-        CornerRadius = UDim.new(0, 2),
+        CornerRadius = UDim.new(0, Config.FrameRoundOffset),
         Parent = TabContainer
     })
 
-    Library:Create("UIStroke", {
-        Color = Color3.fromRGB(219, 68, 103),
-        Thickness = 1,
+    local TabContainerStroke = Library:Create("UIStroke", {
+        Color = Library.AccentColor,
+        Thickness = Config.StrokeHighlightSize,
         Parent = TabContainer
+    })
+
+    Library:AddToRegistry(TabContainerStroke, {
+        Color = 'AccentColor'
     })
     
 
@@ -3120,32 +3153,41 @@ function Library:CreateWindow(...)
         WindowLabel.Text = Title;
     end;
 
+    local _TabAmount = 0
+    local _TotalSize = 0
     function Window:AddTab(Name)
+        _TabAmount += 1
         local Tab = {
             Groupboxes = {};
             Tabboxes = {};
         };
 
         local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 16);
-
+        _TotalSize += TabButtonWidth + 8 + 4
         local TabButton = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
             BorderColor3 = Library.OutlineColor;
             BorderSizePixel = 0;
-            Size = UDim2.new(0, TabButtonWidth + 8 + 4, 1, 0);
+            Size = UDim2.new(0, TabButtonWidth + 8 + 4, 0.85, 0);
             ZIndex = 1;
             Parent = TabArea;
         });
 
+        TabArea.CanvasSize = UDim2.fromOffset((_TotalSize + (_TabAmount * Config.TabPadding) + 2), 0)
+
         Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 2),
+            CornerRadius = UDim.new(0, Config.FrameRoundOffset),
             Parent = TabButton
         })
 
-        Library:Create('UIStroke', {
-            Color = Color3.fromRGB(219, 68, 103),
-            Thickness = 1,
+        local TabButtonColor = Library:Create('UIStroke', {
+            Color = Library.AccentColor,
+            Thickness = Config.StrokeHighlightSize,
             Parent = TabButton
+        })
+
+        Library:AddToRegistry(TabButtonColor, {
+            Color = 'AccentColor'
         })
 
         Library:AddToRegistry(TabButton, {
@@ -3225,10 +3267,10 @@ function Library:CreateWindow(...)
             end;
 
             TweenService:Create(TabButton, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                BackgroundColor3 = Color3.fromRGB(219, 68, 103)
+                BackgroundColor3 = Library.AccentColor
             }):Play()
         
-            Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'MainColor';
+            Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'AccentColor';
             TabFrame.Visible = true;
         end;
 
