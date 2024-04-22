@@ -3348,7 +3348,7 @@ function Library:CreateWindow(...)
                 Parent = BoxInner;
             });
             if type(Info.Properties) == 'table' then
-                for _, v in pairs(Properties) do
+                for _, v in pairs(Info.Properties) do
                     GroupboxLabel[_] = v
                 end
             end
