@@ -1362,7 +1362,7 @@ do
         });
     end;
 
-    function Funcs:AddLabel(Text, DoesWrap)
+    function Funcs:AddLabel(Text, DoesWrap, Properties)
         local Label = {};
 
         local Groupbox = self;
@@ -1389,6 +1389,12 @@ do
                 SortOrder = Enum.SortOrder.LayoutOrder;
                 Parent = TextLabel;
             });
+        end
+
+        if type(Properties) == 'table' then
+            for _, v in pairs(Properties) do
+                TextLabel[_] = v
+            end
         end
 
         Label.TextLabel = TextLabel;
