@@ -280,7 +280,7 @@ local SaveManager = {} do
 		section:AddButton('Share Config (Clipboard)', function()
 			local Result, Configuration = SaveManager:GetRaw();
 			if Result then
-				local Format = "-- Execute this to obtain the configuration (Must have Strelizia loaded!)\nif not isfolder('Strelizia') then makefolder('Strelizia'); makefolder('Strelizia/'..tostring(game.PlaceId)); makefolder('Strelizia/'..tostring(game.PlaceId)..'/themes'); makefolder('Strelizia/'..tostring(game.PlaceId)..'/settings') end;\nlocal s, r = pcall(writefile, 'Strelizia/'..tostring(game.PlaceId)..'/settings/%s.cfg', %s)\nif not s then Library:Notify('Failed to write config: '..r) end"
+				local Format = "-- Execute this to obtain the configuration (Must have Strelizia loaded!)\nif not isfolder('Strelizia') then makefolder('Strelizia'); makefolder('Strelizia/'..tostring(game.PlaceId)); makefolder('Strelizia/'..tostring(game.PlaceId)..'/themes'); makefolder('Strelizia/'..tostring(game.PlaceId)..'/settings') end;\nlocal s, r = pcall(writefile, 'Strelizia/'..tostring(game.PlaceId)..'/settings/%s.json', '%s')\nif not s then Library:Notify('Failed to write config: '..r) end"
 				setclipboard(string.format(Format, Options.SaveManager_ConfigList.Value or "ConfigImport", Configuration))
 				self.Library:Notify("Config loader copied to clipboard!")
 				return true
