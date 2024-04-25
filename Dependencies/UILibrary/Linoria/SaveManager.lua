@@ -281,7 +281,7 @@ local SaveManager = {} do
 			local Result, Configuration = SaveManager:GetRaw();
 			if Result then
 				local Format = "-- Execute this to obtain the configuration (Must have Strelizia loaded!)\nif not isfolder('Strelizia') then makefolder('Strelizia'); makefolder('Strelizia/'..tostring(game.PlaceId)); makefolder('Strelizia/'..tostring(game.PlaceId)..'/themes'); makefolder('Strelizia/'..tostring(game.PlaceId)..'/settings') end;\nlocal s, r = pcall(writefile, 'Strelizia/'..tostring(game.PlaceId)..'/settings/%s.json', '%s')\nif not s then Library:Notify('Failed to write config: '..r) end"
-				setclipboard(string.format(Format, Options.SaveManager_ConfigList.Value or "ConfigImport", Configuration))
+				setclipboard(string.format(Format, Options.SaveManager_ConfigList.Value or ("ConfigImport-"..os.time()), Configuration))
 				self.Library:Notify("Config loader copied to clipboard!")
 				return true
 			end
