@@ -111,6 +111,32 @@ local SaveManager = {} do
 		return true
 	end
 
+	function SaveManager:GetRaw()
+	    local data = {
+	        objects = {}
+	    }
+	
+	    for idx, toggle in next, Toggles do
+	        if self.Ignore[idx] then continue end
+	
+	        table.insert(data.objects, self.Parser[toggle.Type].Save(idx, toggle))
+	    end
+	
+	    for idx, option in next, Options do
+	        if not self.Parser[option.Type] then continue end
+	        if self.Ignore[idx] then continue end
+	
+	        table.insert(data.objects, self.Parser[option.Type].Save(idx, option))
+	    end	
+	
+	    local success, encoded = pcall(httpService.JSONEncode, httpService, data)
+	    if not success then
+	        return false, 'failed to encode data'
+	    end
+	    return true, encoded
+	end
+
+
 	function SaveManager:Load(name)
 		if (not name) then
 			return false, 'no config file is selected'
@@ -249,6 +275,16 @@ local SaveManager = {} do
 		section:AddButton('Refresh list', function()
 			Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
 			Options.SaveManager_ConfigList:SetValue(nil)
+		end)
+
+		section:AddButton('Share Config (Clipboard)', function()
+			local Result, Configuration = SaveManager:GetRaw();
+			if Result then
+				local Format = "-- Execute this to obtain the configuration (Must have Strelizia loaded!)\nif not isfolder('Strelizia') then makefolder('Strelizia'); makefolder('Strelizia/'..tostring(game.PlaceId)); makefolder('Strelizia/'..tostring(game.PlaceId)..'/themes'); makefolder('Strelizia/'..tostring(game.PlaceId)..'/settings') end;\nlocal s, r = pcall(writefile, 'Strelizia/'..tostring(game.PlaceId)..'/settings/%s.cfg', %s)\nif not s then Library:Notify('Failed to write config: '..r) end"
+				setclipboard(string.format(Format, Options.SaveManager_ConfigList.Value or "ConfigImport", Configuration))
+				self.Library:Notify("Config loader copied to clipboard!")
+				return true
+			end
 		end)
 
 		section:AddButton('Set as autoload', function()
