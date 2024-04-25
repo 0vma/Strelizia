@@ -37,7 +37,7 @@ local Library = {
     OutlineColor = Color3.fromRGB(55, 55, 55);
     RiskColor = Color3.fromRGB(255, 50, 50);
 
-    TooltipXSize = 120;
+    TooltipXSize = 240;
 
     Black = Color3.new(0, 0, 0);
     Font = Enum.Font.FredokaOne,
@@ -193,7 +193,7 @@ function Library:MakeDraggable(Instance, Cutoff)
 end;
 
 function Library:AddToolTip(InfoStr, HoverInstance)
-    local X, Y = Library:GetTextBounds(InfoStr, Library.Font, 14);
+    local X, Y = Library:GetTextBounds(InfoStr, Library.Font, 14, nil, true);
     local Tooltip = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor,
         BorderColor3 = Library.OutlineColor,
@@ -321,8 +321,8 @@ function Library:MapValue(Value, MinA, MaxA, MinB, MaxB)
     return (1 - ((Value - MinA) / (MaxA - MinA))) * MinB + ((Value - MinA) / (MaxA - MinA)) * MaxB;
 end;
 
-function Library:GetTextBounds(Text, Font, Size, Resolution)
-    local Bounds = TextService:GetTextSize(Text, Size, Font, Resolution or Vector2.new(Library.TooltipXSize, 1080))
+function Library:GetTextBounds(Text, Font, Size, Resolution, IsTooltip)
+    local Bounds = TextService:GetTextSize(Text, Size, Font, Resolution or Vector2.new((IsTooltip and Library.TooltipXSize) or 1920, 1080))
     return Bounds.X, Bounds.Y
 end;
 
