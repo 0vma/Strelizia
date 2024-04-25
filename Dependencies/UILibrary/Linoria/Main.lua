@@ -35,7 +35,9 @@ local Library = {
     BackgroundColor = Color3.fromRGB(28, 28, 28);
     AccentColor = Color3.fromRGB(219, 68, 103);
     OutlineColor = Color3.fromRGB(55, 55, 55);
-    RiskColor = Color3.fromRGB(255, 50, 50),
+    RiskColor = Color3.fromRGB(255, 50, 50);
+
+    TooltipXSize = 120;
 
     Black = Color3.new(0, 0, 0);
     Font = Enum.Font.FredokaOne,
@@ -318,7 +320,7 @@ function Library:MapValue(Value, MinA, MaxA, MinB, MaxB)
 end;
 
 function Library:GetTextBounds(Text, Font, Size, Resolution)
-    local Bounds = TextService:GetTextSize(Text, Size, Font, Resolution or Vector2.new(1920, 1080))
+    local Bounds = TextService:GetTextSize(Text, Size, Font, Resolution or Vector2.new(Library.TooltipXSize, 1080))
     return Bounds.X, Bounds.Y
 end;
 
