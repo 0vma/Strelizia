@@ -1624,7 +1624,8 @@ do
         return Button;
     end;
 
-    function Funcs:AddDivider(Options)
+    function Funcs:AddDivider(preference)
+        local Options = (preference or {})
         local Groupbox = self;
         local Container = self.Container
 
