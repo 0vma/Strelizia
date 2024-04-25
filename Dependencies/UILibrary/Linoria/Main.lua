@@ -1624,7 +1624,7 @@ do
         return Button;
     end;
 
-    function Funcs:AddDivider()
+    function Funcs:AddDivider(Options)
         local Groupbox = self;
         local Container = self.Container
 
@@ -1632,11 +1632,15 @@ do
             Type = 'Divider',
         }
 
-        Groupbox:AddBlank(2);
+        local DividePixelSize = (type(Options.Size) == 'number' and Options.Size or 5)
+        local UpperBlanks = (type(Options.UpperBlanks) == 'number' and Options.UpperBlanks or 2)
+        local LowerBlanks = (type(Options.LowerBlanks) == 'number' and Options.LowerBlanks or 9)
+
+        Groupbox:AddBlank(UpperBlanks);
         local DividerOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, -4, 0, 5);
+            Size = UDim2.new(1, -4, 0, DividePixelSize);
             ZIndex = 5;
             Parent = Container;
         });
@@ -1659,7 +1663,7 @@ do
             BorderColor3 = 'OutlineColor';
         });
 
-        Groupbox:AddBlank(9);
+        Groupbox:AddBlank(LowerBlanks);
         Groupbox:Resize();
     end
 
