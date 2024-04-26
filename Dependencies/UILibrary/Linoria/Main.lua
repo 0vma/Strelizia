@@ -1553,29 +1553,34 @@ do
                     task.defer(rawset, Button, 'Locked', false)
 
                     if clicked then
+                        coroutine.wrap(function()
+                            local a = TweenService:Create(Button.Inner, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                                BackgroundColor3 = Library.AccentColor
+                            })
+                            a:Play()
+                            a.Completed:Wait()
+                            local a = TweenService:Create(Button.Inner, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                                BackgroundColor3 = Library.MainColor
+                            }):Play()
+                            return true
+                        end)()
                         Library:SafeCallback(Button.Func)
-                        local a = TweenService:Create(Button.Inner, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                            BackgroundColor3 = Library.AccentColor
-                        })
-                        a:Play()
-                        a.Completed:Wait()
-                        local a = TweenService:Create(Button.Inner, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                            BackgroundColor3 = Library.MainColor
-                        }):Play()
                     end
 
                     return
                 end
-
+                coroutine.wrap(function()
+                    local a = TweenService:Create(Button.Inner, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                        BackgroundColor3 = Library.AccentColor
+                    })
+                    a:Play()
+                    a.Completed:Wait()
+                    local a = TweenService:Create(Button.Inner, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                        BackgroundColor3 = Library.MainColor
+                    }):Play()
+                    return true
+                end)()
                 Library:SafeCallback(Button.Func);
-                local a = TweenService:Create(Button.Inner, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                    BackgroundColor3 = Library.AccentColor
-                })
-                a:Play()
-                a.Completed:Wait()
-                local a = TweenService:Create(Button.Inner, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                    BackgroundColor3 = Library.MainColor
-                }):Play()
             end)
         end
 
