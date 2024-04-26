@@ -27,6 +27,7 @@ getgenv().Options = Options;
 local Library = {
     Registry = {};
     RegistryMap = {};
+    Unloaded = false;
 
     HudRegistry = {};
 
@@ -404,6 +405,7 @@ function Library:Unload()
 
      -- Call our unload callback, maybe to undo some hooks etc
     if Library.OnUnload then
+        Library.Unloaded = true
         Library.OnUnload()
     end
 
