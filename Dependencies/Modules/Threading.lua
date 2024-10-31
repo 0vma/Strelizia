@@ -7,6 +7,7 @@ local thread = {
             for _, con in pairs(__cache[n].connections) do pcall(con.Disconnect, con) end 
         
             self.__cache[n] = nil
+            print(string.format('Successfully closed thread %s', n))
         end
     end,
     new = function(self, n: string, f: "function")
@@ -30,7 +31,7 @@ local thread = {
         return (self.__cache[n] and true or false)
     end,
     closeall = function(self)
-        for _, thread in pairs(self) do
+        for _, thread in pairs(self.__cache) do
             self:close(thread)
         end
     end
