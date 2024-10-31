@@ -5,7 +5,12 @@ Utils.TimeToFormat = function(Time: number, Format: string)
     return os.date(Format, Time)
 end 
 
-Utils.FormatHMS = function(Time: number)
+Utils.CommaNumber = function(number: number)
+   number = tostring(number)
+   return number:reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
+end
+
+Utils.FormatHMS = function(Seconds: number)
 	local Minutes = (Seconds - Seconds%60)/60
 	Seconds = Seconds - Minutes*60
 	local Hours = (Minutes - Minutes%60)/60
