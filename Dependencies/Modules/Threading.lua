@@ -32,7 +32,7 @@ local thread = {
     end,
     closeall = function(self)
         for _, thread in pairs(self.__cache) do
-            self:close(thread)
+            self:close(_)
         end
     end
 }
