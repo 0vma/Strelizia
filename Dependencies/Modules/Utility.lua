@@ -5,7 +5,7 @@ Utils.TimeToFormat = function(Time: number, Format: string)
     return os.date(Format, Time)
 end 
 
-Utils.FormatHMS = function(Time: number)
+Utils.FormatHMS = function(Seconds: number)
 	local Minutes = (Seconds - Seconds%60)/60
 	Seconds = Seconds - Minutes*60
 	local Hours = (Minutes - Minutes%60)/60
