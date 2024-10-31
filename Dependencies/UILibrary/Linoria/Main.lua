@@ -1705,6 +1705,12 @@ do
             Parent = Container;
         });
 
+        if Info.Properties and info.Properties.Label then
+            for _, v in pairs(info.Properties.Label) do
+                InputLabel[_] = v 
+            end 
+        end
+
         Groupbox:AddBlank(1);
 
         local TextBoxOuter = Library:Create('Frame', {
@@ -1777,6 +1783,12 @@ do
             ZIndex = 7;
             Parent = Container;
         });
+
+        if Info.Properties and info.Properties.Box then
+            for _, v in pairs(info.Properties.Box) do
+                Box[_] = v 
+            end 
+        end
 
         Library:ApplyTextStroke(Box);
 
