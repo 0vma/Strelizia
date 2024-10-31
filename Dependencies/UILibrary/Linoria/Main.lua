@@ -1705,8 +1705,8 @@ do
             Parent = Container;
         });
 
-        if Info.Properties and info.Properties.Label then
-            for _, v in pairs(info.Properties.Label) do
+        if Info.Properties and Info.Properties.Label then
+            for _, v in pairs(Info.Properties.Label) do
                 InputLabel[_] = v 
             end 
         end
@@ -1784,8 +1784,8 @@ do
             Parent = Container;
         });
 
-        if Info.Properties and info.Properties.Box then
-            for _, v in pairs(info.Properties.Box) do
+        if Info.Properties and Info.Properties.Box then
+            for _, v in pairs(Info.Properties.Box) do
                 Box[_] = v 
             end 
         end
