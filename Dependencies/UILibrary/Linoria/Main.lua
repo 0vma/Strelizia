@@ -11,10 +11,7 @@ local Mouse = LocalPlayer:GetMouse();
 
 local ProtectGui = protectgui or (syn and syn.protect_gui) or (function() end);
 local function removeColorTags(text)
-	text = text:gsub("<font color=\"rgb%(%d+,%s*%d+,%s*%d+%)\">", "")
-	
-	text = text:gsub("</font>", "")
-	return text
+    return text:gsub("<.->", "")
 end
 
 local ScreenGui = Instance.new('ScreenGui');
