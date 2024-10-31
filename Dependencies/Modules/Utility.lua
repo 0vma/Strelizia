@@ -5,7 +5,7 @@ Utils.TimeToFormat = function(Time: number, Format: string)
     return os.date(Format, Time)
 end 
 
-Utils.FormatHMS = function(Seconds: number)
+Utils.FormatHMS = function(Time: number)
 	local Minutes = (Seconds - Seconds%60)/60
 	Seconds = Seconds - Minutes*60
 	local Hours = (Minutes - Minutes%60)/60
@@ -13,6 +13,9 @@ Utils.FormatHMS = function(Seconds: number)
 	return string.format("%02i", Hours)..":"..string.format("%02i", Minutes)..":"..string.format("%02i", Seconds)
 end 
 
+Utils.DecimalRound = function(number: number, decimals: number)
+    return (math.round(number / 10^decimals)  / 10^decimals)
+end
 
 Utils.GetGameInfo = function(Game: number)
     local Success, Return = pcall(Marketplace.GetProductInfo, Marketplace, Game)
@@ -32,7 +35,7 @@ Utils.IsFunctionHooked = function(f, restore: boolean) -- // more secure way to 
         if restore then
             restorefunction(f)
         end 
-        
+
         return true 
     end 
 
