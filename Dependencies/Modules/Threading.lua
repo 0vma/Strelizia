@@ -4,7 +4,13 @@ local thread = {
         if self.__cache[n] then
             pcall(coroutine.close, self.__cache[n].f)
 
-            for _, con in pairs(self.__cache[n].connections) do pcall(con.Disconnect, con) end 
+            for _, con in pairs(self.__cache[n].connections) do
+                if typeof(con) == "RBXScriptConnection" then
+                    pcall(con.Disconnect, con) 
+                elseif typeof(con) == "function" then 
+                    pcall(con) -- // clean up function
+                end 
+            end 
         
             self.__cache[n] = nil
             print(string.format('Successfully closed thread %s', n))
