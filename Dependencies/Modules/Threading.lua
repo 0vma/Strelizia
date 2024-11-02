@@ -23,13 +23,13 @@ local thread = {
 
         return self.__cache[n]
     end,
-    conn = function(self, connection: any)
-        if not self.__cache[connection] then
+    conn = function(self, thread: string, connection: any)
+        if not self.__cache[thread] then
             warn("failed to create an connection, failed to find the specific thread")
             return false
         end
-
-        table.insert(self.__cache[connection]['connections'], connection)
+        
+        table.insert(self.__cache[thread]['connections'], connection)
 
         return connection
     end,
