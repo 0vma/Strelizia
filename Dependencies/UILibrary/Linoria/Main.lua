@@ -17,7 +17,7 @@ end
 local ScreenGui = Instance.new('ScreenGui');
 ProtectGui(ScreenGui);
 
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global;
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
 ScreenGui.Name = "Linoria"
 ScreenGui.Parent = CoreGui;
 
