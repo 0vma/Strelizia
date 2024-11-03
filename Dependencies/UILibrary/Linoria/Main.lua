@@ -210,6 +210,7 @@ function Library:MakeDraggable(Instance, Cutoff)
 
     if is_mobile then
         Instance.InputBegan:Connect(function(Input)
+            print(Input.UserInputType)
             if Input.UserInputType == Enum.UserInputType.Touch then
                 local ObjPos = Vector2.new(
                     Mouse.X - Instance.AbsolutePosition.X,
@@ -219,8 +220,9 @@ function Library:MakeDraggable(Instance, Cutoff)
                 if ObjPos.Y > (Cutoff or 40) then
                     return;
                 end;
-    
+                print('is mb active: '..tostring(is_mb_active))
                 while (is_mb_active) do
+                    print('Yea bro am active sigma')
                     Instance.Position = UDim2.new(
                         0,
                         Mouse.X - ObjPos.X + (Instance.Size.X.Offset * Instance.AnchorPoint.X),
