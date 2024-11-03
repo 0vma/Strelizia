@@ -215,7 +215,7 @@ function Library:MakeDraggable(Instance, Cutoff)
     end)]]
 
     if is_mobile then
-        Instance.MouseButton1Down:Connect(function(Input)
+        Instance.InputBegan:Connect(function(Input)
             print(Input.UserInputType)
             if Input.UserInputType == Enum.UserInputType.Touch then
                 local ObjPos = Vector2.new(
