@@ -61,10 +61,13 @@ local is_mobile = (InputService.TouchEnabled and (not InputService.KeyboardEnabl
 
 if is_mobile then
     InputService.TouchStarted:Connect(function(args)
+        print('mb active')
         is_mb_active = true
     end)
 
     InputService.TouchEnded:Connect(function(args)
+        print('inactive')
+        
         is_mb_active = false
     end)
 end
