@@ -1,4 +1,4 @@
-print('ver0')
+print('ver1')
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -1607,7 +1607,7 @@ do
 
                 print(Input.UserInputType)
 
-                if (Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Info.UserInputType ~= Enum.UserInfoType.Touch) then
+                if (Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Info.UserInputType ~= Enum.UserInputType.Touch) then
                     return false
                 end
 
