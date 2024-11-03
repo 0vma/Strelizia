@@ -17,7 +17,7 @@ end
 local ScreenGui = Instance.new('ScreenGui');
 ProtectGui(ScreenGui);
 
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global;
 ScreenGui.Name = "Linoria"
 ScreenGui.Parent = CoreGui;
 
@@ -221,31 +221,18 @@ function Library:MakeDraggable(Instance, Cutoff)
 
     if is_mobile then
         Instance.InputBegan:Connect(function(Input)
-            print(Input.UserInputType)
             if Input.UserInputType == Enum.UserInputType.Touch then
-                local ObjPos = Vector2.new(
-                    Mouse.X - Instance.AbsolutePosition.X,
-                    Mouse.Y - Instance.AbsolutePosition.Y
-                );
-    
-                if ObjPos.Y > (Cutoff or 40) then
-                    return;
-                end;
-                print('is mb active: '..tostring(is_mb_active))
-                while (is_mb_active) do
-                    print('Yea bro am active sigma')
-                    Instance.Position = UDim2.new(
-                        0,
-                        Mouse.X - ObjPos.X + (Instance.Size.X.Offset * Instance.AnchorPoint.X),
-                        0,
-                        Mouse.Y - ObjPos.Y + (Instance.Size.Y.Offset * Instance.AnchorPoint.Y)
-                    );
-    
-                    RenderStepped:Wait();
-                end;
+                mouse1press()
             end;
         end)
-    else
+
+        Instance.InputEnded:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.Touch then
+                mouse1release()
+            end;
+        end)
+    end 
+
         Instance.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 then
                 local ObjPos = Vector2.new(
@@ -269,7 +256,6 @@ function Library:MakeDraggable(Instance, Cutoff)
                 end;
             end;
         end)
-    end
 end;
 
 function Library:AddToolTip(InfoStr, HoverInstance)
