@@ -62,13 +62,18 @@ local is_mobile = (InputService.TouchEnabled and (not InputService.KeyboardEnabl
 if is_mobile then
     InputService.InputBegan:Connect(function(args)
         if args.UserInputType == Enum.UserInputType.Touch then
-            print('mb active')
+            if Library.Notify then 
+                Library:Notify("active")
+            end
             is_mb_active = true
         end
     end)
 
     InputService.InputEnded:Connect(function(args)
         if args.UserInputType == Enum.UserInputType.Touch then
+            if Library.Notify then 
+                Library:Notify("not active")
+            end
             print('mb inactive')
             is_mb_active = false
         end
