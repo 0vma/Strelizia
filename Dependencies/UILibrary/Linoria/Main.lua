@@ -1401,7 +1401,7 @@ do
                 KeyPicker:Update();
             end;
 
-            if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInfoType == Enum.UserInfoType.Touch) then
+            if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInfoType.Touch) then
                 local AbsPos, AbsSize = ModeSelectOuter.AbsolutePosition, ModeSelectOuter.AbsoluteSize;
 
                 if Mouse.X < AbsPos.X or Mouse.X > AbsPos.X + AbsSize.X
@@ -1612,7 +1612,7 @@ do
             end
 
             Button.Outer.InputBegan:Connect(function(Input)
-                if not ValidateClick(Input) then return end
+                if not ValidateClick(Input) then print('hahah no valid noob') return end
                 if Button.Locked then return end
 
                 if Button.DoubleClick then
