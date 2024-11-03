@@ -1607,7 +1607,7 @@ do
 
                 print(Input.UserInputType)
 
-                if (Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Info.UserInputType ~= Enum.UserInputType.Touch) then
+                if (Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.Touch) then
                     return false
                 end
 
