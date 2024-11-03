@@ -56,6 +56,19 @@ local Library = {
 local RainbowStep = 0
 local Hue = 0
 
+local is_mb_active = false 
+local is_mobile = (InputService.TouchEnabled and (not InputService.KeyboardEnabled ))
+
+if is_mobile then
+    InputService.TouchStarted:Connect(function(args)
+        is_mb_active = true
+    end)
+
+    InputService.TouchEnded:Connect(function(args)
+        is_mb_active = false
+    end)
+end
+
 table.insert(Library.Signals, RenderStepped:Connect(function(Delta)
     RainbowStep = RainbowStep + Delta
 
@@ -195,32 +208,55 @@ function Library:MakeDraggable(Instance, Cutoff)
         end;
     end)]]
 
-    Instance.InputBegan:Connect(function(Input)
-        if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInfoType == Enum.UserInfoType.Touch then
-            print('hold begin')
-            local ObjPos = Vector2.new(
-                Mouse.X - Instance.AbsolutePosition.X,
-                Mouse.Y - Instance.AbsolutePosition.Y
-            );
-
-            if ObjPos.Y > (Cutoff or 40) then
-                return;
-            end;
-
-            while (InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) or InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)) do
-                print('holddddd ittt')
-                Instance.Position = UDim2.new(
-                    0,
-                    Mouse.X - ObjPos.X + (Instance.Size.X.Offset * Instance.AnchorPoint.X),
-                    0,
-                    Mouse.Y - ObjPos.Y + (Instance.Size.Y.Offset * Instance.AnchorPoint.Y)
+    if is_mobile then
+        Instance.InputBegan:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.Touch then
+                local ObjPos = Vector2.new(
+                    Mouse.X - Instance.AbsolutePosition.X,
+                    Mouse.Y - Instance.AbsolutePosition.Y
                 );
-
-                RenderStepped:Wait();
+    
+                if ObjPos.Y > (Cutoff or 40) then
+                    return;
+                end;
+    
+                while (is_mb_active) do
+                    Instance.Position = UDim2.new(
+                        0,
+                        Mouse.X - ObjPos.X + (Instance.Size.X.Offset * Instance.AnchorPoint.X),
+                        0,
+                        Mouse.Y - ObjPos.Y + (Instance.Size.Y.Offset * Instance.AnchorPoint.Y)
+                    );
+    
+                    RenderStepped:Wait();
+                end;
             end;
-            print('naur')
-        end;
-    end)
+        end)
+    else
+        Instance.InputBegan:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                local ObjPos = Vector2.new(
+                    Mouse.X - Instance.AbsolutePosition.X,
+                    Mouse.Y - Instance.AbsolutePosition.Y
+                );
+    
+                if ObjPos.Y > (Cutoff or 40) then
+                    return;
+                end;
+    
+                while (InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)) do
+                    Instance.Position = UDim2.new(
+                        0,
+                        Mouse.X - ObjPos.X + (Instance.Size.X.Offset * Instance.AnchorPoint.X),
+                        0,
+                        Mouse.Y - ObjPos.Y + (Instance.Size.Y.Offset * Instance.AnchorPoint.Y)
+                    );
+    
+                    RenderStepped:Wait();
+                end;
+            end;
+        end)
+    end
 end;
 
 function Library:AddToolTip(InfoStr, HoverInstance)
