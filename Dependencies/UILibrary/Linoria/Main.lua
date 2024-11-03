@@ -60,15 +60,18 @@ local is_mb_active = false
 local is_mobile = (InputService.TouchEnabled and (not InputService.KeyboardEnabled ))
 
 if is_mobile then
-    InputService.TouchStarted:Connect(function(args)
-        print('mb active')
-        is_mb_active = true
+    InputService.InputBegan:Connect(function(args)
+        if args.UserInputType == Enum.UserInputType.Touch then
+            print('mb active')
+            is_mb_active = true
+        end
     end)
 
-    InputService.TouchEnded:Connect(function(args)
-        print('inactive')
-        
-        is_mb_active = false
+    InputService.InputEnded:Connect(function(args)
+        if args.UserInputType == Enum.UserInputType.Touch then
+            print('mb inactive')
+            is_mb_active = false
+        end
     end)
 end
 
@@ -212,7 +215,7 @@ function Library:MakeDraggable(Instance, Cutoff)
     end)]]
 
     if is_mobile then
-        Instance.InputBegan:Connect(function(Input)
+        Instance.MouseButton1Down:Connect(function(Input)
             print(Input.UserInputType)
             if Input.UserInputType == Enum.UserInputType.Touch then
                 local ObjPos = Vector2.new(
