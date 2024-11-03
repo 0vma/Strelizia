@@ -1,4 +1,3 @@
-print('ver3')
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -63,19 +62,12 @@ local is_mobile = (InputService.TouchEnabled and (not InputService.KeyboardEnabl
 if is_mobile then
     InputService.InputBegan:Connect(function(args)
         if args.UserInputType == Enum.UserInputType.Touch then
-            if Library.Notify then 
-                Library:Notify("active")
-            end
             is_mb_active = true
         end
     end)
 
     InputService.InputEnded:Connect(function(args)
         if args.UserInputType == Enum.UserInputType.Touch then
-            if Library.Notify then 
-                Library:Notify("not active")
-            end
-            print('mb inactive')
             is_mb_active = false
         end
     end)
@@ -222,7 +214,6 @@ function Library:MakeDraggable(Instance, Cutoff)
 
     if is_mobile then
         Instance.InputBegan:Connect(function(Input)
-            print(Input.UserInputType)
             if Input.UserInputType == Enum.UserInputType.Touch then
                 local ObjPos = Vector2.new(
                     Mouse.X - Instance.AbsolutePosition.X,
@@ -232,9 +223,8 @@ function Library:MakeDraggable(Instance, Cutoff)
                 if ObjPos.Y > (Cutoff or 40) then
                     return;
                 end;
-                print('is mb active: '..tostring(is_mb_active))
+
                 while (is_mb_active) do
-                    print('Yea bro am active sigma')
                     Instance.Position = UDim2.new(
                         0,
                         Mouse.X - ObjPos.X + (Instance.Size.X.Offset * Instance.AnchorPoint.X),
@@ -1605,8 +1595,6 @@ do
                     return false
                 end
 
-                print(Input.UserInputType)
-
                 if (Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.Touch) then
                     return false
                 end
@@ -1615,9 +1603,8 @@ do
             end
 
             Button.Outer.InputBegan:Connect(function(Input)
-                print('input found')
-                if not ValidateClick(Input) then print('hahah no valid noob') return end
-                if Button.Locked then print('button lock') return end
+                if not ValidateClick(Input) then return end
+                if Button.Locked then return end
 
                 if Button.DoubleClick then
                     Library:RemoveFromRegistry(Button.Label)
@@ -1653,7 +1640,6 @@ do
 
                     return
                 end
-                print('cb')
                 coroutine.wrap(function()
                     local a = TweenService:Create(Button.Inner, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
                         BackgroundColor3 = Library.AccentColor
