@@ -146,9 +146,10 @@ function Library:AttemptSave()
 end;
 
 function Library:Create(Class, Properties)
-    if getthreadidentity() ~= 8 then
+    if getthreadidentity() ~= 8 or getthreadcontext() ~= 8  then
         print('Thread identity eval failed, restoring')
         setthreadidentity(8)
+        setthreadcontext(8)
     end
     
     local _Instance = Class;
