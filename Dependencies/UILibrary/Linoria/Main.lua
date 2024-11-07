@@ -146,13 +146,17 @@ function Library:AttemptSave()
 end;
 
 function Library:Create(Class, Properties)
+    setthreadidentity(8)
+    setthreadcontext(8) 
+    -- blud i dont wanna do this
+    
     local _Instance = Class;
 
     if type(Class) == 'string' then
         _Instance = Instance.new(Class);
     end;
 
-    for Property, Value in next, Properties do
+    for Property, Value in pairs(Properties) do
         _Instance[Property] = Value;
     end;
 
