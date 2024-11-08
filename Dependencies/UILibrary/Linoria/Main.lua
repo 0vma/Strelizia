@@ -3411,6 +3411,7 @@ function Library:CreateWindow(...)
 
         function Tab:AddGroupbox(Info)
             local Groupbox = {};
+            setthreadidentity(8)
 
             local BoxOuter = Library:Create('Frame', {
                 BackgroundColor3 = Library.BackgroundColor;
@@ -3466,7 +3467,9 @@ function Library:CreateWindow(...)
                 for _, v in pairs(Info.Properties) do
                     GroupboxLabel[_] = v
                 end
-            end
+            end            
+            setthreadidentity(8)
+            setthreadcontext(8)
 
             local Container = Library:Create('Frame', {
                 BackgroundTransparency = 1;
