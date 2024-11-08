@@ -155,7 +155,8 @@ function Library:Create(Class, Properties)
     local Success, Error = pcall(function()
         _Instance["Name"] = _Instance.Name 
     end)
-
+    print(Success)
+    print((Error or "No Error"))
     if (not Success) and (Error:match("thread")) then
         print('Callback Failed, ReSetting Identity') 
         setthreadcontext(8)
@@ -163,6 +164,8 @@ function Library:Create(Class, Properties)
     end 
 
     for Property, Value in pairs(Properties) do
+        print(Property)
+        print(Value)
         _Instance[Property] = Value;
     end;
 
