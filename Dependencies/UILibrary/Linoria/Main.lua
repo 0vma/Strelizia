@@ -156,7 +156,7 @@ function Library:Create(Class, Properties)
         _Instance["Name"] = _Instance.Name 
     end)
 
-    if (not Success) and (Error:match("Thread")) then
+    if (not Success) and (Error:match("thread")) then
         print('Callback Failed, ReSetting Identity') 
         setthreadcontext(8)
         setthreadidentity(8)
