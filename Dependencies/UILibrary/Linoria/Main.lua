@@ -155,17 +155,20 @@ function Library:Create(Class, Properties)
     local Success, Error = pcall(function()
         _Instance["Name"] = _Instance.Name 
     end)
-    print(Success)
-    print((Error or "No Error"))
-    if (not Success) and (Error:match("thread")) then
-        print('Callback Failed, ReSetting Identity') 
-        setthreadcontext(8)
-        setthreadidentity(8)
-    end 
+
+    If Properties['Parent'] ~= nil then
+        local Success, Error = pcall(function()
+            _Instance["Parent"] = Properties['Parent']
+        end)
+
+        if (not Success) and (Error:match('thread')) then 
+            print('Callback Failed, ReSetting Identity') 
+            setthreadcontext(8)
+            setthreadidentity(8)
+        end
+    end
 
     for Property, Value in pairs(Properties) do
-        print(Property)
-        print(Value)
         _Instance[Property] = Value;
     end;
 
