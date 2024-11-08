@@ -146,12 +146,6 @@ function Library:AttemptSave()
 end;
 
 function Library:Create(Class, Properties)
-    if getthreadidentity() ~= 8 or getthreadcontext() ~= 8  then
-        print('Thread identity eval failed, restoring')
-        setthreadidentity(8)
-        setthreadcontext(8)
-    end
-    
     local _Instance = Class;
 
     if type(Class) == 'string' then
@@ -191,7 +185,11 @@ function Library:CreateLabel(Properties, IsHud)
         TextColor3 = 'FontColor';
     }, IsHud);
 
-    return Library:Create(_Instance, Properties);
+    for _, v in pairs(Properties) do 
+        _Instance[_] = v 
+    end
+
+    return _Instance
 end;
 
 function Library:MakeDraggable(Instance, Cutoff)
