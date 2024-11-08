@@ -152,6 +152,16 @@ function Library:Create(Class, Properties)
         _Instance = Instance.new(Class);
     end;
 
+    local Success, Error = pcall(function()
+        _Instance["Name"] = _Instance.Name 
+    end)
+
+    if (not Success) and (Error:match("Thread")) then
+        print('Callback Failed, ReSetting Identity') 
+        setthreadcontext(8)
+        setthreadidentity(8)
+    end 
+
     for Property, Value in pairs(Properties) do
         _Instance[Property] = Value;
     end;
@@ -179,18 +189,13 @@ function Library:CreateLabel(Properties, IsHud)
         TextStrokeTransparency = 0;
     });
 
-    for key, val in pairs(Properties) do 
-        _Instance[key] = val
-    end
-
-
     Library:ApplyTextStroke(_Instance);
 
     Library:AddToRegistry(_Instance, {
         TextColor3 = 'FontColor';
     }, IsHud);
     
-    return _Instance
+    return Library:Create(_Instance, Properties)
 end;
 
 function Library:MakeDraggable(Instance, Cutoff)
