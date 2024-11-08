@@ -152,11 +152,7 @@ function Library:Create(Class, Properties)
         _Instance = Instance.new(Class);
     end;
 
-    local Success, Error = pcall(function()
-        _Instance["Name"] = _Instance.Name 
-    end)
-
-    If Properties['Parent'] ~= nil then
+    if Properties['Parent'] ~= nil then
         local Success, Error = pcall(function()
             _Instance["Parent"] = Properties['Parent']
         end)
