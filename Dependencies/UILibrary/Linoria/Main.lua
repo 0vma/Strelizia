@@ -20,6 +20,7 @@ local function containsRichText(text)
 end
 
 local function removeColorTags(text)
+    text = tostring(text)
     if (not containsRichText(text)) then 
         return text 
     end 
