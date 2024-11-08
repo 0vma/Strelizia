@@ -179,16 +179,17 @@ function Library:CreateLabel(Properties, IsHud)
         TextStrokeTransparency = 0;
     });
 
+    for key, val in pairs(Properties) do 
+        _Instance[key] = val
+    end
+
+
     Library:ApplyTextStroke(_Instance);
 
     Library:AddToRegistry(_Instance, {
         TextColor3 = 'FontColor';
     }, IsHud);
-
-    for _, v in pairs(Properties) do 
-        _Instance[_] = v 
-    end
-
+    
     return _Instance
 end;
 
