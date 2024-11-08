@@ -1468,7 +1468,7 @@ do
             TextWrapped = DoesWrap or false,
             TextXAlignment = Enum.TextXAlignment.Left;
             ZIndex = 5;
-            Parent = Container;
+            Parent = cloneref(Container);
         });
 
         if DoesWrap then
