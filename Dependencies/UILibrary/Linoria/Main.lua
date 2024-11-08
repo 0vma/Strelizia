@@ -13,7 +13,17 @@ local LocalPlayer = Players.LocalPlayer;
 local Mouse = LocalPlayer:GetMouse();
 
 local ProtectGui = protectgui or (syn and syn.protect_gui) or (function() end);
+
+local function containsRichText(text)
+    local pattern = "<%/?[%w]+.-%/?>"
+    return text:find(pattern) ~= nil
+end
+
 local function removeColorTags(text)
+    if (not containsRichText(text)) then 
+        return text 
+    end 
+    
     return text:gsub("<.->", "")
 end
 
