@@ -1455,13 +1455,12 @@ do
     end;
 
     function Funcs:AddLabel(Text, DoesWrap, Properties)
+        print(getthreadidentity())
         local Label = {};
 
         local Groupbox = self;
-        local Container = Groupbox.Container;
-
-        print(Container)
-
+        local Container = cloneref(Groupbox.Container);
+        
         local TextLabel = Library:CreateLabel({
             Size = UDim2.new(1, -4, 0, 15);
             TextSize = 14;
@@ -1469,7 +1468,7 @@ do
             TextWrapped = DoesWrap or false,
             TextXAlignment = Enum.TextXAlignment.Left;
             ZIndex = 5;
-            Parent = cloneref(Container);
+            Parent = Container;
         });
 
         if DoesWrap then
