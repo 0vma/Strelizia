@@ -13,7 +13,7 @@ function Module.get(args)
         Headers = headers
     })
 
-    return Success, Result
+    return {s = Success, r = Result}
 end
 
 function Module.post(args)
@@ -32,7 +32,7 @@ function Module.post(args)
         Headers = headers
     })
 
-    return Success, Result
+    return {s = Success, r = Result}
 end
 
 return Module
