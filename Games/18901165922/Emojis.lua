@@ -20,5 +20,6 @@ return {
     ['misc_Crystal Key Upper Half'] = "<:CrystalKeyUpperHalf:1305644900762517514>",
     ['misc_Crystal Key Lower Half'] = "<:CrystalKeyLowerHalf:1305644898925416458>",
     ['misc_Secret Key'] = "<:SecretKey:1305644897298153572>",
-    ['misc_Index Token'] = "<:IndexToken:1305644904805957633>"
+    ['misc_Index Token'] = "<:IndexToken:1305644904805957633>",
+    ['misc_Fishing Token'] = "<:fishing_coin:1305641914657411164>",
 }
