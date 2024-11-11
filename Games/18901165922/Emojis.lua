@@ -16,7 +16,7 @@ return {
     ['currency_Diamonds'] = "<:gems:1305298012871852072>",
 
     -- // misc items
-    ['misc_Crystal Key"] = "<:CrystalKey:1305644902776049704>",
+    ['misc_Crystal Key'] = "<:CrystalKey:1305644902776049704>",
     ['misc_Crystal Key Upper Half'] = "<:CrystalKeyUpperHalf:1305644900762517514>",
     ['misc_Crystal Key Lower Half'] = "<:CrystalKeyLowerHalf:1305644898925416458>",
     ['misc_Secret Key'] = "<:SecretKey:1305644897298153572>",
