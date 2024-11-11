@@ -14,6 +14,7 @@ return {
     -- // currency 
     ['currency_Coins'] = "<:coin:1305641916901232681>",
     ['currency_Diamonds'] = "<:gems:1305298012871852072>",
+    ['currency_Halloween'] = "<:Candy:1305647828218937394>",
 
     -- // misc items
     ['misc_Crystal Key'] = "<:CrystalKey:1305644902776049704>",
