@@ -163,18 +163,6 @@ function Library:Create(Class, Properties)
         _Instance = Instance.new(Class);
     end;
 
-    if Properties['Parent'] ~= nil then
-        local Success, Error = pcall(function()
-            _Instance["Parent"] = Properties['Parent']
-        end)
-
-        if (not Success) and (Error:match('thread')) then 
-            print('Callback Failed, ReSetting Identity') 
-            setthreadcontext(8)
-            setthreadidentity(8)
-        end
-    end
-
     for Property, Value in pairs(Properties) do
         _Instance[Property] = Value;
     end;
@@ -1466,7 +1454,6 @@ do
     end;
 
     function Funcs:AddLabel(Text, DoesWrap, Properties)
-        print(getthreadidentity())
         local Label = {};
 
         local Groupbox = self;
@@ -3422,7 +3409,6 @@ function Library:CreateWindow(...)
 
         function Tab:AddGroupbox(Info)
             local Groupbox = {};
-            setthreadidentity(8)
 
             local BoxOuter = Library:Create('Frame', {
                 BackgroundColor3 = Library.BackgroundColor;
@@ -3479,8 +3465,6 @@ function Library:CreateWindow(...)
                     GroupboxLabel[_] = v
                 end
             end            
-            setthreadidentity(8)
-            setthreadcontext(8)
 
             local Container = Library:Create('Frame', {
                 BackgroundTransparency = 1;
