@@ -39,41 +39,27 @@ getgenv().Strelizia = {
     States = States
 }
 
---[[setmetatable(getgenv().Strelizia.Modules, {
+setmetatable(getgenv().Strelizia.Modules, {
     __index = function(t, i)
         print(string.format('Failed to index Module: %s', i))
         return nil 
     end 
-})]]
+})
 
 do -- // Module Loading
     local Success, Result = pcall(game.HttpGet, game, string.format(States.data.DefaultTreeFormat, States.data.Creator, States.data.Repo, "main"), true)
-    print('Main Result')
-    print(Success)
-    print(Result)
     if Success then 
         Result = HttpService:JSONDecode(Result)
-        print('Second Result')
-        print_table(Result)
         
-        print('Looping')
         for _, Module in pairs(Result.tree) do
-            print('Matches?')
             local Matches = Format_Mattched(Module.path)
             if Matches then
-                print('yes '..Matches)
                 local Success, Result = pcall(game.HttpGet, game, Module.url, true)
-                print('Third Result') 
-                print(Success)
-                print(Result)
+                
                 if Success then
-                    print('it is ye')
                     Result = HttpService:JSONDecode(Result)
-                    print_table(Result) 
                     
-
                     local Decoded = from_base64(Result.content)
-                    print('Decoded is '..Decoded)
 
                     getgenv().Strelizia.Modules[Matches] = loadstring(Decoded)()
                     print(string.format('Finished loading Module: %s', Matches))
