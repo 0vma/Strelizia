@@ -22,11 +22,11 @@ States.data = {
                 Status = false,
                 Reason = "Shutdown reason here"
             },
-            Version = "0.0.1",
-            LastUpdated = 1731488928,
+            Version = "0.0.2 BETA",
+            LastUpdated = 1731534966,
             Script = "https://api.luarmor.net/files/v3/loaders/df91992d2ad7b8dd3432b116e3ff2a31.lua",
             SupportedVersion = 536.25,
-            UpdateLog = '<font color="rgb(0, 255, 0)">[+] Released</font>',
+            UpdateLog = '<font color="rgb(255, 255, 0)">[/] Fixed Bugs</font>',
         },
     }
 }
