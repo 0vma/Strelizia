@@ -62,7 +62,7 @@ do -- // Module Loading
             local Matches = Format_Mattched(Module.path)
             if Matches then
                 print('yes '..Matches)
-                local Success, Result = pcall(game.HttpGet, Module.url, true)
+                local Success, Result = pcall(game.HttpGet, game, Module.url, true)
                 print('Third Result') 
                 print(Success)
                 print(Result)
