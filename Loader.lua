@@ -72,5 +72,5 @@ loadstring(
     game:HttpGet(
         GameState.Script,
         true
-    )()
-)
+    )
+)()
