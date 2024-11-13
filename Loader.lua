@@ -57,8 +57,11 @@ do -- // Module Loading
                 local Success, Result = pcall(game.HttpGet, Module.url, true)
                 if Success then
                     Result = HttpService:JSONDecode(Result)
+                    print_table(Result) 
+                    
 
                     local Decoded = from_base64(Result.content)
+                    print('Decoded is '..Decoded)
 
                     getgenv().Strelizia.Modules[Matches] = loadstring(Decoded)()
                     print(string.format('Finished loading Module: %s', Matches))
