@@ -6,6 +6,7 @@ States.data = {
     
     DefaultTreeFormat = "https://api.github.com/repos/%s/%s/git/trees/%s?recursive=1",
     GameTreeSha = "d3473da19ec2ae3444370551c683193a41c7b63b",
+    Discord = "peFyg8gADB",
 
     Games = {
         ["16732694052"] = {
