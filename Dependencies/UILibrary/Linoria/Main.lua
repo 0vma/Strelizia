@@ -1,5 +1,4 @@
-setthreadcontext(8)
-setthreadidentity(8)
+setthreadidentity(7)
 
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
