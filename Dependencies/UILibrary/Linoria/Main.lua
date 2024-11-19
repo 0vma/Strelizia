@@ -47,10 +47,10 @@ local Library = {
     HudRegistry = {};
 
     FontColor = Color3.fromRGB(255, 255, 255);
-    MainColor = Color3.fromRGB(36, 36, 36);
-    BackgroundColor = Color3.fromRGB(28, 28, 28);
-    AccentColor = Color3.fromRGB(219, 68, 103);
-    OutlineColor = Color3.fromRGB(55, 55, 55);
+    MainColor = Color3.fromRGB(31, 31, 32);
+    BackgroundColor = Color3.fromRGB(36, 36, 36);
+    AccentColor = Color3.fromRGB(153, 24, 185);
+    OutlineColor = Color3.fromRGB(153, 24, 185);
     RiskColor = Color3.fromRGB(255, 50, 50);
 
     TooltipXSize = 240;
@@ -3149,12 +3149,13 @@ function Library:CreateWindow(...)
 
     local DropShadow = Library:Create('ImageLabel', {
         Parent = Inner, 
-        Size = UDim2.fromOffset(Inner.Size.X.Offset * 2.5, Inner.Size.Y.Offset * 2.5),
+        Size = UDim2.fromScale(2, 2),
+        AnchorPoint = Vector2.new(0.5, 0.5),
         Position = Inner.Position,
         Image = "rbxassetid://86129670736962",
         BackgroundTransparency = 1,
         ZIndex = 0,
-        ImageTransparency = 1,
+        ImageTransparency = 0.15,
         ImageColor3 = Library.AccentColor;
     })
 
@@ -3181,7 +3182,7 @@ function Library:CreateWindow(...)
         Position = UDim2.new(0.5, 0, 0, 0);
         Size = UDim2.new(0, 0, 0, 25);
         Text = Config.Title or '';
-        TextXAlignment = Enum.TextXAlignment.Left;
+        TextXAlignment = Enum.TextXAlignment.Center;
         ZIndex = 1;
         Parent = Inner;
     });
