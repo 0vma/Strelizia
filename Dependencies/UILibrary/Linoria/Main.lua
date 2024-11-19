@@ -3155,7 +3155,7 @@ function Library:CreateWindow(...)
         Image = "rbxassetid://86129670736962",
         BackgroundTransparency = 1,
         ZIndex = 0,
-        ImageTransparency = 0.15,
+        ImageTransparency = 0,
         ImageColor3 = Library.AccentColor;
     })
 
