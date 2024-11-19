@@ -3147,6 +3147,20 @@ function Library:CreateWindow(...)
         Parent = Inner
     })
 
+    local DropShadow = Library:Create('ImageLabel', {
+        Parent = Inner, 
+        Size = UDim2.fromOffset(Inner.Size.X.Offset * 2.5, Inner.Size.Y.Offset * 2.5),
+        Position = Inner.Position,
+        Image = "rbxassetid://86129670736962",
+        BackgroundTransparency = 1,
+        ZINdex = 0,
+        ImageColor3 = Library.AccentColor;
+    })
+
+    Library:AddToRegistry(DropShadow, {
+        ImageColor3 = 'AccentColor'
+    })
+
     local WindowInnerStroke = Library:Create("UIStroke", {
         Color = Library.AccentColor,
         Thickness = Config.StrokeHighlightSize,
@@ -3163,13 +3177,36 @@ function Library:CreateWindow(...)
     })
 
     local WindowLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 7, 0, 0);
+        Position = UDim2.new(0.5, 0, 0, 0);
         Size = UDim2.new(0, 0, 0, 25);
         Text = Config.Title or '';
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 1;
         Parent = Inner;
     });
+
+    task.spawn(function()
+    	while Library.Unloaded ~= true and task.wait() do 
+    		local Text = Config.Title 
+    		
+    		WindowLabel.Text = ""
+    		for i = 1, Text:len() do 
+    			WindowLabel.Text = Text:sub(1, i)
+    			task.wait(.12)
+    		end
+    
+    		task.wait(15)
+    		
+    		for i = Text:len(), 0, -1 do 
+    			WindowLabel.Text = Text:sub(1, i)
+    			task.wait(.12)
+    		end
+    
+    		task.wait(3)
+    	end
+    end)
+
+
 
 
 
