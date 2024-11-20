@@ -47,10 +47,10 @@ local Library = {
     HudRegistry = {};
 
     FontColor = Color3.fromRGB(255, 255, 255);
-    MainColor = Color3.fromRGB(31, 31, 32);
-    BackgroundColor = Color3.fromRGB(36, 36, 36);
-    AccentColor = Color3.fromRGB(153, 24, 185);
-    OutlineColor = Color3.fromRGB(153, 24, 185);
+    MainColor = Color3.fromRGB(24, 24, 37);
+    BackgroundColor = Color3.fromRGB(22, 22, 31);
+    AccentColor = Color3.fromRGB(103, 89, 179);
+    OutlineColor = Color3.fromRGB(50, 50, 50);
     RiskColor = Color3.fromRGB(255, 50, 50);
 
     TooltipXSize = 240;
