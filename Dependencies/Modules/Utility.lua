@@ -19,7 +19,7 @@ Utils.FormatHMS = function(Seconds: number)
 end 
 
 Utils.DecimalRound = function(number: number, decimals: number)
-    return (math.round(number / 10^decimals)  / 10^decimals)
+    return (tonumber(string.format("%."..decimals.."f", number)))
 end
 
 Utils.GetGameInfo = function(Game: number)
