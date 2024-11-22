@@ -13,7 +13,6 @@ local thread = {
             end 
         
             self.__cache[n] = nil
-            print(string.format('Successfully closed thread %s', n))
         end
     end,
     new = function(self, n: string, f: "function")
