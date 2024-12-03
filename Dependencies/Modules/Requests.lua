@@ -25,6 +25,11 @@ function Module.post(args)
 
     local fnc = (syn ~= nil and syn.request) or (http ~= nil and http.request) or (request)
     assert(fnc, "no request function found")
+
+    if args.violation_policy and isfunctionhooked(fnc) then
+        local result = args.violation_policy() 
+        if result == 0 then return {s = false, r = "violated"} end 
+    end 
     
     local Success, Result = pcall(fnc, {
         Url = args.url,
