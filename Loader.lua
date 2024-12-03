@@ -53,9 +53,13 @@ if not getgenv().Strelizia then
 		return Strelizia.Modules[Module]
 	end
 end	
-	
-	
-	
+
+if (not script_key) then
+	if isfile('strelizia.key') then
+		script_key = readfile('strelizia.key')
+	end
+end
+
 loadstring(
 	game:HttpGet(
 		GameState.Script,
