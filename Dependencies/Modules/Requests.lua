@@ -1,4 +1,5 @@
 local Module = {}
+
 function Module.get(args)
     assert(args.url, "no url provided")
 
@@ -34,5 +35,24 @@ function Module.post(args)
 
     return {s = Success, r = Result}
 end
+
+function Module.delete(args)
+    assert(args.url, "no url provided")
+
+    local headers = args.headers or {["Content-Type"] = "application/json"}
+
+    local fnc = (syn ~= nil and syn.request) or (http ~= nil and http.request) or (request)
+    assert(fnc, "no request function found")
+    
+    local Success, Result = pcall(fnc, {
+        Url = args.url,
+        Body = args.body,
+        Method = "DELETE",
+        Headers = headers
+    })
+
+    return {s = Success, r = Result}
+end
+
 
 return Module
