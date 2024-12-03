@@ -3133,6 +3133,7 @@ function Library:CreateWindow(...)
         AnchorPoint = Config.AnchorPoint,
         Position = Config.Position,
         Size = Config.Size,
+        Name = "MainFrame",
         Visible = false;
         ZIndex = 1;
         Parent = ScreenGui;
