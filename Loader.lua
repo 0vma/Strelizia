@@ -1,6 +1,6 @@
 if not game:IsLoaded() then game.Loaded:Wait() end 
 
-local GameId = game.GameId
+local GameId = game.PlaceId
 local Player = game.Players.LocalPlayer
 local HttpService = game:GetService('HttpService')
 local States = loadstring(game:HttpGet("https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/States.lua", true))()
