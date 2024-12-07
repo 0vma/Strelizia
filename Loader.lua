@@ -32,7 +32,7 @@ if not getgenv().Strelizia then
 		if Strelizia.Modules[Module] then 
 			return Strelizia.Modules[Module]
 		end
-		
+
 		local Link = (States.data.Modules[Module] or GameState.Modules[Module]) 
 		assert(Link, string.format("Failed to obtain the repo for Module: %s", Module))
 
@@ -49,14 +49,23 @@ if not getgenv().Strelizia then
 		end
 
 		Strelizia.Modules[Module] = loadstring(Error)()
-		
+
 		return Strelizia.Modules[Module]
 	end
 end	
 
 if (not script_key) then
 	if isfile('strelizia.key') then
-		--script_key = readfile('strelizia.key')
+		local IsFileJson, Result = pcall(HttpService.JSONDecode, HttpService, (readfile('strelizia.key')))
+		if (IsFileJson) then
+			if (os.time() >= Result.Expiry) then 
+				delfile('strelizia.key')
+			else 
+				script_key = string.reverse(Result.Key)
+			end
+		else 
+			delfile('strelizia.key')
+		end
 	end
 end
 
