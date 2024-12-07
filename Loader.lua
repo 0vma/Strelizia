@@ -58,7 +58,7 @@ if (not script_key) then
 	if isfile('strelizia.key') then
 		local IsFileJson, Result = pcall(HttpService.JSONDecode, HttpService, (readfile('strelizia.key')))
 		if (IsFileJson) then
-			if (os.time() >= Result.Expiry) then 
+			if (os.time() >= tonumber(Result.Expiry)) then 
 				delfile('strelizia.key')
 			else 
 				script_key = string.reverse(Result.Key)
