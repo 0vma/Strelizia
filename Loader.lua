@@ -3,6 +3,7 @@ if not game:IsLoaded() then game.Loaded:Wait() end
 local GameId = game.PlaceId
 local Player = game.Players.LocalPlayer
 local HttpService = game:GetService('HttpService')
+local VirtualUser = game:GetService("VirtualUser")
 local States = loadstring(game:HttpGet("https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/States.lua", true))()
 
 if (not States) then 
@@ -68,6 +69,14 @@ if (not script_key) then
 		end
 	end
 end
+
+do -- // Anti AFK
+	Playerr.Idled:connect(function()
+	    VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+	    task.wait(1)
+	    VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+	end)
+end	
 
 loadstring(
 	game:HttpGet(
