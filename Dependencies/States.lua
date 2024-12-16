@@ -23,7 +23,9 @@ States.data = {
                 Status = false,
                 Reason = "Shutdown reason here"
             },
-            Modules = {},
+            Modules = {
+                ['Emojis'] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Games/18901165922/Modules/Emojis.lua"
+            },
             Version = "0.0.2 BETA",
             LastUpdated = 1731534966,
             Script = "https://api.luarmor.net/files/v3/loaders/df91992d2ad7b8dd3432b116e3ff2a31.lua",
@@ -35,9 +37,7 @@ States.data = {
                 Status = false,
                 Reason = "Shutdown reason here"
             },
-            Modules = {
-                ['Emojis'] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Games/18901165922/Modules/Emojis.lua"
-            },
+            Modules = {},
             Version = "0.0.1 BETA",
             LastUpdated = 1734366816,
             Script = "https://api.luarmor.net/files/v3/loaders/467d3f58831c5b64fe4c8e8491534846.lua",
