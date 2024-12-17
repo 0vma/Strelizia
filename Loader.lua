@@ -5,6 +5,14 @@ local Player = game.Players.LocalPlayer
 local HttpService = game:GetService('HttpService')
 local VirtualUser = game:GetService("VirtualUser")
 local States = loadstring(game:HttpGet("https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/States.lua", true))()
+local Unsupported = {"Solara", "Xeno"}
+
+for _, Executor in pairs(Unsupported) do 
+	if string.find(identifyexecutor(), Executor) then 
+		Player:Kick('Unsupported Executor: '..Executor)
+		return
+	end
+end
 
 if (not States) then 
 	Player:Kick('No States Provided')
