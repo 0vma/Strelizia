@@ -18,7 +18,7 @@ if (not States) then
 	Player:Kick('No States Provided')
 end 
 
-local GameState = States.data.Games[tostring(GameId)]
+local GameState = States.GetGameState(game.PlaceId)
 if not (GameState) then 
 	Player:Kick('Unsupported Game')
 end 
