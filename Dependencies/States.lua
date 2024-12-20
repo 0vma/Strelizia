@@ -32,6 +32,20 @@ States.data = {
             SupportedVersion = 536.25,
             UpdateLog = '<font color="rgb(255, 255, 0)">[/] Fixed Bugs</font>',
         },
+        ["109487238458636"] = {
+            Shutdown = {
+                Status = false,
+                Reason = "Shutdown reason here"
+            },
+            Modules = {
+                ['Emojis'] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Games/18901165922/Modules/Emojis.lua"
+            },
+            Version = "0.0.2 BETA",
+            LastUpdated = 1731534966,
+            Script = "https://api.luarmor.net/files/v3/loaders/df91992d2ad7b8dd3432b116e3ff2a31.lua",
+            SupportedVersion = 536.25,
+            UpdateLog = '<font color="rgb(255, 255, 0)">[/] Fixed Bugs</font>',
+        },
         ["116605585218149"] = {
             Shutdown = {
                 Status = false,
