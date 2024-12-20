@@ -18,7 +18,7 @@ States.data = {
             SupportedVersion = 536.25,
             UpdateLog = '<stroke color="#000000" thickness="2"><font color="rgb(0, 255, 0)">[+] Added new obstacle course levels for extra challenges</font>\n<font color="rgb(0, 255, 0)">[+] Introduced a new character customization feature</font>\n<font color="rgb(0, 255, 0)">[+] Added in-game achievements to track progress</font>\n<font color="rgb(255, 0, 0)">[-] Removed outdated in-game tutorial to make space for new one</font>\n<font color="rgb(255, 0, 0)">[-] Removed old Halloween-themed items</font>\n<font color="rgb(255, 255, 0)">[*] Fixed bug causing players to fall through the floor</font>\n<font color="rgb(255, 255, 0)">[*] Fixed issue with level progress not saving correctly</font>\n<font color="rgb(255, 255, 0)">[*] Fixed UI overlapping on smaller screen devices</font>\n<font color="rgb(255, 255, 0)">[*] Improved performance for smoother gameplay experience</font></stroke>',
         },
-        ["18901165922"] = {
+        {"18901165922"} = {
             Shutdown = {
                 Status = false,
                 Reason = "Shutdown reason here"
@@ -32,7 +32,7 @@ States.data = {
             SupportedVersion = 536.25,
             UpdateLog = '<font color="rgb(255, 255, 0)">[/] Fixed Bugs</font>',
         },
-        ["116605585218149"] = {
+        {"116605585218149"} = {
             Shutdown = {
                 Status = false,
                 Reason = "Shutdown reason here"
@@ -50,8 +50,18 @@ States.data = {
         ['Threading'] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Threading.lua",
         ['Requests'] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Requests.lua",
         ['Utility'] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Utility.lua"
-    }
+    },
 }
+
+function States.GetGameState(PlaceId) 
+    for _, v in pairs(States.data.Games) do 
+        if table.find(_, tostring(PlaceId)) then 
+            return v 
+        end 
+    end    
+
+    return nil
+end
 
 
 return States
