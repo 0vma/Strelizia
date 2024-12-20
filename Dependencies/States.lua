@@ -9,7 +9,7 @@ States.data = {
     Discord = "peFyg8gADB",
 
     Games = {
-        ["0"] = {
+        {"0"} = {
             Shutdown = {
                 Status = false,
                 Reason = "Shutdown reason here"
