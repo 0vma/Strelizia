@@ -52,7 +52,12 @@ States.data = {
                 Reason = "Shutdown reason here"
             },
             Modules = {
-                 ['Emojis'] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Games/18901165922/Modules/Emojis.lua"
+                ["Promise"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Promise.lua",
+				["Trove"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Trove.lua", 
+				["Signal"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Signal.lua",
+				["TableUtil"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/TableUtil.lua",
+
+				['Emojis'] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Games/116605585218149/Modules/Emojis.lua",
             },
             Version = "0.0.1 BETA",
             LastUpdated = 1734366816,
