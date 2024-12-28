@@ -53,11 +53,28 @@ States.data = {
             },
             Modules = {
                 ["Promise"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Promise.lua",
-				["Trove"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Trove.lua", 
-				["Signal"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Signal.lua",
-				["TableUtil"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/TableUtil.lua",
-
-				['Emojis'] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Games/116605585218149/Modules/Emojis.lua",
+		["Trove"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Trove.lua", 
+		["Signal"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Signal.lua",
+		["TableUtil"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/TableUtil.lua",
+		['Emojis'] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Games/116605585218149/Modules/Emojis.lua",
+            },
+            Version = "0.0.1 BETA",
+            LastUpdated = 1734366816,
+            Script = "https://api.luarmor.net/files/v3/loaders/467d3f58831c5b64fe4c8e8491534846.lua",
+            SupportedVersion = 536.25,
+            UpdateLog = '<font color="rgb(255, 255, 0)">[/] Fixed Bugs</font>',
+        },
+	["16498193900"] = {
+            Shutdown = {
+                Status = false,
+                Reason = "Shutdown reason here"
+            },
+            Modules = {
+                ["Promise"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Promise.lua",
+		["Trove"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Trove.lua", 
+		["Signal"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Signal.lua",
+		["TableUtil"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/TableUtil.lua",
+		['Emojis'] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Games/116605585218149/Modules/Emojis.lua",
             },
             Version = "0.0.1 BETA",
             LastUpdated = 1734366816,
