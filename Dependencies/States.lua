@@ -78,7 +78,7 @@ States.data = {
             },
             Version = "0.0.1 BETA",
             LastUpdated = 1734366816,
-            Script = "https://api.luarmor.net/files/v3/loaders/df91992d2ad7b8dd3432b116e3ff2a31.lua",
+            Script = "https://api.luarmor.net/files/v3/loaders/a0ea5fee0f6ddd772708b14793d19ee6.lua",
             SupportedVersion = 536.25,
             UpdateLog = '<font color="rgb(255, 255, 0)">[/] Fixed Bugs</font>',
         },
