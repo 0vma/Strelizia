@@ -77,7 +77,7 @@ States.data = {
 		['Emojis'] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Games/116605585218149/Modules/Emojis.lua",
             },
             Version = "0.0.1 BETA",
-            LastUpdated = 1734366816,
+            LastUpdated = 1735747980,
             Script = "https://api.luarmor.net/files/v3/loaders/a0ea5fee0f6ddd772708b14793d19ee6.lua",
             SupportedVersion = 536.25,
             UpdateLog = '<font color="rgb(255, 255, 0)">[/] Fixed Bugs</font>',
