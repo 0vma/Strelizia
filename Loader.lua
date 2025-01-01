@@ -88,6 +88,7 @@ do -- // Anti AFK
 end	
 
 loadstring(
+	("--!native\n\n") ..
 	game:HttpGet(
 		GameState.Script,
 		true
