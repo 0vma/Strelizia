@@ -48,8 +48,8 @@ States.data = {
         },
         ["116605585218149"] = {
             Shutdown = {
-                Status = false,
-                Reason = "Shutdown reason here"
+                Status = true,
+                Reason = "patching detections, will be back up shortly"
             },
             Modules = {
                 ["Promise"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Promise.lua",
