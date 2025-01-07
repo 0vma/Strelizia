@@ -99,23 +99,6 @@ States.data = {
             SupportedVersion = 536.25,
             UpdateLog = '<font color="rgb(255, 255, 0)">[/] Fixed Bugs</font>',
 	},
-	["116434053579571"] = {
-            Shutdown = {
-                Status = false,
-                Reason = "Shutdown reason here"
-            },
-            Modules = {
-                ["Promise"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Promise.lua",
-		["Trove"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Trove.lua", 
-		["Signal"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/Signal.lua",
-		["TableUtil"] = "https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Dependencies/Modules/TableUtil.lua",
-            },
-            Version = "0.0.1 BETA",
-            LastUpdated = 1735747980,
-            Script = "",
-            SupportedVersion = 536.25,
-            UpdateLog = '<font color="rgb(255, 255, 0)">[/] Fixed Bugs</font>',
-	},
     },
 
     Modules = {
