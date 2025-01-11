@@ -27,7 +27,8 @@ State.data = {
 				Base:Notification("key system link is now in your clipboard!\npaste it in your browser to continue")
 			end,
 		}
-	}
+	},
+	DiscordJoinCode = "strelizia";
 }
 
 return State
