@@ -9,7 +9,7 @@ State.data = {
 				Reason = 'shutdown'
 			},
 			KeySystem = true,
-			Script = ""
+			Script = "https://pastebin.com/raw/qAZyEREM"
 		}
 	},
 	KeySystemProviders = {
