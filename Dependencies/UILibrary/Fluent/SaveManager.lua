@@ -1,12 +1,13 @@
 local httpService = game:GetService("HttpService")
 
 local SaveManager = {} do
-	SaveManager.Folder = "Strelizia"
+	SaveManager.Folder = "FluentSettings"
 	SaveManager.Ignore = {}
+	SaveManager.Options, SaveManager.Library = {} :: { [string]: {Type: string, Value: any, SetValues: (self: any, NewValue: { [any]: any }) -> nil, SetValue: (self: any, NewValue: any, ...any) -> nil, SetValueRGB: (self: any, NewValue: Color3, Transparency: number?) -> nil} }, {}
 	SaveManager.Parser = {
 		Toggle = {
 			Save = function(idx, object) 
-				return { type = "Toggle", idx = idx, value = object.Value } 
+				return { type = "Toggle", idx = idx, value = object.Value, Timestamp = object.Instance.CreatedAt } 
 			end,
 			Load = function(idx, data)
 				if SaveManager.Options[idx] then 
@@ -16,7 +17,7 @@ local SaveManager = {} do
 		},
 		Slider = {
 			Save = function(idx, object)
-				return { type = "Slider", idx = idx, value = tostring(object.Value) }
+				return { type = "Slider", idx = idx, value = object.Value, Timestamp = object.Instance.CreatedAt }
 			end,
 			Load = function(idx, data)
 				if SaveManager.Options[idx] then 
@@ -26,7 +27,7 @@ local SaveManager = {} do
 		},
 		Dropdown = {
 			Save = function(idx, object)
-				return { type = "Dropdown", idx = idx, value = object.Value, mutli = object.Multi }
+				return { type = "Dropdown", idx = idx, value = object.Value, mutli = object.Multi, Timestamp = object.Instance.CreatedAt }
 			end,
 			Load = function(idx, data)
 				if SaveManager.Options[idx] then 
@@ -36,7 +37,7 @@ local SaveManager = {} do
 		},
 		Colorpicker = {
 			Save = function(idx, object)
-				return { type = "Colorpicker", idx = idx, value = object.Value:ToHex(), transparency = object.Transparency }
+				return { type = "Colorpicker", idx = idx, value = object.Value:ToHex(), transparency = object.Transparency, Timestamp = object.Instance.CreatedAt }
 			end,
 			Load = function(idx, data)
 				if SaveManager.Options[idx] then 
@@ -46,7 +47,7 @@ local SaveManager = {} do
 		},
 		Keybind = {
 			Save = function(idx, object)
-				return { type = "Keybind", idx = idx, mode = object.Mode, key = object.Value }
+				return { type = "Keybind", idx = idx, mode = object.Mode, key = object.Value, Timestamp = object.Instance.CreatedAt }
 			end,
 			Load = function(idx, data)
 				if SaveManager.Options[idx] then 
@@ -57,7 +58,7 @@ local SaveManager = {} do
 
 		Input = {
 			Save = function(idx, object)
-				return { type = "Input", idx = idx, text = object.Value }
+				return { type = "Input", idx = idx, text = object.Value, Timestamp = object.Instance.CreatedAt }
 			end,
 			Load = function(idx, data)
 				if SaveManager.Options[idx] and type(data.text) == "string" then
@@ -78,12 +79,12 @@ local SaveManager = {} do
 		self:BuildFolderTree()
 	end
 
-	function SaveManager:Save(name)
+	function SaveManager:Save(name): (boolean, string?)
 		if (not name) then
-			return false, "no config file is selected"
+			return false, "No config file is selected"
 		end
 
-		local fullPath = self.Folder .. "/settings/" .. name .. ".json"
+		local fullPath = `{self.Folder}/settings/{name}.json`
 
 		local data = {
 			objects = {}
@@ -93,24 +94,28 @@ local SaveManager = {} do
 			if not self.Parser[option.Type] then continue end
 			if self.Ignore[idx] then continue end
 
-			table.insert(data.objects, self.Parser[option.Type].Save(idx, option))
-		end	
+			data.objects[#data.objects + 1] = self.Parser[option.Type].Save(idx, option)
+		end
+
+		table.sort(data.objects, function(v1: { Timestamp: number }, v2: { Timestamp: number })
+			return v1.Timestamp < v2.Timestamp
+		end)
 
 		local success, encoded = pcall(httpService.JSONEncode, httpService, data)
 		if not success then
-			return false, "failed to encode data"
+			return false, "Failed to JSON-Encode data"
 		end
 
 		writefile(fullPath, encoded)
 		return true
 	end
 
-	function SaveManager:Load(name)
+	function SaveManager:Load(name): (boolean, string?)
 		if (not name) then
-			return false, "no config file is selected"
+			return false, "No config file is selected"
 		end
 		
-		local file = self.Folder .. "/settings/" .. name .. ".json"
+		local file = `{self.Folder}/settings/{name}.json`
 		if not isfile(file) then return false, "invalid file" end
 
 		local success, decoded = pcall(httpService.JSONDecode, httpService, readfile(file))
@@ -129,14 +134,14 @@ local SaveManager = {} do
 
 	function SaveManager:IgnoreThemeSettings()
 		self:SetIgnoreIndexes({ 
-			"InterfaceTheme", "AcrylicToggle", "TransparentToggle", "MenuKeybind"
+			"InterfaceManager_InterfaceTheme", "InterfaceManager_AcrylicToggle", "InterfaceManager_TransparentToggle", "InterfaceManager_MenuKeybind"
 		})
 	end
 
 	function SaveManager:BuildFolderTree()
 		local paths = {
 			self.Folder,
-			self.Folder .. "/settings"
+			`{self.Folder}/settings`
 		}
 
 		for i = 1, #paths do
@@ -148,7 +153,7 @@ local SaveManager = {} do
 	end
 
 	function SaveManager:RefreshConfigList()
-		local list = listfiles(self.Folder .. "/settings")
+		local list = listfiles(`{self.Folder}/settings`)
 
 		local out = {}
 		for i = 1, #list do
@@ -157,16 +162,18 @@ local SaveManager = {} do
 				local pos = file:find(".json", 1, true)
 				local start = pos
 
-				local char = file:sub(pos, pos)
-				while char ~= "/" and char ~= "\\" and char ~= "" do
-					pos = pos - 1
-					char = file:sub(pos, pos)
-				end
+				if typeof(pos) == "number" and typeof(start) == "number" then
+					local char = file:sub(pos, pos)
+					while char ~= "/" and char ~= "\\" and char ~= "" do
+						pos = pos - 1
+						char = file:sub(pos, pos)
+					end
 
-				if char == "/" or char == "\\" then
-					local name = file:sub(pos + 1, start - 1)
-					if name ~= "options" then
-						table.insert(out, name)
+					if char == "/" or char == "\\" then
+						local name = file:sub(pos + 1, start - 1)
+						if name ~= "options" then
+							out[#out + 1] = name
+						end
 					end
 				end
 			end
@@ -181,26 +188,28 @@ local SaveManager = {} do
 	end
 
 	function SaveManager:LoadAutoloadConfig()
-		if isfile(self.Folder .. "/settings/autoload.txt") then
-			local name = readfile(self.Folder .. "/settings/autoload.txt")
+		if isfile(`{self.Folder}/settings/autoload.txt`) then
+			local name = readfile(`{self.Folder}/settings/autoload.txt`)
 
 			local success, err = self:Load(name)
 			if not success then
 				return self.Library:Notify({
 					Title = "Interface",
 					Content = "Config loader",
-					SubContent = "Failed to load autoload config: " .. err,
+					SubContent = `Failed to load autoload config: {err}`,
 					Duration = 7
 				})
 			end
 
-			self.Library:Notify({
+			return self.Library:Notify({
 				Title = "Interface",
 				Content = "Config loader",
 				SubContent = string.format("Auto loaded config %q", name),
 				Duration = 7
 			})
 		end
+
+		return nil
 	end
 
 	function SaveManager:BuildConfigSection(tab)
@@ -244,6 +253,8 @@ local SaveManager = {} do
 
                 SaveManager.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
                 SaveManager.Options.SaveManager_ConfigList:SetValue(nil)
+
+				return nil
             end
         })
 
@@ -260,7 +271,7 @@ local SaveManager = {} do
 				})
 			end
 
-			self.Library:Notify({
+			return self.Library:Notify({
 				Title = "Interface",
 				Content = "Config loader",
 				SubContent = string.format("Loaded config %q", name),
@@ -281,7 +292,7 @@ local SaveManager = {} do
 				})
 			end
 
-			self.Library:Notify({
+			return self.Library:Notify({
 				Title = "Interface",
 				Content = "Config loader",
 				SubContent = string.format("Overwrote config %q", name),
@@ -297,7 +308,7 @@ local SaveManager = {} do
 		local AutoloadButton
 		AutoloadButton = section:AddButton({Title = "Set as autoload", Description = "Current autoload config: none", Callback = function()
 			local name = SaveManager.Options.SaveManager_ConfigList.Value
-			writefile(self.Folder .. "/settings/autoload.txt", name)
+			writefile(`{self.Folder}/settings/autoload.txt`, name)
 			AutoloadButton:SetDesc("Current autoload config: " .. name)
 			self.Library:Notify({
 				Title = "Interface",
@@ -307,8 +318,8 @@ local SaveManager = {} do
 			})
 		end})
 
-		if isfile(self.Folder .. "/settings/autoload.txt") then
-			local name = readfile(self.Folder .. "/settings/autoload.txt")
+		if isfile(`{self.Folder}/settings/autoload.txt`) then
+			local name = readfile(`{self.Folder}/settings/autoload.txt`)
 			AutoloadButton:SetDesc("Current autoload config: " .. name)
 		end
 
