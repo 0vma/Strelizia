@@ -10,6 +10,14 @@ State.data = {
 			},
 			KeySystem = true,
 			Script = "https://pastebin.com/raw/qAZyEREM"
+		},
+		["16498193900"] = { -- // Lootify
+			Shutdown = {
+				Status = false,
+				Reason = 'shutdown'
+			},
+			KeySystem = true,
+			Script = "a0ea5fee0f6ddd772708b14793d19ee6"
 		}
 	},
 	KeySystemProviders = {
