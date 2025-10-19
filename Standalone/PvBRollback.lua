@@ -43,7 +43,7 @@ Receive.OnClientEvent:Once(function(PackType, Ids)
 	Opened = true 
 	
 	for _, CardId in Ids do 
-		local Target = Save.Cards.Inventory[CardId];
+		local Target = Data.Cards.Inventory[CardId];
 		if not Target then continue end 
 
 		local Wanted = WANTED_CARDS[Target.Type];
