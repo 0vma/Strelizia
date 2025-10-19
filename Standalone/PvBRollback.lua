@@ -65,7 +65,7 @@ Receive.OnClientEvent:Once(function(PackType, Ids)
 	]], HttpService:JSONEncode(getgenv().Options)))
 
 	while true do 
-		TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+		TeleportService:Teleport(game.PlaceId, LocalPlayer)
 		task.wait(0.5)
 	end
 end)
