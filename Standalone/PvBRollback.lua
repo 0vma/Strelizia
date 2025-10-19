@@ -59,7 +59,7 @@ Receive.OnClientEvent:Once(function(PackType, Ids)
 	end 
 
 	queue_on_teleport(string.format([[
-		getgenv().Options = game:GetService('HttpService'):JSONDecode([[%s]])
+		getgenv().Options = game:GetService('HttpService'):JSONDecode([=[%s]=])
 
 		loadstring(game:HttpGet('https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Standalone/PvBRollback.lua', true))()
 	]], HttpService:JSONEncode(getgenv().Options)))
