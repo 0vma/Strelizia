@@ -18,8 +18,6 @@ local ShouldRollback = true;
 local TARGET_PACK = getgenv().Options.TargetPack 
 local WANTED_CARDS = getgenv().Options.WantedCards 
 
-local PACK_INSTANCE;
-
 local function FindCardPack(Target: string): Tool
 	for _, Child in LocalPlayer.Backpack:GetChildren() do
 		if Child:GetAttribute('PackType') ~= Target then continue end 
@@ -28,10 +26,13 @@ local function FindCardPack(Target: string): Tool
 	end 
 end
 
-PACK_INSTANCE = FindCardPack(TARGET_PACK);
-if not PACK_INSTANCE then return end 
+local PackInstance;
+while (not PackInstance) do
+	PackInstance = FindCardPack(TARGET_PACK); task.wait(0.1)
+end
 
-PACK_INSTANCE.Parent = LocalPlayer.Character
+PackInstance.Parent = LocalPlayer.Character
+
 local Opened;
 task.spawn(function()
 	while not Opened and task.wait(0.25) do 
@@ -58,16 +59,17 @@ Receive.OnClientEvent:Once(function(PackType, Ids)
 		Rollback:FireServer('\255'); task.wait(1)
 	end 
 
-	queue_on_teleport(string.format([[
-		getgenv().Options = game:GetService('HttpService'):JSONDecode([=[%s]=])
+	if ShouldRollback or (not getgenv().Options.StopWhenFound) then 
+		queue_on_teleport(string.format([[
+			getgenv().Options = game:GetService('HttpService'):JSONDecode([=[%s]=])
 
-		loadstring(game:HttpGet('https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Standalone/PvBRollback.lua', true))()
-	]], HttpService:JSONEncode(getgenv().Options)))
+			loadstring(game:HttpGet('https://raw.githubusercontent.com/0vma/Strelizia/refs/heads/main/Standalone/PvBRollback.lua', true))()
+		]], HttpService:JSONEncode(getgenv().Options)))
+	end
 
 	while true do 
 		TeleportService:Teleport(game.PlaceId, LocalPlayer)
 		task.wait(0.5)
 	end
 end)
-
 
