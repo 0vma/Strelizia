@@ -32,17 +32,16 @@ while (not PackInstance) do
 end
 
 PackInstance.Parent = LocalPlayer.Character
+local OriginalOpened = PackInstance:GetAttribute('Uses');
 
-local Opened;
 task.spawn(function()
-	while not Opened and task.wait(0.25) do 
+	while PackInstance:GetAttribute('Uses') == OriginalOpened do 
 		OpenHeld:FireServer()
+		task.wait(0.33)
 	end 
 end)
 
 Receive.OnClientEvent:Once(function(PackType, Ids)
-	Opened = true 
-	
 	for _, CardId in Ids do 
 		local Target = Data.Cards.Inventory[CardId];
 		if not Target then continue end 
