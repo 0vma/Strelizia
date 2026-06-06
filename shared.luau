@@ -32,9 +32,9 @@ c.SetPriority=function(n,o)assert(d.number(o))n.Priority=o return n end c.
 GetPriority=function(n)return n.Priority end c.SetStep=function(n,o)assert(m(o))
 local p=n.CurrentStep n.CurrentStep=o if p then k()end if o~=nil then j(o)end
 return n end c.SetProfiling=function(n,o)assert(d.boolean(o))if n.Profiling==o
-then return n end n.Profiling=o if o then h(n.Index)j(n.Index)else if n.
-CurrentStep then n:SetStep(nil)end i()k()end return n end c.Run=function(n)n.
-Running=true local o,p=pcall(n.Callback,n)if(not o)then f('Error',string.format(
+then return n end n.Profiling=o if o then j(n.Index)else if n.CurrentStep then n
+:SetStep(nil)end k()end return n end c.Run=function(n)n.Running=true local o,p=
+pcall(n.Callback,n)if(not o)then f('Error',string.format(
 [[An error has occured during runtime of Thread '%s' on Step '%s': %s]],
 tostring(n.Index),tostring(tostring(n.CurrentStep)),tostring(p)))end n.Running=
 false if n.Profiling then n:SetProfiling(false)end return o,p end c.Destroy=
@@ -2651,7 +2651,7 @@ ai,aj in af or{}do if ah:find(aj,1,true)~=nil then return true end end return
 false end return ae end end)()end,[18]=function()a(18)return(function(...)return
 function(aa)local ab,ac,ad,ae=aa:Get'Modules/Color',Color3.new(0,1,0),Color3.
 new(1,0,0),Color3.new(0,0,1)return{Name='Slime RNG',Ids={['92416421522960']=true
-},Keyless=true,Downtime={Status=false,Message='Placeholder'},
+},Keyless=false,Downtime={Status=false,Message='Placeholder'},
 BlacklistedExecutors={'Solara','Xeno'},Credits={{Name='vma',Role='developer'},{
 Name='felik',Role='contributor'}},Script='d0595bedc8bfc40178f522fe49b5285f',
 Update={Time=1780179066,Log={ab.Paint('[+] Added auto use special dices',ac),ab.
@@ -2671,7 +2671,7 @@ Paint('[*] Mitigated unexpected auto equip behavior',ae),ab.Paint(
 '[*] Mitigated unexpected XP transfer behavior',ae)}}}end end)()end,[19]=
 function()a(19)return(function(...)return function(aa)local ab,ac,ad,ae=aa:Get
 'Modules/Color',Color3.new(0,1,0),Color3.new(1,0,0),Color3.new(0,0,1)return{Name
-='Kick a Lucky Block',Ids={['89469502395769']=true},Keyless=true,Downtime={
+='Kick a Lucky Block',Ids={['89469502395769']=true},Keyless=false,Downtime={
 Status=false,Message='Placeholder'},BlacklistedExecutors={'Solara','Xeno'},
 Credits={{Name='felix',Role='developer'}},Script=
 'dbf4452a0cf919c7bad6aef8117e789f',Update={Time=1763296128,Log={ab.Paint(
@@ -3109,64 +3109,68 @@ return function(aa)local ab,ac,ad,ae=aa:Get'RBXUtil/TableUtil',aa:Get
 'Functions/Time',aa:Get'Modules/t',utf8.char local af=ac.Constants local ag={
 DiscordInviteCode='mkPHtrSyWy',Characters={Invisible=10240,BulletPoint=8226},
 Emojis={Unknown='<:letter_x:1305284794044776622>',Person=
-'<:person:1305298114265219094>'},LRM_Constants={},KeySystemAdProviders={{Name=
-'Linkvertise',KeyLength=af.Hour*24,CompletionTime=af.Minute*3,Identifier=
-'Linkvertise-EsllfgSWtQqg'},{Name='Another Provider',KeyLength=af.Hour*12,
-CompletionTime=af.Minute*2,Identifier='Something-ABCD'}},ProductionRoleInfo={
-developer={Color=Color3.fromRGB(2,116,255)},contributor={Color=Color3.fromRGB(
-255,255,127)},generic={Color=Color3.new(1,1,1)}}}for ah,ai in ag.Characters do
-if typeof(ai)~='number'then continue end ag.Characters[ah]=ae(ai)end
-setmetatable(ag.Emojis,{__index=function(ah,ai)local aj=rawget(ah,'Unknown')
-rawset(ah,ai,aj)return aj end})return ag end end)()end,[40]=function()local aa,
-ab,ac=a(40)return(function(...)local ad={}ad.__index=ad ad.Extensions={Children=
-function(ae)local af={}for ag,ah in ae:GetChildren()do af[ah.Name]=ah end return
-af end}local ae=cloneref or function(ae)return ae end ad.Services=setmetatable({
-},{__index=function(af,ag)local ah,ai=pcall(game.GetService,game,ag)if ah and ai
-then ai=ae(ai)rawset(af,ag,ai)return ai end return nil end})ad.new=function(af)
-local ag=setmetatable({__vinca=true,Loaded={},Loading={},Container={}},ad)ag.
-Root=af or ag return ag end ad.is=function(af)return af and typeof(af)=='table'
-and rawget(af,'__vinca')end ad.Add=function(af,ag,ah)assert(not af.Container[ag]
-,'Index already exists')af.Container[ag]=ah return af end ad.Load=function(af,ag
-)if af.Loaded[ag]~=nil then return af.Loaded[ag]end local ah=af.Container[ag]
-assert(ah~=nil,string.format('Unknown dependency "%s"',tostring(ag)))assert(not
-af.Loading[ag],string.format('Circular dependency at "%s"',tostring(ag)))af.
-Loading[ag]=true if typeof(ah)=='table'and ah.ClassName=='ModuleScript'then ah=
-ac(ah)elseif typeof(ah)=='Instance'and ah.ClassName=='ModuleScript'then ah=ac(ah
-)end if typeof(ah)=='function'then ah=ah(af.Root)end af.Loading[ag]=nil af.
-Loaded[ag]=ah return ah end ad.Extend=function(af,ag)for ah,ai in ag do af:Add(
-ah,ai)end return af end ad.Get=function(af,ag)local ah=af for ai in string.
-gmatch(ag,'[^/]+')do if ad.is(ah)then ah=ah:Load(ai)else ah=ah[ai]end assert(ah
-~=nil,string.format('Invalid path "%s" at "%s"',tostring(ag),tostring(ai)))end
-return ah end return ad end)()end},{{1,2,{'Shared'},{{2,2,{'Modules'},{{7,2,{'t'
-}},{20,2,{'Preference'}},{8,2,{'Interface'},{{9,1,{'List'},{{10,1,{'Obsidian'},{
-{12,2,{'SaveManager'}},{16,2,{'ThemeManager'}},{11,2,{'Main'}},{13,2,{'Tabs'},{{
-14,2,{'Home'}},{15,2,{'Settings'}}}}}}}}}},{17,2,{'Places'},{{19,2,{
-'Kick a Lucky Block'}},{18,2,{'Slime RNG'}}}},{6,2,{'Color'}},{3,2,{
-'TaskManager'},{{4,2,{'Task'}},{5,2,{'Lock'}}}}}},{39,2,{'Constants'}},{21,2,{
-'RBXUtil'},{{22,2,{'TableUtil'}},{26,2,{'Trove'}},{24,2,{'Promise'}},{23,2,{
-'Signal'}},{25,2,{'Tree'}}}},{27,2,{'Functions'},{{29,2,{'Time'}},{35,2,{'Hooks'
-}},{28,2,{'CreateGUID'}},{31,2,{'Strings'}},{34,2,{'GetPing'}},{33,2,{
-'OutputMessage'}},{32,2,{'PromptDiscord'}},{38,2,{'Noclip'}},{36,2,{'AntiAFK'}},
-{30,2,{'Numbers'}},{37,2,{'BinarySearch'}}}},{40,2,{'Vinca'}}}}},'0.4.2',
-'strelizia.cc',string,task,setmetatable,error,next,table,unpack,coroutine,script
-,type,require,pcall,tostring,tonumber,_VERSION local au,av,aw,ax,ay,az,aA=aj.
-insert,aj.remove,aj.freeze or function(au)return au end,al.wrap,ae.sub,ae.match,
-ae.gmatch if as and ay(as,1,4)=='Lune'then local aB,aC=ap(ao,'@lune/task')if aB
-and aC then af=aC end end local aB=af and af.defer local aC,aD,aE,aF,aG,aH,aI,aJ
-,aK=aB or function(aC,...)ax(aC)(...)end,{[1]='Folder',[2]='ModuleScript',[3]=
-'Script',[4]='LocalScript',[5]='StringValue'},{},{},{},{},{},{},{}local aL,aM={
-GetFullName={{},function(aL)local aM,aN=aL.Name,aL.Parent while aN do aM=aN.Name
-..'.'..aM aN=aN.Parent end return aM end},GetChildren={{},function(aL)local aM={
-}for aN in ai,aK[aL]do au(aM,aN)end return aM end},GetDescendants={{},function(
-aL)local aM={}for aN in ai,aK[aL]do au(aM,aN)for aO,aP in ai,aN:GetDescendants()
-do au(aM,aP)end end return aM end},FindFirstChild={{'string','boolean?'},
-function(aL,aM,aN)local aO=aK[aL]for aP in ai,aO do if aP.Name==aM then return
-aP end end if aN then for aP in ai,aO do return aP:FindFirstChild(aM,true)end
-end end},FindFirstAncestor={{'string'},function(aL,aM)local aN=aL.Parent while
-aN do if aN.Name==aM then return aN end aN=aN.Parent end end},WaitForChild={{
-'string','number?'},function(aL,aM)return aL:FindFirstChild(aM)end}},{}for aN,aO
-in ai,aL do local aP,aQ,aR=aO[1],aO[2],{}for aS,aT in ai,aP do local aU,aV=az(aT
-,'^([^%?]+)(%??)')aR[aS]={aU,aV}end aM[aN]=function(aS,...)if not aK[aS]then ah(
+'<:person:1305298114265219094>'},LRM_Constants={Premium=LRM_IsUserPremium or
+false,DiscordUserId=LRM_LinkedDiscordID or 0,ScriptName=LRM_ScriptName or
+'generic',TotalExecutions=LRM_TotalExecutions or 1337,SecondsLeft=
+LRM_SecondsLeft or 60,UserNote=LRM_UserNote or'user note',ScriptVersion=
+LRM_ScriptVersion or'0001'},KeySystemAdProviders={{Name='Linkvertise',KeyLength=
+af.Hour*24,CompletionTime=af.Minute*3,Identifier='Linkvertise-EsllfgSWtQqg'},{
+Name='Another Provider',KeyLength=af.Hour*12,CompletionTime=af.Minute*2,
+Identifier='Something-ABCD'}},ProductionRoleInfo={developer={Color=Color3.
+fromRGB(2,116,255)},contributor={Color=Color3.fromRGB(255,255,127)},generic={
+Color=Color3.new(1,1,1)}}}for ah,ai in ag.Characters do if typeof(ai)~='number'
+then continue end ag.Characters[ah]=ae(ai)end setmetatable(ag.Emojis,{__index=
+function(ah,ai)local aj=rawget(ah,'Unknown')rawset(ah,ai,aj)return aj end})
+return ag end end)()end,[40]=function()local aa,ab,ac=a(40)return(function(...)
+local ad={}ad.__index=ad ad.Extensions={Children=function(ae)local af={}for ag,
+ah in ae:GetChildren()do af[ah.Name]=ah end return af end}local ae=cloneref or
+function(ae)return ae end ad.Services=setmetatable({},{__index=function(af,ag)
+local ah,ai=pcall(game.GetService,game,ag)if ah and ai then ai=ae(ai)rawset(af,
+ag,ai)return ai end return nil end})ad.new=function(af)local ag=setmetatable({
+__vinca=true,Loaded={},Loading={},Container={}},ad)ag.Root=af or ag return ag
+end ad.is=function(af)return af and typeof(af)=='table'and rawget(af,'__vinca')
+end ad.Add=function(af,ag,ah)assert(not af.Container[ag],'Index already exists')
+af.Container[ag]=ah return af end ad.Load=function(af,ag)if af.Loaded[ag]~=nil
+then return af.Loaded[ag]end local ah=af.Container[ag]assert(ah~=nil,string.
+format('Unknown dependency "%s"',tostring(ag)))assert(not af.Loading[ag],string.
+format('Circular dependency at "%s"',tostring(ag)))af.Loading[ag]=true if
+typeof(ah)=='table'and ah.ClassName=='ModuleScript'then ah=ac(ah)elseif typeof(
+ah)=='Instance'and ah.ClassName=='ModuleScript'then ah=ac(ah)end if typeof(ah)==
+'function'then ah=ah(af.Root)end af.Loading[ag]=nil af.Loaded[ag]=ah return ah
+end ad.Extend=function(af,ag)for ah,ai in ag do af:Add(ah,ai)end return af end
+ad.Get=function(af,ag)local ah=af for ai in string.gmatch(ag,'[^/]+')do if ad.
+is(ah)then ah=ah:Load(ai)else ah=ah[ai]end assert(ah~=nil,string.format(
+'Invalid path "%s" at "%s"',tostring(ag),tostring(ai)))end return ah end return
+ad end)()end},{{1,2,{'Shared'},{{39,2,{'Constants'}},{2,2,{'Modules'},{{8,2,{
+'Interface'},{{9,1,{'List'},{{10,1,{'Obsidian'},{{11,2,{'Main'}},{16,2,{
+'ThemeManager'}},{12,2,{'SaveManager'}},{13,2,{'Tabs'},{{15,2,{'Settings'}},{14,
+2,{'Home'}}}}}}}}}},{7,2,{'t'}},{6,2,{'Color'}},{20,2,{'Preference'}},{3,2,{
+'TaskManager'},{{4,2,{'Task'}},{5,2,{'Lock'}}}},{17,2,{'Places'},{{19,2,{
+'Kick a Lucky Block'}},{18,2,{'Slime RNG'}}}}}},{40,2,{'Vinca'}},{21,2,{
+'RBXUtil'},{{24,2,{'Promise'}},{22,2,{'TableUtil'}},{23,2,{'Signal'}},{25,2,{
+'Tree'}},{26,2,{'Trove'}}}},{27,2,{'Functions'},{{33,2,{'OutputMessage'}},{30,2,
+{'Numbers'}},{37,2,{'BinarySearch'}},{36,2,{'AntiAFK'}},{29,2,{'Time'}},{38,2,{
+'Noclip'}},{32,2,{'PromptDiscord'}},{35,2,{'Hooks'}},{28,2,{'CreateGUID'}},{31,2
+,{'Strings'}},{34,2,{'GetPing'}}}}}}},'0.4.2','strelizia.cc',string,task,
+setmetatable,error,next,table,unpack,coroutine,script,type,require,pcall,
+tostring,tonumber,_VERSION local au,av,aw,ax,ay,az,aA=aj.insert,aj.remove,aj.
+freeze or function(au)return au end,al.wrap,ae.sub,ae.match,ae.gmatch if as and
+ay(as,1,4)=='Lune'then local aB,aC=ap(ao,'@lune/task')if aB and aC then af=aC
+end end local aB=af and af.defer local aC,aD,aE,aF,aG,aH,aI,aJ,aK=aB or function
+(aC,...)ax(aC)(...)end,{[1]='Folder',[2]='ModuleScript',[3]='Script',[4]=
+'LocalScript',[5]='StringValue'},{},{},{},{},{},{},{}local aL,aM={GetFullName={{
+},function(aL)local aM,aN=aL.Name,aL.Parent while aN do aM=aN.Name..'.'..aM aN=
+aN.Parent end return aM end},GetChildren={{},function(aL)local aM={}for aN in ai
+,aK[aL]do au(aM,aN)end return aM end},GetDescendants={{},function(aL)local aM={}
+for aN in ai,aK[aL]do au(aM,aN)for aO,aP in ai,aN:GetDescendants()do au(aM,aP)
+end end return aM end},FindFirstChild={{'string','boolean?'},function(aL,aM,aN)
+local aO=aK[aL]for aP in ai,aO do if aP.Name==aM then return aP end end if aN
+then for aP in ai,aO do return aP:FindFirstChild(aM,true)end end end},
+FindFirstAncestor={{'string'},function(aL,aM)local aN=aL.Parent while aN do if
+aN.Name==aM then return aN end aN=aN.Parent end end},WaitForChild={{'string',
+'number?'},function(aL,aM)return aL:FindFirstChild(aM)end}},{}for aN,aO in ai,aL
+do local aP,aQ,aR=aO[1],aO[2],{}for aS,aT in ai,aP do local aU,aV=az(aT,
+'^([^%?]+)(%??)')aR[aS]={aU,aV}end aM[aN]=function(aS,...)if not aK[aS]then ah(
 "Expected ':' not '.' calling member function "..aN,2)end local aT={...}for aU,
 aV in ai,aR do local aW=aT[aU]local aX,aY,aZ=an(aW),aV[1],aV[2]if aW==nil and
 not aZ then ah('Argument '..aW..' missing or nil',3)end if aY~='any'and aX~=aY
