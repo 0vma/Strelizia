@@ -64,14 +64,16 @@ return(function(...)local e=d(c.Parent.Vinca)return e.new():Extend(e.Extensions.
 Children(c))end)()end,function()local b,c=a(3)return(function(...)return
 function(d)return d.new(d):Extend(d.Extensions.Children(c))end end)()end,
 function()a(4)return(function(...)return function(b)local c=b.Services local d,e
-,f,g=c.EncodingService,b:Get'Shared/Modules/t',{},'strelizia/key.bin'f.Erase=
-function(h)return delfile(g)end f.Read=function(h)if(not isfile(g))then return
-nil end local i,j=pcall(d.Base64Decode,d,buffer.fromstring(readfile(g)))if(not i
-)then return f:Erase()end return buffer.tostring(j):reverse()end f.Write=
-function(h,i)assert(e.string(i))writefile(g,buffer.tostring(d:Base64Encode(
-buffer.fromstring(i:reverse()))))return true end return f end end)()end,function
-()a(5)return(function(...)return function(b)local c,d,e,f=b:Get
-'Shared/Modules/t',
+,f,g,h=c.EncodingService,b:Get'Shared/Modules/t',{},'strelizia/key.bin',typeof(
+isfile)=='function'and typeof(writefile)=='function'and typeof(delfile)==
+'function'f.Erase=function(i)if not h then return false end return pcall(delfile
+,g)end f.Read=function(i)if(not h)then return nil end if(not isfile(g))then
+return nil end local j,k=pcall(d.Base64Decode,d,buffer.fromstring(readfile(g)))
+if(not j)then return f:Erase()end return buffer.tostring(k):reverse()end f.Write
+=function(i,j)assert(e.string(j))if not h then return false end writefile(g,
+buffer.tostring(d:Base64Encode(buffer.fromstring(j:reverse()))))return true end
+return f end end)()end,function()a(5)return(function(...)return function(b)local
+c,d,e,f=b:Get'Shared/Modules/t',
 [[Cannot run any Luarmor module methods without calling :Init() first!]],
 getgenv(),{}f.Init=function(g,h)assert(c.string(h))if(not g.Cached)then g.Cached
 =loadstring(game:HttpGet'https://sdkapi-public.luarmor.net/library.lua')()g.
@@ -148,8 +150,8 @@ function(g,h)for i,j in h do g:Add(i,j)end return g end e.Get=function(g,h)local
 i=g for j in string.gmatch(h,'[^/]+')do if e.is(i)then i=i:Load(j)else i=i[j]end
 assert(i~=nil,string.format('Invalid path "%s" at "%s"',tostring(h),tostring(j))
 )end return i end return e end)()end},{{1,4,{'Loader'},{{8,2,{'Vinca'}},{2,2,{
-'Library'},{{3,2,{'Modules'},{{5,2,{'Luarmor'}},{4,2,{'KeyFile'}}}},{6,2,{
-'Interface'}},{7,2,{'Shared'}}}}}}},'0.4.2','strelizia.cc',string,task,
+'Library'},{{6,2,{'Interface'}},{7,2,{'Shared'}},{3,2,{'Modules'},{{4,2,{
+'KeyFile'}},{5,2,{'Luarmor'}}}}}}}}},'0.4.2','strelizia.cc',string,task,
 setmetatable,error,next,table,unpack,coroutine,script,type,require,pcall,
 tostring,tonumber,_VERSION local v,w,x,y,z,A,B=k.insert,k.remove,k.freeze or
 function(v)return v end,m.wrap,f.sub,f.match,f.gmatch if t and z(t,1,4)=='Lune'
