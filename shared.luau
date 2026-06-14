@@ -1,3222 +1,32166 @@
-local a local aa,ab,ac,ad,ae,af,ag,ah,ai,aj,ak,al,am,an,ao,ap,aq,ar,as,at={
-function()local b,c,d=a(1)return(function(...)local e=d(c.Vinca)return e.new():
-Extend(e.Extensions.Children(c))end)()end,function()local b,c=a(2)return(
-function(...)return function(d)return d.new(d):Extend(d.Extensions.Children(c))
-end end)()end,function()local b,c,d=a(3)return(function(...)return function(e)
-local f=e.Services local g,h,i,j=f.RunService,d(c.Lock)(e),d(c.Task)(e),e:Get
-'RBXUtil/Trove'local k={Running=false,Connection=nil,Trove=j.new(),Tasks={},
-PendingTasks={}}k.Task=i k.Lock=h k.Begin=function()if k.Running then return end
-k.Running=true k.Connection=g.Heartbeat:Connect(function(l)if(not k.Running)then
-return end debug.profilebegin'TaskManager'for m,n in k.PendingTasks do k.
-PendingTasks[m]=nil task.spawn(function()local o=n:Run()if(not o)or(not n.
-Interval)then return k.RemoveTask(m)end task.wait(n.Interval)if(k.Tasks[m])then
-k.PendingTasks[m]=n end end)end debug.profileend()end)end k.Stop=function()if
-not k.Running then return end k.Running=false k.Connection:Disconnect()k.
-Connection=nil for l in k.Tasks do k.RemoveTask(l)end k.Trove:Destroy()end k.
-AddTask=function(l)assert(l and i.is(l),'Task must be a Task object!')local m=l.
-Identifier k.Tasks[m]=l k.PendingTasks[m]=l return m end k.RemoveTask=function(l
-)local m=k.Tasks[l]if(not m)then return end k.Tasks[l]=nil k.PendingTasks[l]=nil
-m:Destroy()end k.GetTasksFromIndex=function(l)local m={}for n,o in k.Tasks do if
-o.Index~=l then continue end m[n]=o end return m end k.RemoveTasksByIndex=
-function(l)for m in k.GetTasksFromIndex(l)do k.RemoveTask(m)end end return k end
-end)()end,function()a(4)return(function(...)return function(b)local c={}c.
-__index=c local d,e,f,g,h,i,j,k=b:Get'Modules/t',b:Get'Functions/Time',b:Get
-'Functions/OutputMessage',b:Get'Functions/CreateGUID',debug.setmemorycategory,
-debug.resetmemorycategory,debug.profilebegin,debug.profileend local l,m=d.tuple(
-d.string,d['function'],d.optional(d.number),d.optional(d.boolean)),d.optional(d.
-string)c.new=function(n,o,p,q)assert(l(n,o,p,q))return setmetatable({__TASK=true
-,Index=n,Identifier=g(),Callback=o,Running=false,Destroyed=false,Interval=p,
-CurrentStep=nil,Profiling=false,Priority=1,Locks=q and{Groups={},Individual={}}
-or nil},c)end c.is=function(n)return typeof(n)=='table'and rawget(n,'__TASK')end
-c.SetPriority=function(n,o)assert(d.number(o))n.Priority=o return n end c.
-GetPriority=function(n)return n.Priority end c.SetStep=function(n,o)assert(m(o))
-local p=n.CurrentStep n.CurrentStep=o if p then k()end if o~=nil then j(o)end
-return n end c.SetProfiling=function(n,o)assert(d.boolean(o))if n.Profiling==o
-then return n end n.Profiling=o if o then j(n.Index)else if n.CurrentStep then n
-:SetStep(nil)end k()end return n end c.Run=function(n)n.Running=true local o,p=
-pcall(n.Callback,n)if(not o)then f('Error',string.format(
-[[An error has occured during runtime of Thread '%s' on Step '%s': %s]],
-tostring(n.Index),tostring(tostring(n.CurrentStep)),tostring(p)))end n.Running=
-false if n.Profiling then n:SetProfiling(false)end return o,p end c.Destroy=
-function(n)n.Destroyed=true local o=n.Locks if o then for p in o.Groups do p:
-Release()end for p in o.Individual do p:Release()end table.clear(o.Groups)table.
-clear(o.Individual)end return n end return{new=c.new,is=c.is}end end)()end,
-function()a(5)return(function(...)return function(b)local c,d,e=b:Get'Modules/t'
-,b:Get'RBXUtil/Signal',b:Get'RBXUtil/TableUtil'local f,g,h,i=e.Dictionary,e.
-Filter,function(f,g)local h,i=f:GetPriority(),g:GetPriority()if h~=i then return
-h>i end return f.Identifier>g.Identifier end,{Cache={}}i.__index=i i.new=
-function(j)assert(c.string(j))if i.Cache[j]then return i.Cache[j]end local k=
-setmetatable({__LOCK=true,Index=j,User=nil,UserChanged=d.new(),TakeoverRecipient
-=nil,TakeoverInitiated=d.new(),Aborted=false,Destroyed=false},i)i.Cache[j]=k
-return k end i.is=function(j)return typeof(j)=='table'and rawget(j,'__LOCK')end
-i.CanTake=function(j,k)assert(k and typeof(k)=='table',
-'Must provide a Task object for evaluation!')assert(k.Locks,
-'Task must be Lock-utilizing!')local l=j.User if(not l)then return true end if(l
-==k)then return true end local m=j.TakeoverRecipient if m then return h(k,m)end
-return h(k,l)end i.TakeAsync=function(j,k)assert(k and typeof(k)=='table',
-'Must provide a Task object for evaluation!')assert(k.Locks,
-'Task must be Lock-utilizing!')if(not j.User)then j.User=k j.Aborted=false k.
-Locks.Individual[j]=true j.UserChanged:Fire(k,nil)return true end if(j.User==k)
-then return true end j.Aborted=true j.TakeoverRecipient=k j.TakeoverInitiated:
-Fire(k,j.User)return j.UserChanged:Wait()==k end i.Release=function(j)if(not j.
-User)then return j end local k,l=j.User,j.TakeoverRecipient j.User=l j.
-TakeoverRecipient=nil j.Aborted=false k.Locks.Individual[j]=nil if l then l.
-Locks.Individual[j]=true end j.UserChanged:Fire(l,k)return j end local j={}j.
-__index=j j.new=function(k)assert(k and typeof(k)=='table',
-'Must provide Locks for a Group')local l=setmetatable({User=nil,UserChanged=d.
-new(),Locks=f(g(k,i.is)),TakeoverRecipient=nil,TakeoverInitiated=d.new(),Aborted
-=false,Connections={},Destroyed=false},j)for m in l.Locks do table.insert(l.
-Connections,m.TakeoverInitiated:Connect(function(n,o)if(not l.User)or(l.User~=o)
-then return end l.Aborted=true end))end return l end j.CanTake=function(k,l)for
-m in k.Locks do if m:CanTake(l)then continue end return false end return true
-end j.TakeAsync=function(k,l)local m=k.User if(m==l)then return true end if m
-then k.TakeoverRecipient=l k.TakeoverInitiated:Fire(l,m)return k.UserChanged:
-Wait()==l end local n={}for o in k.Locks do if o:TakeAsync(l)then n[o]=true
-continue end for p in n do p:Release()end return false end k.User=l k.Aborted=
-false l.Locks.Groups[k]=true k.UserChanged:Fire(l,m)return true end j.Release=
-function(k)if(not k.User)then return k end local l,m=k.User,k.TakeoverRecipient
-for n in k.Locks do if(n.User~=l)then continue end if m then n.User=m n.Aborted=
-false l.Locks.Individual[n]=nil m.Locks.Individual[n]=true else n:Release()end
-end k.User=m k.TakeoverRecipient=nil k.Aborted=false l.Locks.Groups[k]=nil if m
-then m.Locks.Groups[k]=true end k.UserChanged:Fire(m,l)return k end j.Destroy=
-function(k)if(not k.Destroyed)then k.Destroyed=true for l,m in k.Connections do
-m:Disconnect()end table.clear(k.Connections)end return k end return table.freeze
-{new=i.new,Group=j}end end)()end,function()a(6)return(function(...)return
-function(b)local c=b:Get'Modules/t'local d,e,f,g=c.tuple(c.ColorSequence,c.
-numberConstrained(0,1)),c.tuple(c.string,c.union(c.Color3,c.ColorSequence)),c.
-intersection(c.array(c.Color3),function(d)return#d>=2,
-'Merge requires at least 2 colors'end),math.floor local h,i=function(h,i)return
-string.format('<font color="rgb(%s,%s,%s)">%s</font>',tostring(g(i.R*255)),
-tostring(g(i.G*255)),tostring(g(i.B*255)),tostring(h))end,{}i.
-EvaluateColorSequence=function(j,k)assert(d(j,k))local l=j.Keypoints local m=l[1
-]for n=2,#l do local o=l[n]if k<=o.Time then local p=(k-m.Time)/(o.Time-m.Time)
-return m.Value:Lerp(o.Value,p)end m=o end return l[#l].Value end i.Paint=
-function(j,k)assert(e(j,k))if typeof(k)=='Color3'then return h(j,k)elseif
-typeof(k)=='ColorSequence'then local l,m={},#j for n=1,m do local o=(m==1)and 0
-or((n-1)/(m-1))l[n]=i.Paint(j:sub(n,n),i.EvaluateColorSequence(k,o))end return
-table.concat(l)end end i.Merge=function(...)local j={...}assert(f(j))local k,l={
-},#j for m,n in j do table.insert(k,ColorSequenceKeypoint.new((m-1)/(l-1),n))end
-return ColorSequence.new(k)end return i end end)()end,function()a(7)return(
-function(...)return function(b)local c={}c.type=function(d)return function(e)
-local f=type(e)if f==d then return true else return false,string.format(
-'%s expected, got %s',d,f)end end end c.typeof=function(d)return function(e)
-local f=typeof(e)if f==d then return true else return false,string.format(
-'%s expected, got %s',d,f)end end end c.any=function(d)if d~=nil then return
-true else return false,'any expected, got nil'end end c.boolean=c.typeof
-'boolean'c.buffer=c.typeof'buffer'c.thread=c.typeof'thread'c.callback=c.typeof
-'function'c['function']=c.callback c.none=c.typeof'nil'c['nil']=c.none c.string=
-c.typeof'string'c.table=c.typeof'table'c.userdata=c.type'userdata'c.vector=c.
-type'vector'c.number=function(d)local e=typeof(d)if e=='number'then if d==d then
-return true else return false,'unexpected NaN value'end else return false,string
-.format('number expected, got %s',e)end end c.nan=function(d)local e=typeof(d)if
-e=='number'then if d~=d then return true else return false,
-'unexpected non-NaN value'end else return false,string.format(
-'number expected, got %s',e)end end c.Axes=c.typeof'Axes'c.BrickColor=c.typeof
-'BrickColor'c.CatalogSearchParams=c.typeof'CatalogSearchParams'c.CFrame=c.typeof
-'CFrame'c.Content=c.typeof'Content'c.Color3=c.typeof'Color3'c.ColorSequence=c.
-typeof'ColorSequence'c.ColorSequenceKeypoint=c.typeof'ColorSequenceKeypoint'c.
-DateTime=c.typeof'DateTime'c.DockWidgetPluginGuiInfo=c.typeof
-'DockWidgetPluginGuiInfo'c.Enum=c.typeof'Enum'c.EnumItem=c.typeof'EnumItem'c.
-Enums=c.typeof'Enums'c.Faces=c.typeof'Faces'c.FloatCurveKey=c.typeof
-'FloatCurveKey'c.Font=c.typeof'Font'c.Instance=c.typeof'Instance'c.NumberRange=c
-.typeof'NumberRange'c.NumberSequence=c.typeof'NumberSequence'c.
-NumberSequenceKeypoint=c.typeof'NumberSequenceKeypoint'c.OverlapParams=c.typeof
-'OverlapParams'c.PathWaypoint=c.typeof'PathWaypoint'c.PhysicalProperties=c.
-typeof'PhysicalProperties'c.Random=c.typeof'Random'c.Ray=c.typeof'Ray'c.
-RaycastParams=c.typeof'RaycastParams'c.RaycastResult=c.typeof'RaycastResult'c.
-RBXScriptConnection=c.typeof'RBXScriptConnection'c.RBXScriptSignal=c.typeof
-'RBXScriptSignal'c.Rect=c.typeof'Rect'c.Region3=c.typeof'Region3'c.Region3int16=
-c.typeof'Region3int16'c.TweenInfo=c.typeof'TweenInfo'c.UDim=c.typeof'UDim'c.
-UDim2=c.typeof'UDim2'c.Vector2=c.typeof'Vector2'c.Vector2int16=c.typeof
-'Vector2int16'c.Vector3=c.typeof'Vector3'c.Vector3int16=c.typeof'Vector3int16'c.
-literalList=function(d)local e={}for f,g in ipairs(d)do e[g]=true end return
-function(f)if e[f]then return true end return false,'bad type for literal list'
-end end c.literal=function(...)local d=select('#',...)if d==1 then local e=...
-return function(f)if f~=e then return false,string.format('expected %s, got %s',
-tostring(e),tostring(f))end return true end else local e={}for f=1,d do local g=
-select(f,...)e[f]=c.literal(g)end return c.unionList(e)end end c.exactly=c.
-literal c.keyOf=function(d)local e,f={},0 for g in pairs(d)do f=f+1 e[f]=g end
-return c.literal(table.unpack(e,1,f))end c.valueOf=function(d)local e,f={},0 for
-g,h in pairs(d)do f=f+1 e[f]=h end return c.literal(table.unpack(e,1,f))end c.
-integer=function(d)local e,f=c.number(d)if not e then return false,f or''end if
-d%1==0 then return true else return false,string.format(
-'integer expected, got %s',d)end end c.numberMin=function(d)return function(e)
-local f,g=c.number(e)if not f then return false,g or''end if e>=d then return
-true else return false,string.format('number >= %s expected, got %s',d,e)end end
-end c.numberMax=function(d)return function(e)local f,g=c.number(e)if not f then
-return false,g end if e<=d then return true else return false,string.format(
-'number <= %s expected, got %s',d,e)end end end c.numberMinExclusive=function(d)
-return function(e)local f,g=c.number(e)if not f then return false,g or''end if d
-<e then return true else return false,string.format(
-'number > %s expected, got %s',d,e)end end end c.numberMaxExclusive=function(d)
-return function(e)local f,g=c.number(e)if not f then return false,g or''end if e
-<d then return true else return false,string.format(
-'number < %s expected, got %s',d,e)end end end c.numberPositive=c.
-numberMinExclusive(0)c.numberNegative=c.numberMaxExclusive(0)c.numberConstrained
-=function(d,e)assert(c.number(d))assert(c.number(e))local f,g=c.numberMin(d),c.
-numberMax(e)return function(h)local i,j=f(h)if not i then return false,j or''end
-local k,l=g(h)if not k then return false,l or''end return true end end c.
-numberConstrainedExclusive=function(d,e)assert(c.number(d))assert(c.number(e))
-local f,g=c.numberMinExclusive(d),c.numberMaxExclusive(e)return function(h)local
-i,j=f(h)if not i then return false,j or''end local k,l=g(h)if not k then return
-false,l or''end return true end end c.match=function(d)assert(c.string(d))return
-function(e)local f,g=c.string(e)if not f then return false,g end if string.
-match(e,d)==nil then return false,string.format('%q failed to match pattern %q',
-e,d)end return true end end c.optional=function(d)assert(c.callback(d))return
-function(e)if e==nil then return true end local f,g=d(e)if f then return true
-else return false,string.format('(optional) %s',g or'')end end end c.tuple=
-function(...)local d={...}return function(...)local e={...}for f,g in ipairs(d)
-do local h,i=g(e[f])if h==false then return false,string.format(
-'Bad tuple index #%s:\n\t%s',f,i or'')end end return true end end c.keys=
-function(d)assert(c.callback(d))return function(e)local f,g=c.table(e)if f==
-false then return false,g or''end for h in pairs(e)do local i,j=d(h)if i==false
-then return false,string.format('bad key %s:\n\t%s',tostring(h),j or'')end end
-return true end end c.values=function(d)assert(c.callback(d))return function(e)
-local f,g=c.table(e)if f==false then return false,g or''end for h,i in pairs(e)
-do local j,k=d(i)if j==false then return false,string.format(
-'bad value for key %s:\n\t%s',tostring(h),k or'')end end return true end end c.
-map=function(d,e)assert(c.callback(d))assert(c.callback(e))local f,g=c.keys(d),c
-.values(e)return function(h)local i,j=f(h)if not i then return false,j or''end
-local k,l=g(h)if not k then return false,l or''end return true end end c.set=
-function(d)return c.map(d,c.literal(true))end do local d=c.keys(c.integer)c.
-array=function(e)assert(c.callback(e))local f=c.values(e)return function(g)local
-h,i=d(g)if h==false then return false,string.format('[array] %s',i or'')end
-local j=0 for k in ipairs(g)do j=j+1 end for k in pairs(g)do if k<1 or k>j then
-return false,string.format('[array] key %s must be sequential',tostring(k))end
-end local k,l=f(g)if not k then return false,string.format('[array] %s',l or'')
-end return true end end c.strictArray=function(...)local e={...}assert(c.array(c
-.callback)(e))return function(f)local g,h=d(f)if g==false then return false,
-string.format('[strictArray] %s',h or'')end if#e<#f then return false,string.
-format('[strictArray] Array size exceeds limit of %d',#e)end for i,j in pairs(e)
-do local k,l=j(f[i])if not k then return false,string.format(
-'[strictArray] Array index #%d - %s',i,l)end end return true end end end do
-local d=c.array(c.callback)c.unionList=function(e)assert(d(e))return function(f)
-for g,h in ipairs(e)do if h(f)then return true end end return false,
-'bad type for union'end end c.union=function(...)return c.unionList{...}end c.
-some=c.union c.intersectionList=function(e)assert(d(e))return function(f)for g,h
-in ipairs(e)do local i,j=h(f)if not i then return false,j or''end end return
-true end end c.intersection=function(...)return c.intersectionList{...}end c.
-every=c.intersection end do local d=c.map(c.any,c.callback)c.interface=function(
-e)assert(d(e))return function(f)local g,h=c.table(f)if g==false then return
-false,h or''end for i,j in pairs(e)do local k,l=j(f[i])if k==false then return
-false,string.format('[interface] bad value for %s:\n\t%s',tostring(i),l or'')end
-end return true end end c.strictInterface=function(e)assert(d(e))return function
-(f)local g,h=c.table(f)if g==false then return false,h or''end for i,j in pairs(
-e)do local k,l=j(f[i])if k==false then return false,string.format(
-'[interface] bad value for %s:\n\t%s',tostring(i),l or'')end end for i in pairs(
-f)do if not e[i]then return false,string.format(
-'[interface] unexpected field %q',tostring(i))end end return true end end end c.
-instanceOf=function(d,e)assert(c.string(d))local f if e~=nil then f=c.children(e
-)end return function(g)local h,i=c.Instance(g)if not h then return false,i or''
-end if g.ClassName~=d then return false,string.format('%s expected, got %s',d,g.
-ClassName)end if f then local j,k=f(g)if not j then return false,k end end
-return true end end c.instance=c.instanceOf c.instanceIsA=function(d,e)assert(c.
-string(d))local f if e~=nil then f=c.children(e)end return function(g)local h,i=
-c.Instance(g)if not h then return false,i or''end if not g:IsA(d)then return
-false,string.format('%s expected, got %s',d,g.ClassName)end if f then local j,k=
-f(g)if not j then return false,k end end return true end end c.enum=function(d)
-assert(c.Enum(d))return function(e)local f,g=c.EnumItem(e)if not f then return
-false,g end if e.EnumType==d then return true else return false,string.format(
-'enum of %s expected, got enum of %s',tostring(d),tostring(e.EnumType))end end
-end do local d=c.tuple(c.callback,c.callback)c.wrap=function(e,f)assert(d(e,f))
-return function(...)assert(f(...))return e(...)end end end c.strict=function(d)
-return function(...)assert(d(...))end end do local d=c.map(c.string,c.callback)c
-.children=function(e)assert(d(e))return function(f)local g,h=c.Instance(f)if not
-g then return false,h or''end local i={}for j,k in ipairs(f:GetChildren())do
-local l=k.Name if e[l]then if i[l]then return false,string.format(
-'Cannot process multiple children with the same name %q',l)end i[l]=k end end
-for j,k in pairs(e)do local l,m=k(i[j])if not l then return false,string.format(
-'[%s.%s] %s',f:GetFullName(),j,m or'')end end return true end end end return c
-end end)()end,function()local b,c,d=a(8)return(function(...)return function(e)
-local f={Loaded={}}f.GetInterface=function(g)assert(typeof(g)=='string',
-'Must provide Inteface Name')if f.Loaded[g]then return f.Loaded[g]end local h=c.
-List:FindFirstChild(g)assert(h,string.format(
-"Failed to find Interface Components for: '%s'",tostring(g)))local i={}for j,k
-in h:GetChildren()do assert(k.ClassName=='ModuleScript',string.format(
-[[Failed to load Interface Component '%s' of '%s': Instance is not a ModuleScript.]]
-,tostring(k.Name),tostring(g)))i[k.Name]=d(k)(e)end f.Loaded[g]=i return i end
-return f end end)()end,[11]=function()a(11)return(function(...)return function(b
-)local c=(cloneref or clonereference or function(c)return c end)local d,e,f,g,h,
-i,j,k,l,m,n=c(game:GetService'CoreGui'),c(game:GetService'Players'),c(game:
-GetService'RunService'),c(game:GetService'SoundService'),c(game:GetService
-'UserInputService'),c(game:GetService'TextService'),c(game:GetService'Teams'),c(
-game:GetService'TweenService'),getgenv or function()return shared end,
-setclipboard or nil,protectgui or(syn and syn.protect_gui)or function()end local
-o,p=gethui or function()return d end,e.LocalPlayer or e.PlayerAdded:Wait()local
-q,r,s,t,u,v,w,x=c(p:GetMouse()),{},{},{},{},{},
-[[https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/]],{}
-local y={TransparencyTexture={RobloxId=139785960036434,Path=
-'Obsidian/assets/TransparencyTexture.png',URL=w..
-'assets/TransparencyTexture.png',Id=nil},SaturationMap={RobloxId=4155801252,Path
-='Obsidian/assets/SaturationMap.png',URL=w..'assets/SaturationMap.png',Id=nil},
-LoadingIcon={RobloxId=97544096941083,Path='Obsidian/assets/LoadingIcon.png',URL=
-w..'assets/LoadingIcon.png',Id=nil},CheckIcon={RobloxId=97682394690683,Path=
-'Obsidian/assets/CheckIcon.png',URL=w..'assets/CheckIcon.png',Id=nil}}do local z
-=function(z,A)if not isfolder or not makefolder then return end local B,C=z:
-split'/',''if A then table.remove(B,#B)end for D,E in ipairs(B)do if not
-isfolder(C..E)then makefolder(C..E)end C=C..E..'/'end return C end x.AddAsset=
-function(A,B,C,D)if y[A]~=nil then error(string.format('Asset %q already exists'
-,A))end assert(typeof(B)=='number','RobloxAssetId must be a number')y[A]={
-RobloxId=B,Path=string.format('Obsidian/custom_assets/%s',A),URL=C,Id=nil}x.
-DownloadAsset(A,D)end x.GetAsset=function(A)if not y[A]then return nil end local
-B=y[A]if B.Id then return B.Id end local C=string.format('rbxassetid://%s',B.
-RobloxId)if getcustomasset then local D,E=pcall(getcustomasset,B.Path)if D and E
-then C=E end end B.Id=C return C end x.DownloadAsset=function(A,B)if not
-getcustomasset or not writefile or not isfile then return false,
-'missing functions'end local C=y[A]z(C.Path,true)if B~=true and isfile(C.Path)
-then return true,nil end local D,E=pcall(function()writefile(C.Path,game:
-HttpGet(C.URL))end)return D,E end for A,B in y do x.DownloadAsset(A)end end
-local z={LocalPlayer=p,DevicePlatform=nil,IsMobile=false,IsRobloxFocused=true,
-ScreenGui=nil,SearchText='',Searching=false,GlobalSearch=false,LastSearchTab=nil
-,ActiveTab=nil,Tabs={},TabButtons={},DependencyBoxes={},KeybindFrame=nil,
-KeybindContainer=nil,KeybindToggles={},Notifications={},Dialogues={},
-ActiveLoading=nil,ActiveDialog=nil,Corners={},ToggleKeybind=Enum.KeyCode.
-RightControl,TweenInfo=TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.
-EasingDirection.Out),NotifyTweenInfo=TweenInfo.new(0.25,Enum.EasingStyle.Quad,
-Enum.EasingDirection.Out),Toggled=false,Unloaded=false,Labels=r,Buttons=s,
-Toggles=t,Options=u,NotifySide='Right',ShowCustomCursor=true,ForceCheckbox=false
-,ShowToggleFrameInKeybinds=true,NotifyOnError=false,CantDragForced=false,Signals
-={},UnloadSignals={},OriginalMinSize=Vector2.new(480,360),MinSize=Vector2.new(
-480,360),DPIScale=1,CornerRadius=4,CornerRadiusDropdown=false,IsLightTheme=false
-,Scheme={BackgroundColor=Color3.fromRGB(15,15,15),MainColor=Color3.fromRGB(25,25
-,25),AccentColor=Color3.fromRGB(125,85,255),OutlineColor=Color3.fromRGB(40,40,40
-),FontColor=Color3.new(1,1,1),Font=Font.fromEnum(Enum.Font.Code),RedColor=Color3
-.fromRGB(255,50,50),DestructiveColor=Color3.fromRGB(220,38,38),DarkColor=Color3.
-new(0,0,0),WhiteColor=Color3.new(1,1,1)},Registry={},Scales={},ScalesOffset={},
-ImageManager=x,ShowCursorBinding=string.sub(tostring{},10)}if f:IsStudio()then
-if h.TouchEnabled and not h.MouseEnabled then z.IsMobile=true z.OriginalMinSize=
-Vector2.new(480,240)else z.IsMobile=false z.OriginalMinSize=Vector2.new(480,360)
-end else pcall(function()z.DevicePlatform=h:GetPlatform()end)z.IsMobile=(z.
-DevicePlatform==Enum.Platform.Android or z.DevicePlatform==Enum.Platform.IOS)z.
-OriginalMinSize=z.IsMobile and Vector2.new(480,240)or Vector2.new(480,360)end
-local A,B,C,D,E={Frame={BorderSizePixel=0},ImageLabel={BackgroundTransparency=1,
-BorderSizePixel=0},ImageButton={AutoButtonColor=false,BorderSizePixel=0},
-ScrollingFrame={BorderSizePixel=0},TextLabel={BorderSizePixel=0,FontFace='Font',
-RichText=true,TextColor3='FontColor'},TextButton={AutoButtonColor=false,
-BorderSizePixel=0,FontFace='Font',RichText=true,TextColor3='FontColor'},TextBox=
-{BorderSizePixel=0,FontFace='Font',PlaceholderColor3=function()local A,B,C=z.
-Scheme.FontColor:ToHSV()return Color3.fromHSV(A,B,C/2)end,Text='',TextColor3=
-'FontColor'},UIListLayout={SortOrder=Enum.SortOrder.LayoutOrder},UIStroke={
-ApplyStrokeMode=Enum.ApplyStrokeMode.Border},Window={Title='No Title',Footer=
-'No Footer',Position=UDim2.fromOffset(6,6),Size=UDim2.fromOffset(720,600),
-IconSize=UDim2.fromOffset(30,30),AutoShow=true,Center=true,Resizable=true,
-SearchbarSize=UDim2.fromScale(1,1),GlobalSearch=false,CornerRadius=4,NotifySide=
-'Right',ShowCustomCursor=true,Font=Enum.Font.Code,ToggleKeybind=Enum.KeyCode.
-RightControl,ShowMobileButtons=true,MobileButtonsSide='Left',
-UnlockMouseWhileOpen=true,EnableSidebarResize=false,EnableCompacting=true,
-DisableCompactingSnap=false,SidebarCompacted=false,MinContainerWidth=256,
-MinSidebarWidth=128,SidebarCompactWidth=48,SidebarCollapseThreshold=0.5,
-CompactWidthActivation=128},Dialog={Title='Dialog',Description='Description',
-AutoDismiss=true,OutsideClickDismiss=true,FooterButtons={}},Loading={Title=
-'mspaint',Icon=95816097006870,IconSize=UDim2.fromOffset(30,30),LoadingIcon=x.
-GetAsset'LoadingIcon',LoadingIconColor=nil,LoadingIconTweenTime=1,CurrentStep=0,
-TotalSteps=10,ShowSidebar=false,AutoResizeHeight=false,WindowWidth=450,
-WindowHeight=275,ContentWidth=450,SidebarWidth=250},Toggle={Text='Toggle',
-Default=false,Callback=function()end,Changed=function()end,Risky=false,Disabled=
-false,Visible=true},Input={Text='Input',Default='',Finished=false,Numeric=false,
-ClearTextOnFocus=true,ClearTextOnBlur=false,Placeholder='',AllowEmpty=true,
-EmptyReset='---',Callback=function()end,Changed=function()end,VerifyValue=nil,
-Disabled=false,Visible=true},Slider={Text='Slider',Default=0,Min=0,Max=100,
-Rounding=0,Prefix='',Suffix='',Callback=function()end,Changed=function()end,
-Disabled=false,Visible=true},Dropdown={Values={},DisabledValues={},ValueImages={
-},RichText=false,Multi=false,MaxVisibleDropdownItems=8,Callback=function()end,
-Changed=function()end,Disabled=false,Visible=true},Viewport={Object=nil,Camera=
-nil,Clone=true,AutoFocus=true,Interactive=false,Height=200,Visible=true},Image={
-Image='',Transparency=0,BackgroundTransparency=0,Color=Color3.new(1,1,1),
-RectOffset=Vector2.zero,RectSize=Vector2.zero,ScaleType=Enum.ScaleType.Fit,
-Height=200,Outline=false,Visible=true},Video={Video='',Looped=false,Playing=
-false,Volume=1,Height=200,Visible=true},UIPassthrough={Instance=nil,Height=24,
-Visible=true},KeyPicker={Text='KeyPicker',Default='None',DefaultModifiers={},
-Blacklisted={},BlacklistedModifiers={},Whitelisted={},WhitelistedModifiers={},
-Mode='Toggle',Modes={'Always','Toggle','Hold'},SyncToggleState=false,Callback=
-function()end,ChangedCallback=function()end,Changed=function()end,Clicked=
-function()end},ColorPicker={Default=Color3.new(1,1,1),Callback=function()end,
-Changed=function()end}},{Bottom={0,1},Right={1,0}},{Left={0.5,1},Right={0.5,1}},
-{RedColor='Red',WhiteColor='White',DarkColor='Dark'},{Red='RedColor',White=
-'WhiteColor',Dark='DarkColor'}local F,G,H=function(F)if not F then return nil
-end local G=D[F]if G and z.Scheme[G]~=nil then z.Scheme[F]=z.Scheme[G]z.Scheme[G
-]=nil return z.Scheme[F]end local H=E[F]if H and z.Scheme[H]~=nil then warn(
-string.format('Scheme Value %q is deprecated, please use %q instead.',F,H))
-return z.Scheme[H]end return z.Scheme[F]end,function(F,G,H)local I=Instance.new
-'BindableEvent'local J=F:Once(function(...)if not H or typeof(H)=='function'and
-H(...)then I:Fire(true)else I:Fire(false)end end)task.delay(G,function()J:
-Disconnect()I:Fire(false)end)local K=I.Event:Wait()I:Destroy()return K end,
-function(F,G)return F.UserInputType==Enum.UserInputType.MouseButton1 or(G==true
-and F.UserInputType==Enum.UserInputType.MouseButton2)or F.UserInputType==Enum.
-UserInputType.Touch end local I,J,L,M,N,O,P,Q,R,S=function(I,J)return H(I,J)and
-I.UserInputState==Enum.UserInputState.Begin and z.IsRobloxFocused end,function(I
-)return(I.UserInputType==Enum.UserInputType.MouseMovement or I.UserInputType==
-Enum.UserInputType.Touch)and I.UserInputState==Enum.UserInputState.Change end,
-function(I,J)return H(I,J)and(I.UserInputState==Enum.UserInputState.Begin or I.
-UserInputState==Enum.UserInputState.Change)and z.IsRobloxFocused end,function(I)
-local J=0 for K,L in I do J=J+1 end return J end,function(I)if not(I and I.
-PlaybackState==Enum.PlaybackState.Playing)then return end I:Cancel()end,function
-(I)return I:match'^%s*(.-)%s*$'end,function(I,J)assert(J>=0,
-'Invalid rounding number.')if J==0 then return math.floor(I)end return tonumber(
-string.format('%.'..J..'f',I))end,function(I)I=I:gsub('<br%s*/>','\n')return(I:
-gsub('<[^<>]->',''))end,function(I)local J=e:GetPlayers()if I then local L=table
-.find(J,p)if L then table.remove(J,L)end end table.sort(J,function(L,M)return L.
-Name:lower()<M.Name:lower()end)return J end,function()local I=j:GetTeams()table.
-sort(I,function(J,L)return J.Name:lower()<L.Name:lower()end)return I end z.
-UpdateDependencyBoxes=function(T)for U,V in z.DependencyBoxes do V:Update(true)
-end if z.Searching then z:UpdateSearch(z.SearchText)end end local function
-CheckDepbox(T,U)local V=0 for W,X in T.Elements do if X.Type=='Divider'then X.
-Holder.Visible=false continue elseif X.SubButton then local Y=false if X.Text:
-lower():match(U)and X.Visible then Y=true else X.Base.Visible=false end if X.
-SubButton.Text:lower():match(U)and X.SubButton.Visible then Y=true else X.
-SubButton.Base.Visible=false end X.Holder.Visible=Y if Y then V=V+1 end continue
-end if X.Text and X.Text:lower():match(U)and X.Visible then X.Holder.Visible=
-true V=V+1 else X.Holder.Visible=false end end for W,X in T.DependencyBoxes do
-if not X.Visible then continue end V=V+CheckDepbox(X,U)end T.Holder.Visible=V>0
-return V end local function RestoreDepbox(T)for U,V in T.Elements do V.Holder.
-Visible=typeof(V.Visible)=='boolean'and V.Visible or true if V.SubButton then V.
-Base.Visible=V.Visible V.SubButton.Base.Visible=V.SubButton.Visible end end T:
-Resize()T.Holder.Visible=true for U,V in T.DependencyBoxes do if not V.Visible
-then continue end RestoreDepbox(V)end end local aa,ab=function(T,U)if not T then
-return end local V=false for W,X in T.Groupboxes do local Y=0 for Z,_ in X.
-Elements do if _.Type=='Divider'then _.Holder.Visible=false continue elseif _.
-SubButton then local aa=false if _.Text:lower():match(U)and _.Visible then aa=
-true else _.Base.Visible=false end if _.SubButton.Text:lower():match(U)and _.
-SubButton.Visible then aa=true else _.SubButton.Base.Visible=false end _.Holder.
-Visible=aa if aa then Y=Y+1 end continue end if _.Text and _.Text:lower():match(
-U)and _.Visible then _.Holder.Visible=true Y=Y+1 else _.Holder.Visible=false end
-end for aa,Z in X.DependencyBoxes do if not Z.Visible then continue end Y=Y+
-CheckDepbox(Z,U)end if Y>0 then X:Resize()V=true end X.BoxHolder.Visible=Y>0 end
-for aa,W in T.Tabboxes do local X,Y=0,{}for Z,_ in W.Tabs do Y[_]=0 for ab,ac in
-_.Elements do if ac.Type=='Divider'then ac.Holder.Visible=false continue elseif
-ac.SubButton then local ad=false if ac.Text:lower():match(U)and ac.Visible then
-ad=true else ac.Base.Visible=false end if ac.SubButton.Text:lower():match(U)and
-ac.SubButton.Visible then ad=true else ac.SubButton.Base.Visible=false end ac.
-Holder.Visible=ad if ad then Y[_]=Y[_]+1 end continue end if ac.Text and ac.Text
-:lower():match(U)and ac.Visible then ac.Holder.Visible=true Y[_]=Y[_]+1 else ac.
-Holder.Visible=false end end for ab,ac in _.DependencyBoxes do if not ac.Visible
-then continue end Y[_]=Y[_]+CheckDepbox(ac,U)end end for ab,ac in Y do ab.
-ButtonHolder.Visible=ac>0 if ac>0 then X=X+1 V=true if W.ActiveTab==ab then ab:
-Resize()elseif W.ActiveTab and Y[W.ActiveTab]==0 then ab:Show()end end end W.
-BoxHolder.Visible=X>0 end return V end,function(aa)if not aa then return end for
-ab,ac in aa.Groupboxes do for ad,T in ac.Elements do T.Holder.Visible=typeof(T.
-Visible)=='boolean'and T.Visible or true if T.SubButton then T.Base.Visible=T.
-Visible T.SubButton.Base.Visible=T.SubButton.Visible end end for ad,T in ac.
-DependencyBoxes do if not T.Visible then continue end RestoreDepbox(T)end ac:
-Resize()ac.BoxHolder.Visible=true end for ab,ac in aa.Tabboxes do for ad,T in ac
-.Tabs do for U,V in T.Elements do V.Holder.Visible=typeof(V.Visible)=='boolean'
-and V.Visible or true if V.SubButton then V.Base.Visible=V.Visible V.SubButton.
-Base.Visible=V.SubButton.Visible end end for U,V in T.DependencyBoxes do if not
-V.Visible then continue end RestoreDepbox(V)end T.ButtonHolder.Visible=true end
-if ac.ActiveTab then ac.ActiveTab:Resize()end ac.BoxHolder.Visible=true end end
-z.UpdateSearch=function(ac,ad)z.SearchText=ad local T={}if z.GlobalSearch then
-for U,V in z.Tabs do if typeof(V)=='table'and not V.IsKeyTab then table.insert(T
-,V)end end elseif z.LastSearchTab and typeof(z.LastSearchTab)=='table'then table
-.insert(T,z.LastSearchTab)end for U,V in ipairs(T)do ab(V)end local U=ad:lower()
-if O(U)==''then z.Searching=false z.LastSearchTab=nil return end if not z.
-GlobalSearch and z.ActiveTab and z.ActiveTab.IsKeyTab then z.Searching=false z.
-LastSearchTab=nil return end z.Searching=true local V={}if z.GlobalSearch then V
-=T if#V==0 then for W,X in z.Tabs do if typeof(X)=='table'and not X.IsKeyTab
-then table.insert(V,X)end end end elseif z.ActiveTab then table.insert(V,z.
-ActiveTab)end local W,X=false for Y,Z in ipairs(V)do local _=aa(Z,U)if _ then if
-not X then X=Z end if Z==z.ActiveTab then W=true end end end if z.GlobalSearch
-then if W and z.ActiveTab then z.ActiveTab:RefreshSides()elseif X then local Y=
-ad task.defer(function()if z.SearchText~=Y then return end if z.ActiveTab~=X
-then X:Show()end end)end z.LastSearchTab=nil else z.LastSearchTab=z.ActiveTab
-end end z.AddToRegistry=function(ac,ad,T)z.Registry[ad]=T end z.
-RemoveFromRegistry=function(ac,ad)z.Registry[ad]=nil end z.
-UpdateColorsUsingRegistry=function(ac)for ad,T in z.Registry do for U,V in T do
-local W=F(V)if W or typeof(V)=='function'then ad[U]=W or V()end end end end z.
-SetDPIScale=function(ac,ad)z.DPIScale=ad/100 z.MinSize=z.OriginalMinSize*z.
-DPIScale for T,U in z.Scales do U.Scale=z.DPIScale-(tonumber(z.ScalesOffset[U])
-or 0)end for T,U in u do if U.Type=='Dropdown'then U:RecalculateListSize()end
-end for T,U in z.Notifications do U:Resize()end end z.GiveSignal=function(ac,ad)
-local T=typeof(ad)if ad and(T=='RBXScriptConnection'or T=='RBXScriptSignal')then
-table.insert(z.Signals,ad)end return ad end IsValidCustomIcon=function(ac)return
-typeof(ac)=='string'and(ac:match'rbxasset'or ac:match'roblox%.com/asset/%?id='or
-ac:match'rbxthumb://type=')end local ac,ad=pcall(function()return((loadstring(
-game:HttpGet
-[[https://raw.githubusercontent.com/deividcomsono/lucide-roblox-direct/refs/heads/main/source.lua]]
-)))()end)z.GetIcon=function(T,U)if not ac then return end local V,W=pcall(ad.
-GetAsset,U)if not V then return end return W end z.GetCustomIcon=function(T,U)if
-not U then return nil end if tonumber(U)then U=string.format('rbxassetid://%s',
-tostring(U))end local V=IsValidCustomIcon(U)if V then return{Url=U,
-ImageRectOffset=Vector2.zero,ImageRectSize=Vector2.zero,Custom=true}end local W=
-z:GetIcon(U)if W then return W end return nil end z.Validate=function(T,U,V)if
-typeof(U)~='table'then return V end for W,X in V do if typeof(W)=='number'then
-continue end if typeof(X)=='table'then U[W]=z:Validate(U[W],X)elseif U[W]==nil
-then U[W]=X end end return U end local T=function(T,U)local V=z.Registry[U]or{}
-for W,X in T do if W~='Text'then local Y=F(X)if Y or typeof(X)=='function'then V
-[W]=X X=Y or X()else V[W]=nil end end U[W]=X end if M(V)>0 then z.Registry[U]=V
-end end local U,V=function(U,V)local W=Instance.new(U)if A[U]then T(A[U],W)end
-T(V,W)if V.Parent and not V.ZIndex then pcall(function()W.ZIndex=V.Parent.ZIndex
-end)end return W end,function(U,V)local W=pcall(function()if not V then V=d end
-local W if typeof(V)=='function'then W=V()else W=V end U.Parent=W end)if not(W
-and U.Parent)then U.Parent=z.LocalPlayer:WaitForChild('PlayerGui',math.huge)end
-end local W,X=function(W,X)if X then V(W,d)return end pcall(n,W)V(W,o)end,U(
-'ScreenGui',{Name='Obsidian',DisplayOrder=998,ResetOnSpawn=false})W(X)z.
-ScreenGui=X X.DescendantRemoving:Connect(function(Y)z:RemoveFromRegistry(Y)end)
-local Y,Z,_=(U('TextButton',{BackgroundTransparency=1,Modal=false,Size=UDim2.
-fromScale(0,0),AnchorPoint=Vector2.zero,Text='',ZIndex=-999,Parent=X}))do Z=U(
-'Frame',{AnchorPoint=Vector2.new(0.5,0.5),BackgroundColor3='WhiteColor',Size=
-UDim2.fromOffset(9,1),Visible=false,ZIndex=11000,Parent=X})U('Frame',{
-AnchorPoint=Vector2.new(0.5,0.5),BackgroundColor3='DarkColor',Position=UDim2.
-fromScale(0.5,0.5),Size=UDim2.new(1,2,1,2),ZIndex=10999,Parent=Z})local ae=U(
-'Frame',{AnchorPoint=Vector2.new(0.5,0.5),BackgroundColor3='WhiteColor',Position
-=UDim2.fromScale(0.5,0.5),Size=UDim2.fromOffset(1,9),ZIndex=11000,Parent=Z})U(
-'Frame',{AnchorPoint=Vector2.new(0.5,0.5),BackgroundColor3='DarkColor',Position=
-UDim2.fromScale(0.5,0.5),Size=UDim2.new(1,2,1,2),ZIndex=10999,Parent=ae})_=U(
-'ImageLabel',{AnchorPoint=Vector2.new(0.5,0.5),BackgroundTransparency=1,Position
-=UDim2.fromScale(0.5,0.5),Size=UDim2.fromOffset(20,20),ZIndex=11000,Visible=
-false,Parent=Z})end local ae,af do ae=U('Frame',{AnchorPoint=Vector2.new(1,0),
-BackgroundTransparency=1,Position=UDim2.new(1,-6,0,6),Size=UDim2.new(0,300,1,-6)
-,Parent=X})table.insert(z.Scales,U('UIScale',{Parent=ae}))af=U('UIListLayout',{
-HorizontalAlignment=Enum.HorizontalAlignment.Right,Padding=UDim.new(0,8),Parent=
-ae})end z.ResetCursorIcon=function(ag)_.Visible=false _.Size=UDim2.fromOffset(20
-,20)end z.ChangeCursorIcon=function(ag,ah)if not ah or ah==''then z:
-ResetCursorIcon()return end local ai=z:GetCustomIcon(ah)assert(ai,
-[[Image must be a valid Roblox asset or a valid URL or a valid lucide icon.]])_.
-Visible=true _.Image=ai.Url _.ImageRectOffset=ai.ImageRectOffset _.ImageRectSize
-=ai.ImageRectSize end z.ChangeCursorIconSize=function(ag,ah)assert(typeof(ah)==
-'UDim2','UDim2 expected.')_.Size=ah end z.GetBetterColor=function(ag,ah,ai)ai=ai
-*(z.IsLightTheme and-4 or 2)return Color3.fromRGB(math.clamp(ah.R*255+ai,0,255),
-math.clamp(ah.G*255+ai,0,255),math.clamp(ah.B*255+ai,0,255))end z.
-GetLighterColor=function(ag,ah)local ai,aj,ak=ah:ToHSV()return Color3.fromHSV(ai
-,math.max(0,aj-0.1),math.min(1,ak+0.1))end z.GetDarkerColor=function(ag,ah)local
-ai,aj,ak=ah:ToHSV()return Color3.fromHSV(ai,aj,ak/2)end z.GetKeyString=function(
-ag,ah)if ah.EnumType==Enum.KeyCode and ah.Value>33 and ah.Value<127 then return
-string.char(ah.Value)end return ah.Name end z.GetTextBounds=function(ag,ah,ai,aj
-,ak)local al=Instance.new'GetTextBoundsParams'al.Text=ah al.RichText=true al.
-Font=ai al.Size=aj al.Width=ak or workspace.CurrentCamera.ViewportSize.X-32
-local am=i:GetTextBoundsAsync(al)return am.X,am.Y end z.MouseIsOverFrame=
-function(ag,ah,ai)local aj,ak=ah.AbsolutePosition,ah.AbsoluteSize return ai.X>=
-aj.X and ai.X<=aj.X+ak.X and ai.Y>=aj.Y and ai.Y<=aj.Y+ak.Y end z.SafeCallback=
-function(ag,ah,...)if not(ah and typeof(ah)=='function')then return end local ai
-=table.pack(xpcall(ah,function(ai)task.defer(error,debug.traceback(ai,2))if z.
-NotifyOnError then z:Notify(ai)end return ai end,...))if not ai[1]then return
-nil end return table.unpack(ai,2,ai.n)end z.MakeDraggable=function(ag,ah,ai,aj,
-ak)local al,am,an,ao=false ai.InputBegan:Connect(function(ap)if not I(ap)or ak
-and z.CantDragForced then return end am=ap.Position an=ah.Position al=true ao=ap
-.Changed:Connect(function()if ap.UserInputState~=Enum.UserInputState.End then
-return end al=false if ao and ao.Connected then ao:Disconnect()ao=nil end end)
-end)z:GiveSignal(h.InputChanged:Connect(function(ap)if(not aj and not z.Toggled)
-or(ak and z.CantDragForced)or not(X and X.Parent)then al=false if ao and ao.
-Connected then ao:Disconnect()ao=nil end return end if al and J(ap)then local aq
-=ap.Position-am ah.Position=UDim2.new(an.X.Scale,an.X.Offset+aq.X,an.Y.Scale,an.
-Y.Offset+aq.Y)end end))end z.MakeResizable=function(ag,ah,ai,aj)local ak,al,am,
-an=false ai.InputBegan:Connect(function(ao)if not I(ao)then return end al=ao.
-Position am=ah.Size ak=true an=ao.Changed:Connect(function()if ao.UserInputState
-~=Enum.UserInputState.End then return end ak=false if an and an.Connected then
-an:Disconnect()an=nil end end)end)z:GiveSignal(h.InputChanged:Connect(function(
-ao)if not ah.Visible or not(X and X.Parent)then ak=false if an and an.Connected
-then an:Disconnect()an=nil end return end if ak and J(ao)then local ap=ao.
-Position-al ah.Size=UDim2.new(am.X.Scale,math.clamp(am.X.Offset+ap.X,z.MinSize.X
-,math.huge),am.Y.Scale,math.clamp(am.Y.Offset+ap.Y,z.MinSize.Y,math.huge))if aj
-then z:SafeCallback(aj)end end end))end z.MakeCover=function(ag,ah,ai)local aj,
-ak=B[ai]or{0,0},C[ai]or{1,0.5}local al=U('Frame',{AnchorPoint=Vector2.new(aj[1],
-aj[2]),BackgroundColor3=ah.BackgroundColor3,Position=UDim2.fromScale(aj[1],aj[2]
-),Size=UDim2.fromScale(ak[1],ak[2]),Parent=ah})return al end z.MakeLine=function
-(ag,ah,ai)local aj=U('Frame',{AnchorPoint=ai.AnchorPoint or Vector2.zero,
-BackgroundColor3='OutlineColor',Position=ai.Position,Size=ai.Size,ZIndex=ai.
-ZIndex or ah.ZIndex,Parent=ah})return aj end z.AddOutline=function(ag,ah)local
-ai,aj=U('UIStroke',{Color='OutlineColor',Thickness=1,ZIndex=2,Parent=ah}),U(
-'UIStroke',{Color='DarkColor',Thickness=1.5,ZIndex=1,Parent=ah})return ai,aj end
-z.AddBlank=function(ag,ah,ai)return U('Frame',{BackgroundTransparency=1,Size=ai
-or UDim2.fromScale(0,0),Parent=ah})end z.MakeOutline=function(ag,ah,ai,aj)warn
-[[Obsidian:MakeOutline is deprecated, please use Obsidian:AddOutline instead.]]
-local ak=U('Frame',{BackgroundColor3='DarkColor',Position=UDim2.fromOffset(-2,-2
-),Size=UDim2.new(1,4,1,4),ZIndex=aj,Parent=ah})local al=U('Frame',{
-BackgroundColor3='OutlineColor',Position=UDim2.fromOffset(1,1),Size=UDim2.new(1,
--2,1,-2),ZIndex=aj,Parent=ak})if ai and ai>0 then U('UICorner',{CornerRadius=
-UDim.new(0,ai+1),Parent=ak})U('UICorner',{CornerRadius=UDim.new(0,ai),Parent=al}
-)end return ak,al end z.AddDraggableLabel=function(ag,ah)local ai,aj={},U(
-'TextLabel',{AutomaticSize=Enum.AutomaticSize.XY,TextXAlignment=Enum.
-TextXAlignment.Left,BackgroundColor3='BackgroundColor',Size=UDim2.fromOffset(0,0
-),Position=UDim2.fromOffset(6,6),Text=ah,TextSize=15,ZIndex=10,Parent=X})table.
-insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius),Parent=aj
-}))U('UIPadding',{PaddingBottom=UDim.new(0,6),PaddingLeft=UDim.new(0,12),
-PaddingRight=UDim.new(0,12),PaddingTop=UDim.new(0,6),Parent=aj})table.insert(z.
-Scales,U('UIScale',{Parent=aj}))z:AddOutline(aj)z:MakeDraggable(aj,aj,true)ai.
-Label=aj ai.SetText=function(ak,al)aj.Text=al end ai.SetVisible=function(ak,al)
-aj.Visible=al end return ai end z.AddDraggableButton=function(ag,ah,ai,aj)local
-ak,al={},U('TextButton',{BackgroundColor3='BackgroundColor',Position=UDim2.
-fromOffset(6,6),TextSize=16,ZIndex=10,Parent=X})table.insert(z.Corners,U(
-'UICorner',{CornerRadius=UDim.new(0,z.CornerRadius),Parent=al}))if not aj then
-table.insert(z.Scales,U('UIScale',{Parent=al}))end z:AddOutline(al)al.
-MouseButton1Click:Connect(function()z:SafeCallback(ai,ak)end)z:MakeDraggable(al,
-al,true)ak.Button=al ak.SetText=function(am,an)local ao,ap=z:GetTextBounds(an,z.
-Scheme.Font,16)al.Text=an al.Size=UDim2.fromOffset(ao*2,ap*2)end ak:SetText(ah)
-return ak end z.AddDraggableMenu=function(ag,ah)local ai=U('Frame',{
-AutomaticSize=Enum.AutomaticSize.XY,BackgroundColor3='BackgroundColor',Position=
-UDim2.fromOffset(6,6),Size=UDim2.fromOffset(0,0),ZIndex=10,Parent=X})table.
-insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius),Parent=ai
-}))table.insert(z.Scales,U('UIScale',{Parent=ai}))z:AddOutline(ai)z:MakeLine(ai,
-{Position=UDim2.fromOffset(0,34),Size=UDim2.new(1,0,0,1)})local aj=U('TextLabel'
-,{BackgroundTransparency=1,Size=UDim2.new(1,0,0,34),Text=ah,TextSize=15,
-TextXAlignment=Enum.TextXAlignment.Left,Parent=ai})U('UIPadding',{PaddingLeft=
-UDim.new(0,12),PaddingRight=UDim.new(0,12),Parent=aj})local ak=U('Frame',{
-BackgroundTransparency=1,Position=UDim2.fromOffset(0,35),Size=UDim2.new(1,0,1,-
-35),Parent=ai})U('UIListLayout',{Padding=UDim.new(0,7),Parent=ak})U('UIPadding',
-{PaddingBottom=UDim.new(0,7),PaddingLeft=UDim.new(0,7),PaddingRight=UDim.new(0,7
-),PaddingTop=UDim.new(0,7),Parent=ak})z:MakeDraggable(ai,aj,true)return ai,ak
-end do local ag=z:AddDraggableLabel''ag:SetVisible(false)z.SetWatermark=function
-(ah,ai)warn
-[[Watermark is deprecated, please use Library:AddDraggableLabel instead.]]ag:
-SetText(ai)end z.SetWatermarkVisibility=function(ah,ai)warn
-[[Watermark is deprecated, please use Library:AddDraggableLabel instead.]]ag:
-SetVisible(ai)end end local ag z.AddContextMenu=function(ah,ai,aj,ak,al,am,an)
-local ao,ap=(ai:FindFirstAncestorOfClass'ScreenGui')if ao~=X and(z.ActiveLoading
-and ao~=z.ActiveLoading.ScreenGui)then ao=X end if al then ap=U('ScrollingFrame'
-,{AutomaticCanvasSize=al==2 and Enum.AutomaticSize.Y or Enum.AutomaticSize.None,
-AutomaticSize=al==1 and Enum.AutomaticSize.Y or Enum.AutomaticSize.None,
-BackgroundColor3='BackgroundColor',BottomImage=
-'rbxasset://textures/ui/Scroll/scroll-middle.png',CanvasSize=UDim2.fromOffset(0,
-0),ScrollBarImageColor3='OutlineColor',ScrollBarThickness=al==2 and 2 or 0,Size=
-typeof(aj)=='function'and aj()or aj,TopImage=
-'rbxasset://textures/ui/Scroll/scroll-middle.png',Visible=false,ZIndex=10,Parent
-=ao})else ap=U('Frame',{BackgroundColor3='BackgroundColor',Size=typeof(aj)==
-'function'and aj()or aj,Visible=false,ZIndex=10,Parent=ao})end table.insert(z.
-Scales,U('UIScale',{Parent=ap}))U('UIStroke',{Color='OutlineColor',Parent=ap})if
-an~=true then table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.
-CornerRadius/2),Parent=ap}))end local aq={Active=false,Holder=ai,Menu=ap,List=
-nil,Signal=nil,Size=aj}if al then aq.List=U('UIListLayout',{Parent=ap})end aq.
-Open=function(ar)if ag==aq then return elseif ag then ag:Close()end ag=aq aq.
-Active=true if typeof(ak)=='function'then ap.Position=UDim2.fromOffset(math.
-floor(ai.AbsolutePosition.X+ak()[1]),math.floor(ai.AbsolutePosition.Y+ak()[2]))
-else ap.Position=UDim2.fromOffset(math.floor(ai.AbsolutePosition.X+ak[1]),math.
-floor(ai.AbsolutePosition.Y+ak[2]))end ap.Size=typeof(aq.Size)=='function'and aq
-.Size()or aq.Size if typeof(am)=='function'then z:SafeCallback(am,true)end ap.
-Visible=true aq.Signal=ai:GetPropertyChangedSignal'AbsolutePosition':Connect(
-function()if typeof(ak)=='function'then ap.Position=UDim2.fromOffset(math.floor(
-ai.AbsolutePosition.X+ak()[1]),math.floor(ai.AbsolutePosition.Y+ak()[2]))else ap
-.Position=UDim2.fromOffset(math.floor(ai.AbsolutePosition.X+ak[1]),math.floor(ai
-.AbsolutePosition.Y+ak[2]))end end)end aq.Close=function(ar)if ag~=aq then
-return end ap.Visible=false if aq.Signal then aq.Signal:Disconnect()aq.Signal=
-nil end aq.Active=false ag=nil if typeof(am)=='function'then z:SafeCallback(am,
-false)end end aq.Toggle=function(ar)if aq.Active then aq:Close()else aq:Open()
-end end aq.SetSize=function(ar,as)aq.Size=as ap.Size=typeof(as)=='function'and
-as()or as end return aq end z:GiveSignal(h.InputBegan:Connect(function(ah)if z.
-Unloaded then return end if I(ah,true)then local ai=ah.Position if ag and not(z:
-MouseIsOverFrame(ag.Menu,ai)or z:MouseIsOverFrame(ag.Holder,ai))then ag:Close()
-end end end))local ah=U('TextLabel',{AutomaticSize=Enum.AutomaticSize.Y,
-BackgroundColor3='BackgroundColor',TextSize=14,TextWrapped=true,Visible=false,
-ZIndex=20,Parent=X})U('UIPadding',{PaddingBottom=UDim.new(0,2),PaddingLeft=UDim.
-new(0,4),PaddingRight=UDim.new(0,4),PaddingTop=UDim.new(0,2),Parent=ah})table.
-insert(z.Scales,U('UIScale',{Parent=ah}))U('UIStroke',{Color='OutlineColor',
-Parent=ah})table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.
-CornerRadius/2),Parent=ah}))ah:GetPropertyChangedSignal'AbsolutePosition':
-Connect(function()if z.Unloaded then return end local ai=z:GetTextBounds(ah.Text
-,ah.FontFace,ah.TextSize,(workspace.CurrentCamera.ViewportSize.X-ah.
-AbsolutePosition.X-8)/z.DPIScale)ah.Size=UDim2.fromOffset(ai+8)end)local ai z.
-AddTooltip=function(aj,ak,al,am)local an={Disabled=false,Hovering=false,Signals=
-{}}local ao,ap=function()if ai==am or z.ActiveDialog or(ag and z:
-MouseIsOverFrame(ag.Menu,q))or(an.Disabled and typeof(al)~='string')or(not an.
-Disabled and typeof(ak)~='string')then return end ai=am local ao=am:
-FindFirstAncestorOfClass'ScreenGui'if ao~=X and(z.ActiveLoading and ao~=z.
-ActiveLoading.ScreenGui)then ao=X end ah.Parent=ao ah.Text=an.Disabled and al or
-ak ah.Visible=true while(z.Toggled or z.ActiveLoading)and not z.ActiveDialog and
-z:MouseIsOverFrame(am,q)and not(ag and z:MouseIsOverFrame(ag.Menu,q))do ah.
-Position=UDim2.fromOffset(q.X+(z.ShowCustomCursor and 8 or 14),q.Y+(z.
-ShowCustomCursor and 8 or 12))f.RenderStepped:Wait()end ah.Visible=false ai=nil
-end,function(ao)local ap=typeof(ao)if ao and(ap=='RBXScriptConnection'or ap==
-'RBXScriptSignal')then table.insert(an.Signals,ao)end return ao end ap(am.
-MouseEnter:Connect(ao))ap(am.MouseMoved:Connect(ao))ap(am.MouseLeave:Connect(
-function()if ai~=am then return end ah.Visible=false ai=nil end))an.Destroy=
-function(aq)for ar=#an.Signals,1,-1 do local as=table.remove(an.Signals,ar)if as
-and as.Connected then as:Disconnect()end end if ai==am then if ah then ah.
-Visible=false end ai=nil end end table.insert(v,ah)return an end z.OnUnload=
-function(aj,ak)table.insert(z.UnloadSignals,ak)end z.Unload=function(aj)for ak=#
-z.Signals,1,-1 do local al=table.remove(z.Signals,ak)if al and al.Connected then
-al:Disconnect()end end for ak,al in z.UnloadSignals do z:SafeCallback(al)end for
-ak,al in v do z:SafeCallback(al.Destroy,al)end z.Unloaded=true if z.
-ActiveLoading then z.ActiveLoading:Destroy()end if X then X:Destroy()end l().
-Library=nil end local aj,ak,al,am,an=z:GetIcon'check',z:GetIcon'chevron-up',z:
-GetIcon'move-diagonal-2',z:GetIcon'key',z:GetIcon'move'z.SetIconModule=function(
-ao,ap)ac=true ad=ap aj=z:GetIcon'check'ak=z:GetIcon'chevron-up'al=z:GetIcon
-'move-diagonal-2'am=z:GetIcon'key'an=z:GetIcon'move'end local ao={}do local ap={
-}ap.AddKeyPicker=function(aq,ar,as)as=z:Validate(as,A.KeyPicker)local at=aq
-local au,av=at.TextLabel,{Text=as.Text,Value=as.Default,Modifiers=as.
-DefaultModifiers,DisplayValue=as.Default,Blacklisted=as.Blacklisted,
-BlacklistedModifiers=as.BlacklistedModifiers,Whitelisted=as.Whitelisted,
-WhitelistedModifiers=as.WhitelistedModifiers,Toggled=false,Mode=as.Mode,
-SyncToggleState=as.SyncToggleState,Callback=as.Callback,ChangedCallback=as.
-ChangedCallback,Changed=as.Changed,Clicked=as.Clicked,Type='KeyPicker'}if av.
-Mode=='Press'then assert(at.Type=='Label',
-[[KeyPicker with the mode 'Press' can be only applied on Labels.]])av.
-SyncToggleState=false as.Modes={'Press'}as.Mode='Press'end if av.SyncToggleState
-then as.Modes={'Toggle','Hold'}if not table.find(as.Modes,as.Mode)then as.Mode=
-'Toggle'end end local aw,ax,ay,az,aA=false,{MB1=Enum.UserInputType.MouseButton1,
-MB2=Enum.UserInputType.MouseButton2,MB3=Enum.UserInputType.MouseButton3},{[Enum.
-UserInputType.MouseButton1]='MB1',[Enum.UserInputType.MouseButton2]='MB2',[Enum.
-UserInputType.MouseButton3]='MB3'},{LAlt=Enum.KeyCode.LeftAlt,RAlt=Enum.KeyCode.
-RightAlt,LCtrl=Enum.KeyCode.LeftControl,RCtrl=Enum.KeyCode.RightControl,LShift=
-Enum.KeyCode.LeftShift,RShift=Enum.KeyCode.RightShift,Tab=Enum.KeyCode.Tab,
-CapsLock=Enum.KeyCode.CapsLock},{[Enum.KeyCode.LeftAlt]='LAlt',[Enum.KeyCode.
-RightAlt]='RAlt',[Enum.KeyCode.LeftControl]='LCtrl',[Enum.KeyCode.RightControl]=
-'RCtrl',[Enum.KeyCode.LeftShift]='LShift',[Enum.KeyCode.RightShift]='RShift',[
-Enum.KeyCode.Tab]='Tab',[Enum.KeyCode.CapsLock]='CapsLock'}local aB,aC=function(
-aB)return aB.UserInputType==Enum.UserInputType.Keyboard and aA[aB.KeyCode]~=nil
-end,function()local aB={}for aC,aD in az do if table.find(aB,aC)then continue
-end if not h:IsKeyDown(aD)then continue end table.insert(aB,aC)end return aB end
-local aD,aE,aF,aG=function(aD)if not(typeof(aD)=='table'and M(aD)>0)then return
-true end local aE,aF=aC(),true for aG,aH in aD do if table.find(aE,aH)then
-continue end aF=false break end return aF end,function(aD)if not aD then return
-false end if ay[aD.UserInputType]~=nil then return h:IsMouseButtonPressed(aD.
-UserInputType)and not h:GetFocusedTextBox()elseif aD.UserInputType==Enum.
-UserInputType.Keyboard then return h:IsKeyDown(aD.KeyCode)and not h:
-GetFocusedTextBox()else return false end end,function(aD)local aE={}for aF,aG in
-aD do table.insert(aE,az[aG])end return aE end,function(aD)if typeof(aD)~=
-'table'then return{}end local aE={}for aF,aG in aD do if not az[aG]then continue
-end table.insert(aE,aG)end return aE end av.Modifiers=aG(av.Modifiers)local aH=
-U('TextButton',{BackgroundColor3='MainColor',Size=UDim2.fromOffset(18,18),Text=
-av.Value,TextSize=14,Parent=au})U('UIStroke',{Color='OutlineColor',Parent=aH})
-table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius/2),
-Parent=aH}))local aI={Normal=av.Mode~='Toggle'}do local aJ=U('TextButton',{
-BackgroundTransparency=1,Size=UDim2.new(1,0,0,16),Text='',Visible=not as.NoUI,
-Parent=z.KeybindContainer})local aK,aL=U('TextLabel',{AutomaticSize=Enum.
-AutomaticSize.X,BackgroundTransparency=1,Size=UDim2.fromScale(0,1),Text='',
-TextSize=14,TextTransparency=0.5,Parent=aJ}),U('Frame',{AnchorPoint=Vector2.new(
-0,0.5),BackgroundColor3='MainColor',Position=UDim2.fromScale(0,0.5),Size=UDim2.
-fromOffset(14,14),SizeConstraint=Enum.SizeConstraint.RelativeYY,Parent=aJ})table
-.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius/2),Parent
-=aL}))U('UIStroke',{Color='OutlineColor',Parent=aL})local aM=U('ImageLabel',{
-Image=aj and aj.Url or'',ImageColor3='FontColor',ImageRectOffset=aj and aj.
-ImageRectOffset or Vector2.zero,ImageRectSize=aj and aj.ImageRectSize or Vector2
-.zero,ImageTransparency=1,Position=UDim2.fromOffset(2,2),Size=UDim2.new(1,-4,1,-
-4),Parent=aL})aI.Display=function(aN,aO)aK.TextTransparency=aO and 0 or 0.5 aM.
-ImageTransparency=aO and 0 or 1 end aI.SetText=function(aN,aO)aK.Text=aO end aI.
-SetVisibility=function(aN,aO)aJ.Visible=aO end aI.SetNormal=function(aN,aO)aI.
-Normal=aO aJ.Active=not aO aK.Position=aO and UDim2.fromOffset(0,0)or UDim2.
-fromOffset(22,0)aL.Visible=not aO end av.DoClick=function(...)end aJ.
-MouseButton1Click:Connect(function()if aI.Normal then return end av.Toggled=not
-av.Toggled av:DoClick()end)aI.Holder=aJ aI.Label=aK aI.Checkbox=aL aI.Loaded=
-true table.insert(z.KeybindToggles,aI)end local aJ=z:AddContextMenu(aH,UDim2.
-fromOffset(62,0),function()return{aH.AbsoluteSize.X+1.5,0.5}end,1,nil,true)av.
-Menu=aJ local aK={}for aL,aM in as.Modes do local aN,aO={},U('TextButton',{
-BackgroundColor3='MainColor',BackgroundTransparency=1,Size=UDim2.new(1,0,0,21),
-Text=aM,TextSize=14,TextTransparency=0.5,Parent=aJ.Menu})aN.Select=function(aP)
-for aQ,aR in aK do aR:Deselect()end av.Mode=aM aO.BackgroundTransparency=0 aO.
-TextTransparency=0 aJ:Close()end aN.Deselect=function(aP)av.Mode=nil aO.
-BackgroundTransparency=1 aO.TextTransparency=0.5 end aO.MouseButton1Click:
-Connect(function()aN:Select()end)if av.Mode==aM then aN:Select()end aK[aM]=aN
-end av.Display=function(aL,aM)if z.Unloaded then return end local aN,aO=z:
-GetTextBounds(aM or av.DisplayValue,aH.FontFace,aH.TextSize,au.AbsoluteSize.X)aH
-.Text=aM or av.DisplayValue aH.Size=UDim2.fromOffset((aN+9),(aO+4))end av.Update
-=function(aL)av:Display()if as.NoUI then return end if av.Mode=='Toggle'and at.
-Type=='Toggle'and at.Disabled then aI:SetVisibility(false)return end local aM,aN
-=av:GetState(),z.ShowToggleFrameInKeybinds and av.Mode=='Toggle'if av.
-SyncToggleState and at.Value~=aM then at:SetValue(aM)end if aI.Loaded then if aN
-then aI:SetNormal(false)else aI:SetNormal(true)end aI:SetText(('[%s] %s (%s)'):
-format(av.DisplayValue,av.Text,av.Mode))aI:SetVisibility(true)aI:Display(aM)end
-end av.GetState=function(aL)if av.Mode=='Always'then return true elseif av.Mode
-=='Hold'then local aM=av.Value if aM=='None'then return false end if not aD(av.
-Modifiers)then return false end if ax[aM]~=nil then return h:
-IsMouseButtonPressed(ax[aM])and not h:GetFocusedTextBox()else return h:
-IsKeyDown(Enum.KeyCode[aM])and not h:GetFocusedTextBox()end else return av.
-Toggled end end av.OnChanged=function(aL,aM)av.Changed=aM end av.OnClick=
-function(aL,aM)av.Clicked=aM end av.DoClick=function(aL)if av.Mode=='Press'then
-if av.Toggled and as.WaitForCallback==true then return end av.Toggled=true end z
-:SafeCallback(av.Callback,av.Toggled)z:SafeCallback(av.Clicked,av.Toggled)if av.
-Mode=='Press'then av.Toggled=false end end av.SetValue=function(aL,aM)local aN,
-aO,aP=aM[1],aM[2],aM[3]local aQ,aR=pcall(function()if aN=='None'then aN=nil
-return nil end if ax[aN]==nil then return Enum.KeyCode[aN]end return ax[aN]end)
-if aN==nil then av.Value='None'elseif aQ then av.Value=aN else av.Value=
-'Unknown'end av.Modifiers=aG((typeof(aP)=='table'and{aP}or{(av.Modifiers)})[1])
-av.DisplayValue=(M(av.Modifiers)>0 and{(table.concat(av.Modifiers,' + ')..' + '
-..av.Value)}or{(av.Value)})[1]if aK[aO]then aK[aO]:Select()end local aS=aF(av.
-Modifiers)z:SafeCallback(av.ChangedCallback,aR,aS)z:SafeCallback(av.Changed,aR,
-aS)av:Update()end av.SetText=function(aL,aM)aI:SetText(aM)av:Update()end aH.
-MouseButton1Click:Connect(function()if aw then return end aw=true aH.Text='...'
-aH.Size=UDim2.fromOffset(29,18)local aL,aM,aN={}aN=function()aM=h.InputBegan:
-Wait()if h:GetFocusedTextBox()~=nil then return true end if aM.KeyCode==Enum.
-KeyCode.Escape then return false end local aO,aP=(aB(aM))if ay[aM.UserInputType]
-~=nil then aP=ay[aM.UserInputType]elseif aM.UserInputType==Enum.UserInputType.
-Keyboard then if aO then aP=aA[aM.KeyCode]else aP=aM.KeyCode.Name end end if aP
-then if aO then if av.WhitelistedModifiers and#av.WhitelistedModifiers>0 and not
-table.find(av.WhitelistedModifiers,aP)then return aN()end if av.
-BlacklistedModifiers and table.find(av.BlacklistedModifiers,aP)then return aN()
-end else if av.Whitelisted and#av.Whitelisted>0 and not table.find(av.
-Whitelisted,aP)then return aN()end if av.Blacklisted and table.find(av.
-Blacklisted,aP)then return aN()end end end return false end repeat task.wait()aH
-.Text='...'aH.Size=UDim2.fromOffset(29,18)if aN()then aw=false av:Update()return
-end if aM.KeyCode==Enum.KeyCode.Escape then break end if aB(aM)then local aO=
-false repeat task.wait()if h:IsKeyDown(aM.KeyCode)then task.wait(0.075)if h:
-IsKeyDown(aM.KeyCode)then if not table.find(aL,aA[aM.KeyCode])then aL[#aL+1]=aA[
-aM.KeyCode]av:Display(table.concat(aL,' + ')..' + ...')end if aN()then aO=true
-break end if aM.KeyCode==Enum.KeyCode.Escape then break end if not aB(aM)then
-break end else if not table.find(aL,aA[aM.KeyCode])then break end end end until
-false if aO then aw=false av:Update()return end end break until false local aO=
-'Unknown'if ay[aM.UserInputType]~=nil then aO=ay[aM.UserInputType]elseif aM.
-UserInputType==Enum.UserInputType.Keyboard then aO=aM.KeyCode==Enum.KeyCode.
-Escape and'None'or aM.KeyCode.Name end aL=(aM.KeyCode==Enum.KeyCode.Escape or aO
-=='Unknown')and{}or aL av.Toggled=false av:SetValue{aO,av.Mode,aL}repeat task.
-wait()until not aE(aM)or h:GetFocusedTextBox()aw=false end)aH.MouseButton2Click:
-Connect(aJ.Toggle)z:GiveSignal(h.InputBegan:Connect(function(aL)if z.Unloaded
-then return end if av.Mode=='Always'or av.Value=='Unknown'or av.Value=='None'or
-aw or h:GetFocusedTextBox()then return end local aM,aN,aO=av.Value,aD(av.
-Modifiers),false if aM and aN==true and(ay[aL.UserInputType]==aM or(aL.
-UserInputType==Enum.UserInputType.Keyboard and aL.KeyCode.Name==aM))then aO=true
-end if av.Mode=='Toggle'then if aO then av.Toggled=not av.Toggled av:DoClick()
-end elseif av.Mode=='Press'then if aO then av:DoClick()end end av:Update()end))z
-:GiveSignal(h.InputEnded:Connect(function()if z.Unloaded then return end if av.
-Value=='Unknown'or av.Value=='None'or aw or h:GetFocusedTextBox()then return end
-av:Update()end))av:Update()if at.Addons then table.insert(at.Addons,av)end av.
-Default=av.Value av.DefaultModifiers=table.clone(av.Modifiers or{})u[ar]=av
-return aq end local aq={}for ar=0,1,0.1 do table.insert(aq,ColorSequenceKeypoint
-.new(ar,Color3.fromHSV(ar,1,1)))end ap.AddColorPicker=function(ar,as,at)at=z:
-Validate(at,A.ColorPicker)local au=ar local av,aw=au.TextLabel,{Value=at.Default
-,Transparency=at.Transparency or 0,Title=at.Title,Callback=at.Callback,Changed=
-at.Changed,Type='ColorPicker'}aw.Hue,aw.Sat,aw.Vib=aw.Value:ToHSV()local ax=U(
-'TextButton',{BackgroundColor3=aw.Value,Size=UDim2.fromOffset(18,18),Text='',
-Parent=av})local ay=U('UIStroke',{Color=z:GetDarkerColor(aw.Value),Parent=ax})
-table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius/2),
-Parent=ax}))local az=U('ImageLabel',{Image=x.GetAsset'TransparencyTexture',
-ImageTransparency=(1-aw.Transparency),ScaleType=Enum.ScaleType.Tile,Position=
-UDim2.new(0,-1,0,-1),Size=UDim2.new(1,2,1,2),TileSize=UDim2.fromOffset(9,9),
-Parent=ax})table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.
-CornerRadius/2),Parent=az}))local aA=z:AddContextMenu(ax,UDim2.fromOffset(at.
-Transparency and 256 or 234,0),function()return{0.5,ax.AbsoluteSize.Y+1.5}end,1)
-aA.List.Padding=UDim.new(0,8)aw.ColorMenu=aA U('UIPadding',{PaddingBottom=UDim.
-new(0,6),PaddingLeft=UDim.new(0,6),PaddingRight=UDim.new(0,6),PaddingTop=UDim.
-new(0,6),Parent=aA.Menu})if typeof(aw.Title)=='string'then U('TextLabel',{
-BackgroundTransparency=1,Size=UDim2.new(1,0,0,8),Text=aw.Title,TextSize=14,
-TextXAlignment=Enum.TextXAlignment.Left,Parent=aA.Menu})end local aB=U('Frame',{
-BackgroundTransparency=1,Size=UDim2.new(1,0,0,200),Parent=aA.Menu})U(
-'UIListLayout',{FillDirection=Enum.FillDirection.Horizontal,Padding=UDim.new(0,6
-),Parent=aB})local aC=U('ImageButton',{BackgroundColor3=aw.Value,Image=x.
-GetAsset'SaturationMap',Size=UDim2.fromOffset(200,200),Parent=aB})local aD=U(
-'Frame',{AnchorPoint=Vector2.new(0.5,0.5),BackgroundColor3='WhiteColor',Size=
-UDim2.fromOffset(6,6),Parent=aC})U('UICorner',{CornerRadius=UDim.new(1,0),Parent
-=aD})U('UIStroke',{Color='DarkColor',Parent=aD})local aE=U('TextButton',{Size=
-UDim2.fromOffset(16,200),Text='',Parent=aB})U('UIGradient',{Color=ColorSequence.
-new(aq),Rotation=90,Parent=aE})local aF,aG,aH,aI=(U('Frame',{AnchorPoint=Vector2
-.new(0.5,0.5),BackgroundColor3='WhiteColor',BorderColor3='DarkColor',
-BorderSizePixel=1,Position=UDim2.fromScale(0.5,aw.Hue),Size=UDim2.new(1,2,0,1),
-Parent=aE}))if at.Transparency then aG=U('ImageButton',{Image=x.GetAsset
-'TransparencyTexture',ScaleType=Enum.ScaleType.Tile,Size=UDim2.fromOffset(16,200
-),TileSize=UDim2.fromOffset(8,8),Parent=aB})aH=U('Frame',{BackgroundColor3=aw.
-Value,Size=UDim2.fromScale(1,1),Parent=aG})U('UIGradient',{Rotation=90,
-Transparency=NumberSequence.new{NumberSequenceKeypoint.new(0,0),
-NumberSequenceKeypoint.new(1,1)},Parent=aH})aI=U('Frame',{AnchorPoint=Vector2.
-new(0.5,0.5),BackgroundColor3='WhiteColor',BorderColor3='DarkColor',
-BorderSizePixel=1,Position=UDim2.fromScale(0.5,aw.Transparency),Size=UDim2.new(1
-,2,0,1),Parent=aG})end local aJ=U('Frame',{BackgroundTransparency=1,Size=UDim2.
-new(1,0,0,20),Parent=aA.Menu})U('UIListLayout',{FillDirection=Enum.FillDirection
-.Horizontal,HorizontalFlex=Enum.UIFlexAlignment.Fill,Padding=UDim.new(0,8),
-Parent=aJ})local aK=U('TextBox',{BackgroundColor3='MainColor',ClearTextOnFocus=
-false,Size=UDim2.fromScale(1,1),Text='#??????',TextSize=14,Parent=aJ})U(
-'UIStroke',{Color='OutlineColor',Parent=aK})table.insert(z.Corners,U('UICorner',
-{CornerRadius=UDim.new(0,z.CornerRadius/2),Parent=aK}))local aL=U('TextBox',{
-BackgroundColor3='MainColor',ClearTextOnFocus=false,Size=UDim2.fromScale(1,1),
-Text='?, ?, ?',TextSize=14,Parent=aJ})U('UIStroke',{Color='OutlineColor',Parent=
-aL})table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius/
-2),Parent=aL}))local aM=z:AddContextMenu(ax,UDim2.fromOffset(93,0),function()
-return{ax.AbsoluteSize.X+1.5,0.5}end,1)aw.ContextMenu=aM aM.List.Padding=UDim.
-new(0,6)do local aN=function(aN,aO)local aP=U('TextButton',{
-BackgroundTransparency=1,Size=UDim2.new(1,0,0,21),Text=aN,TextSize=14,Parent=aM.
-Menu})aP.MouseButton1Click:Connect(function()z:SafeCallback(aO)aM:Close()end)end
-aN('Copy color',function()z.CopiedColor={aw.Value,aw.Transparency}end)aw.
-SetValueRGB=function(...)end aN('Paste color',function()aw:SetValueRGB(z.
-CopiedColor[1],z.CopiedColor[2])end)if m then aN('Copy Hex',function()m(
-tostring(aw.Value:ToHex()))end)aN('Copy RGB',function()m(table.concat({math.
-floor(aw.Value.R*255),math.floor(aw.Value.G*255),math.floor(aw.Value.B*255)},
-', '))end)end end aw.SetHSVFromRGB=function(aN,aO)aw.Hue,aw.Sat,aw.Vib=aO:ToHSV(
-)end aw.Display=function(aN)if z.Unloaded then return end aw.Value=Color3.
-fromHSV(aw.Hue,aw.Sat,aw.Vib)ax.BackgroundColor3=aw.Value ay.Color=z:
-GetDarkerColor(aw.Value)az.ImageTransparency=(1-aw.Transparency)aC.
-BackgroundColor3=Color3.fromHSV(aw.Hue,1,1)if aH then aH.BackgroundColor3=aw.
-Value end aD.Position=UDim2.fromScale(aw.Sat,1-aw.Vib)aF.Position=UDim2.
-fromScale(0.5,aw.Hue)if aI then aI.Position=UDim2.fromScale(0.5,aw.Transparency)
-end aK.Text='#'..aw.Value:ToHex()aL.Text=table.concat({math.floor(aw.Value.R*255
-),math.floor(aw.Value.G*255),math.floor(aw.Value.B*255)},', ')end aw.Update=
-function(aN)aw:Display()z:SafeCallback(aw.Callback,aw.Value)z:SafeCallback(aw.
-Changed,aw.Value)end aw.OnChanged=function(aN,aO)aw.Changed=aO end aw.SetValue=
-function(aN,aO,aP)if typeof(aO)=='Color3'then aw:SetValueRGB(aO,aP)return end
-local aQ=Color3.fromHSV(aO[1],aO[2],aO[3])aw.Transparency=at.Transparency and aP
-or 0 aw:SetHSVFromRGB(aQ)aw:Update()end aw.SetValueRGB=function(aN,aO,aP)aw.
-Transparency=at.Transparency and aP or 0 aw:SetHSVFromRGB(aO)aw:Update()end ax.
-MouseButton1Click:Connect(aA.Toggle)ax.MouseButton2Click:Connect(aM.Toggle)aC.
-InputBegan:Connect(function(aN)while L(aN)do local aO=aC.AbsolutePosition.X
-local aP=aO+aC.AbsoluteSize.X local aQ,aR=math.clamp(q.X,aO,aP),aC.
-AbsolutePosition.Y local aS=aR+aC.AbsoluteSize.Y local aT,aU,aV=math.clamp(q.Y,
-aR,aS),aw.Sat,aw.Vib aw.Sat=(aQ-aO)/(aP-aO)aw.Vib=1-((aT-aR)/(aS-aR))if aw.Sat~=
-aU or aw.Vib~=aV then aw:Update()end f.RenderStepped:Wait()end end)aE.InputBegan
-:Connect(function(aN)while L(aN)do local aO=aE.AbsolutePosition.Y local aP=aO+aE
-.AbsoluteSize.Y local aQ,aR=math.clamp(q.Y,aO,aP),aw.Hue aw.Hue=(aQ-aO)/(aP-aO)
-if aw.Hue~=aR then aw:Update()end f.RenderStepped:Wait()end end)if aG then aG.
-InputBegan:Connect(function(aN)while L(aN)do local aO,aP=aG.AbsolutePosition.Y,
-aG.AbsolutePosition.Y+aG.AbsoluteSize.Y local aQ,aR=math.clamp(q.Y,aO,aP),aw.
-Transparency aw.Transparency=(aQ-aO)/(aP-aO)if aw.Transparency~=aR then aw:
-Update()end f.RenderStepped:Wait()end end)end aK.FocusLost:Connect(function(aN)
-if not aN then return end local aO,aP=pcall(Color3.fromHex,aK.Text)if aO and
-typeof(aP)=='Color3'then aw.Hue,aw.Sat,aw.Vib=aP:ToHSV()end aw:Update()end)aL.
-FocusLost:Connect(function(aN)if not aN then return end local aO,aP,aQ=aL.Text:
-match'(%d+),%s*(%d+),%s*(%d+)'if aO and aP and aQ then aw:SetHSVFromRGB(Color3.
-fromRGB(aO,aP,aQ))end aw:Update()end)aw:Display()if au.Addons then table.insert(
-au.Addons,aw)end aw.Default=aw.Value u[as]=aw return ar end ao.__index=ap ao.
-__namecall=function(ar,as,...)return ap[as](...)end end local ap={}do local aq={
-}aq.AddDivider=function(ar,...)local as,at,au,av=select(1,...),0,0 if typeof(as)
-=='table'then av=as.Text at=as.MarginTop or as.Margin or 0 au=as.MarginBottom or
-as.Margin or 0 elseif typeof(as)=='string'then av=as end local aw=ar local ax=aw
-.Container local ay=U('Frame',{BackgroundTransparency=1,Size=UDim2.new(1,0,0,6+
-at+au),Parent=ax})local az=U('Frame',{BackgroundTransparency=1,Size=UDim2.new(1,
-0,1,0),Parent=ay})U('UIPadding',{PaddingTop=UDim.new(0,at),PaddingBottom=UDim.
-new(0,au),Parent=ay})if av then local aA=U('TextLabel',{AutomaticSize=Enum.
-AutomaticSize.X,BackgroundTransparency=1,Size=UDim2.fromScale(1,0),Text=av,
-TextSize=14,TextTransparency=0.5,TextXAlignment=Enum.TextXAlignment.Center,
-Parent=az})local aB=z:GetTextBounds(av,aA.FontFace,aA.TextSize,aA.AbsoluteSize.X
-)local aC=math.floor(aB/2)+10 U('Frame',{AnchorPoint=Vector2.new(0,0.5),
-BackgroundColor3='MainColor',BorderColor3='OutlineColor',BorderSizePixel=1,
-Position=UDim2.fromScale(0,0.5),Size=UDim2.new(0.5,-aC,0,2),Parent=az})U('Frame'
-,{AnchorPoint=Vector2.new(1,0.5),BackgroundColor3='MainColor',BorderColor3=
-'OutlineColor',BorderSizePixel=1,Position=UDim2.fromScale(1,0.5),Size=UDim2.new(
-0.5,-aC,0,2),Parent=az})else U('Frame',{AnchorPoint=Vector2.new(0,0.5),
-BackgroundColor3='MainColor',BorderColor3='OutlineColor',BorderSizePixel=1,
-Position=UDim2.fromScale(0,0.5),Size=UDim2.new(1,0,0,2),Parent=az})end aw:
-Resize()local aA={Holder=ay,Text=av,MarginTop=at,MarginBottom=au,Type='Divider'}
-table.insert(aw.Elements,aA)return aA end aq.AddLabel=function(ar,...)local as,
-at,au,av={},{},select(1,...),select(2,...)if typeof(au)=='table'or typeof(av)==
-'table'then local aw=typeof(au)=='table'and au or av as.Text=aw.Text or''as.
-DoesWrap=aw.DoesWrap or false as.Size=aw.Size or 14 as.Visible=aw.Visible or
-true as.Idx=typeof(av)=='table'and au or nil as.Alignment=aw.Alignment or Enum.
-TextXAlignment.Left else as.Text=au or''as.DoesWrap=av or false as.Size=14 as.
-Visible=true as.Idx=select(3,...)or nil end local aw=ar local ax,ay=aw.Container
-,{Text=as.Text,DoesWrap=as.DoesWrap,Alignment=as.Alignment or Enum.
-TextXAlignment.Left,Addons=at,Visible=as.Visible,Type='Label'}local az=U(
-'TextLabel',{BackgroundTransparency=1,Size=UDim2.new(1,0,0,18),Text=ay.Text,
-TextSize=as.Size,TextWrapped=ay.DoesWrap,TextXAlignment=aw.IsKeyTab and Enum.
-TextXAlignment.Center or ay.Alignment,Parent=ax})ay.SetVisible=function(aA,aB)ay
-.Visible=aB az.Visible=ay.Visible aw:Resize()end ay.SetText=function(aA,aB)ay.
-Text=aB az.Text=aB if ay.DoesWrap then local aC,aD=z:GetTextBounds(ay.Text,az.
-FontFace,az.TextSize,az.AbsoluteSize.X)az.Size=UDim2.new(1,0,0,aD+4)end aw:
-Resize()end if ay.DoesWrap then local aA,aB=z:GetTextBounds(ay.Text,az.FontFace,
-az.TextSize,az.AbsoluteSize.X)az.Size=UDim2.new(1,0,0,aB+4)local aC=az.
-AbsoluteSize az:GetPropertyChangedSignal'AbsoluteSize':Connect(function()if az.
-AbsoluteSize==aC then return end local aD,aE=z:GetTextBounds(ay.Text,az.FontFace
-,az.TextSize,az.AbsoluteSize.X)az.Size=UDim2.new(1,0,0,aE+4)aC=az.AbsoluteSize
-aw:Resize()end)else U('UIListLayout',{FillDirection=Enum.FillDirection.
-Horizontal,HorizontalAlignment=Enum.HorizontalAlignment.Right,Padding=UDim.new(0
-,6),Parent=az})end aw:Resize()ay.TextLabel=az ay.Container=ax if not as.DoesWrap
-then setmetatable(ay,ao)end ay.Holder=az table.insert(aw.Elements,ay)if as.Idx
-then r[as.Idx]=ay else table.insert(r,ay)end return ay end aq.AddButton=function
-(ar,...)local as=function(...)local as,at,au={},select(1,...),select(2,...)if
-typeof(at)=='table'or typeof(au)=='table'then local av=typeof(at)=='table'and at
-or au as.Text=av.Text or''as.Func=av.Func or av.Callback or function()end as.
-DoubleClick=av.DoubleClick as.Tooltip=av.Tooltip as.DisabledTooltip=av.
-DisabledTooltip as.Risky=av.Risky or false as.Disabled=av.Disabled or false as.
-Visible=av.Visible or true as.Idx=typeof(au)=='table'and at or nil else as.Text=
-at or''as.Func=au or function()end as.DoubleClick=false as.Tooltip=nil as.
-DisabledTooltip=nil as.Risky=false as.Disabled=false as.Visible=true as.Idx=
-select(3,...)or nil end return as end local at,au=as(...),ar local av,aw=au.
-Container,{Text=at.Text,Func=at.Func,DoubleClick=at.DoubleClick,Tooltip=at.
-Tooltip,DisabledTooltip=at.DisabledTooltip,TooltipTable=nil,Risky=at.Risky,
-Disabled=at.Disabled,Visible=at.Visible,Tween=nil,Type='Button'}local ax=U(
-'Frame',{BackgroundTransparency=1,Size=UDim2.new(1,0,0,21),Parent=av})U(
-'UIListLayout',{FillDirection=Enum.FillDirection.Horizontal,HorizontalFlex=Enum.
-UIFlexAlignment.Fill,Padding=UDim.new(0,9),Parent=ax})local ay,az=function(ay)
-local az=U('TextButton',{Active=not ay.Disabled,BackgroundColor3=ay.Disabled and
-'BackgroundColor'or'MainColor',Size=UDim2.fromScale(1,1),Text=ay.Text,TextSize=
-14,TextTransparency=0.4,Visible=ay.Visible,Parent=ax})local aA=U('UIStroke',{
-Color='OutlineColor',Transparency=ay.Disabled and 0.5 or 0,Parent=az})table.
-insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius/2),Parent=
-az}))return az,aA end,function(ay)ay.Base.MouseEnter:Connect(function()if ay.
-Disabled then return end ay.Tween=k:Create(ay.Base,z.TweenInfo,{TextTransparency
-=0})ay.Tween:Play()end)ay.Base.MouseLeave:Connect(function()if ay.Disabled then
-return end ay.Tween=k:Create(ay.Base,z.TweenInfo,{TextTransparency=0.4})ay.Tween
-:Play()end)ay.Base.MouseButton1Click:Connect(function()if ay.Disabled or ay.
-Locked then return end if ay.DoubleClick then ay.Locked=true ay.Base.Text=
-'Are you sure?'ay.Base.TextColor3=z.Scheme.AccentColor z.Registry[ay.Base].
-TextColor3='AccentColor'local az=G(ay.Base.MouseButton1Click,0.5)ay.Base.Text=ay
-.Text ay.Base.TextColor3=ay.Risky and z.Scheme.RedColor or z.Scheme.FontColor z.
-Registry[ay.Base].TextColor3=ay.Risky and'RedColor'or'FontColor'if az then z:
-SafeCallback(ay.Func)end f.RenderStepped:Wait()ay.Locked=false return end z:
-SafeCallback(ay.Func)end)end aw.Base,aw.Stroke=ay(aw)az(aw)aw.AddButton=function
-(aA,...)local aB=as(...)local aC={Text=aB.Text,Func=aB.Func,DoubleClick=aB.
-DoubleClick,Tooltip=aB.Tooltip,DisabledTooltip=aB.DisabledTooltip,TooltipTable=
-nil,Risky=aB.Risky,Disabled=aB.Disabled,Visible=aB.Visible,Tween=nil,Type=
-'SubButton'}aw.SubButton=aC aC.Base,aC.Stroke=ay(aC)az(aC)aC.UpdateColors=
-function(aD)if z.Unloaded then return end N(aC.Tween)aC.Base.BackgroundColor3=aC
-.Disabled and z.Scheme.BackgroundColor or z.Scheme.MainColor aC.Base.
-TextTransparency=aC.Disabled and 0.8 or 0.4 aC.Stroke.Transparency=aC.Disabled
-and 0.5 or 0 z.Registry[aC.Base].BackgroundColor3=aC.Disabled and
-'BackgroundColor'or'MainColor'end aC.SetDisabled=function(aD,aE)aC.Disabled=aE
-if aC.TooltipTable then aC.TooltipTable.Disabled=aC.Disabled end aC.Base.Active=
-not aC.Disabled aC:UpdateColors()end aC.SetVisible=function(aD,aE)aC.Visible=aE
-aC.Base.Visible=aC.Visible au:Resize()end aC.SetText=function(aD,aE)aC.Text=aE
-aC.Base.Text=aE end if typeof(aC.Tooltip)=='string'or typeof(aC.DisabledTooltip)
-=='string'then aC.TooltipTable=z:AddTooltip(aC.Tooltip,aC.DisabledTooltip,aC.
-Base)aC.TooltipTable.Disabled=aC.Disabled end if aC.Risky then aC.Base.
-TextColor3=z.Scheme.RedColor z.Registry[aC.Base].TextColor3='RedColor'end aC:
-UpdateColors()if aB.Idx then s[aB.Idx]=aC else table.insert(s,aC)end return aC
-end aw.UpdateColors=function(aA)if z.Unloaded then return end N(aw.Tween)aw.Base
-.BackgroundColor3=aw.Disabled and z.Scheme.BackgroundColor or z.Scheme.MainColor
-aw.Base.TextTransparency=aw.Disabled and 0.8 or 0.4 aw.Stroke.Transparency=aw.
-Disabled and 0.5 or 0 z.Registry[aw.Base].BackgroundColor3=aw.Disabled and
-'BackgroundColor'or'MainColor'end aw.SetDisabled=function(aA,aB)aw.Disabled=aB
-if aw.TooltipTable then aw.TooltipTable.Disabled=aw.Disabled end aw.Base.Active=
-not aw.Disabled aw:UpdateColors()end aw.SetVisible=function(aA,aB)aw.Visible=aB
-ax.Visible=aw.Visible au:Resize()end aw.SetText=function(aA,aB)aw.Text=aB aw.
-Base.Text=aB end if typeof(aw.Tooltip)=='string'or typeof(aw.DisabledTooltip)==
-'string'then aw.TooltipTable=z:AddTooltip(aw.Tooltip,aw.DisabledTooltip,aw.Base)
-aw.TooltipTable.Disabled=aw.Disabled end if aw.Risky then aw.Base.TextColor3=z.
-Scheme.RedColor z.Registry[aw.Base].TextColor3='RedColor'end aw:UpdateColors()au
-:Resize()aw.Holder=ax table.insert(au.Elements,aw)if at.Idx then s[at.Idx]=aw
-else table.insert(s,aw)end return aw end aq.AddCheckbox=function(ar,as,at)at=z:
-Validate(at,A.Toggle)local au=ar local av,aw=au.Container,{Text=at.Text,Value=at
-.Default,Tooltip=at.Tooltip,DisabledTooltip=at.DisabledTooltip,TooltipTable=nil,
-Callback=at.Callback,Changed=at.Changed,Risky=at.Risky,Disabled=at.Disabled,
-Visible=at.Visible,Addons={},Variant='Checkbox',Type='Toggle'}local ax=U(
-'TextButton',{Active=not aw.Disabled,BackgroundTransparency=1,Size=UDim2.new(1,0
-,0,18),Text='',Visible=aw.Visible,Parent=av})local ay=U('TextLabel',{
-BackgroundTransparency=1,Position=UDim2.fromOffset(26,0),Size=UDim2.new(1,-26,1,
-0),Text=aw.Text,TextSize=14,TextTransparency=0.4,TextXAlignment=Enum.
-TextXAlignment.Left,Parent=ax})U('UIListLayout',{FillDirection=Enum.
-FillDirection.Horizontal,HorizontalAlignment=Enum.HorizontalAlignment.Right,
-Padding=UDim.new(0,6),Parent=ay})local az=U('Frame',{BackgroundColor3=
-'MainColor',Size=UDim2.fromScale(1,1),SizeConstraint=Enum.SizeConstraint.
-RelativeYY,Parent=ax})table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.
-new(0,z.CornerRadius/2),Parent=az}))local aA,aB=U('UIStroke',{Color=
-'OutlineColor',Parent=az}),U('ImageLabel',{Image=aj and aj.Url or'',ImageColor3=
-'FontColor',ImageRectOffset=aj and aj.ImageRectOffset or Vector2.zero,
-ImageRectSize=aj and aj.ImageRectSize or Vector2.zero,ImageTransparency=1,
-Position=UDim2.fromOffset(2,2),Size=UDim2.new(1,-4,1,-4),Parent=az})aw.
-UpdateColors=function(aC)aw:Display()end aw.Display=function(aC)if z.Unloaded
-then return end aA.Transparency=aw.Disabled and 0.5 or 0 if aw.Disabled then ay.
-TextTransparency=0.8 aB.ImageTransparency=aw.Value and 0.8 or 1 az.
-BackgroundColor3=z.Scheme.BackgroundColor z.Registry[az].BackgroundColor3=
-'BackgroundColor'return end k:Create(ay,z.TweenInfo,{TextTransparency=aw.Value
-and 0 or 0.4}):Play()k:Create(aB,z.TweenInfo,{ImageTransparency=aw.Value and 0
-or 1}):Play()az.BackgroundColor3=z.Scheme.MainColor z.Registry[az].
-BackgroundColor3='MainColor'end aw.OnChanged=function(aC,aD)aw.Changed=aD end aw
-.SetValue=function(aC,aD)if aw.Disabled then return end aw.Value=aD aw:Display()
-for aE,aF in aw.Addons do if aF.Type=='KeyPicker'and aF.SyncToggleState then aF.
-Toggled=aw.Value aF:Update()end end z:UpdateDependencyBoxes()z:SafeCallback(aw.
-Callback,aw.Value)z:SafeCallback(aw.Changed,aw.Value)end aw.SetDisabled=function
-(aC,aD)aw.Disabled=aD if aw.TooltipTable then aw.TooltipTable.Disabled=aw.
-Disabled end for aE,aF in aw.Addons do if aF.Type=='KeyPicker'and aF.
-SyncToggleState then aF:Update()end end ax.Active=not aw.Disabled aw:Display()
-end aw.SetVisible=function(aC,aD)aw.Visible=aD ax.Visible=aw.Visible au:Resize()
-end aw.SetText=function(aC,aD)aw.Text=aD ay.Text=aD end ax.MouseButton1Click:
-Connect(function()if aw.Disabled then return end aw:SetValue(not aw.Value)end)if
-typeof(aw.Tooltip)=='string'or typeof(aw.DisabledTooltip)=='string'then aw.
-TooltipTable=z:AddTooltip(aw.Tooltip,aw.DisabledTooltip,ax)aw.TooltipTable.
-Disabled=aw.Disabled end if aw.Risky then ay.TextColor3=z.Scheme.RedColor z.
-Registry[ay].TextColor3='RedColor'end aw:Display()au:Resize()aw.TextLabel=ay aw.
-Container=av setmetatable(aw,ao)aw.Holder=ax table.insert(au.Elements,aw)aw.
-Default=aw.Value t[as]=aw return aw end aq.AddToggle=function(ar,as,at)if z.
-ForceCheckbox then return aq.AddCheckbox(ar,as,at)end at=z:Validate(at,A.Toggle)
-local au=ar local av,aw=au.Container,{Text=at.Text,Value=at.Default,Tooltip=at.
-Tooltip,DisabledTooltip=at.DisabledTooltip,TooltipTable=nil,Callback=at.Callback
-,Changed=at.Changed,Risky=at.Risky,Disabled=at.Disabled,Visible=at.Visible,
-Addons={},Variant='Switch',Type='Toggle'}local ax=U('TextButton',{Active=not aw.
-Disabled,BackgroundTransparency=1,Size=UDim2.new(1,0,0,18),Text='',Visible=aw.
-Visible,Parent=av})local ay=U('TextLabel',{BackgroundTransparency=1,Size=UDim2.
-new(1,-40,1,0),Text=aw.Text,TextSize=14,TextTransparency=0.4,TextXAlignment=Enum
-.TextXAlignment.Left,Parent=ax})U('UIListLayout',{FillDirection=Enum.
-FillDirection.Horizontal,HorizontalAlignment=Enum.HorizontalAlignment.Right,
-Padding=UDim.new(0,6),Parent=ay})local az=U('Frame',{AnchorPoint=Vector2.new(1,0
-),BackgroundColor3='MainColor',Position=UDim2.fromScale(1,0),Size=UDim2.
-fromOffset(32,18),Parent=ax})U('UICorner',{CornerRadius=UDim.new(1,0),Parent=az}
-)U('UIPadding',{PaddingBottom=UDim.new(0,2),PaddingLeft=UDim.new(0,2),
-PaddingRight=UDim.new(0,2),PaddingTop=UDim.new(0,2),Parent=az})local aA,aB=U(
-'UIStroke',{Color='OutlineColor',Parent=az}),U('Frame',{BackgroundColor3=
-'FontColor',Size=UDim2.fromScale(1,1),SizeConstraint=Enum.SizeConstraint.
-RelativeYY,Parent=az})U('UICorner',{CornerRadius=UDim.new(1,0),Parent=aB})aw.
-UpdateColors=function(aC)aw:Display()end aw.Display=function(aC)if z.Unloaded
-then return end local aD=aw.Value and 1 or 0 az.BackgroundTransparency=aw.
-Disabled and 0.75 or 0 aA.Transparency=aw.Disabled and 0.75 or 0 az.
-BackgroundColor3=aw.Value and z.Scheme.AccentColor or z.Scheme.MainColor aA.
-Color=aw.Value and z.Scheme.AccentColor or z.Scheme.OutlineColor z.Registry[az].
-BackgroundColor3=aw.Value and'AccentColor'or'MainColor'z.Registry[aA].Color=aw.
-Value and'AccentColor'or'OutlineColor'if aw.Disabled then ay.TextTransparency=
-0.8 aB.AnchorPoint=Vector2.new(aD,0)aB.Position=UDim2.fromScale(aD,0)aB.
-BackgroundColor3=z:GetDarkerColor(z.Scheme.FontColor)z.Registry[aB].
-BackgroundColor3=function()return z:GetDarkerColor(z.Scheme.FontColor)end return
-end k:Create(ay,z.TweenInfo,{TextTransparency=aw.Value and 0 or 0.4}):Play()k:
-Create(aB,z.TweenInfo,{AnchorPoint=Vector2.new(aD,0),Position=UDim2.fromScale(aD
-,0)}):Play()aB.BackgroundColor3=z.Scheme.FontColor z.Registry[aB].
-BackgroundColor3='FontColor'end aw.OnChanged=function(aC,aD)aw.Changed=aD end aw
-.SetValue=function(aC,aD)if aw.Disabled then return end aw.Value=aD aw:Display()
-for aE,aF in aw.Addons do if aF.Type=='KeyPicker'and aF.SyncToggleState then aF.
-Toggled=aw.Value aF:Update()end end z:UpdateDependencyBoxes()z:SafeCallback(aw.
-Callback,aw.Value)z:SafeCallback(aw.Changed,aw.Value)end aw.SetDisabled=function
-(aC,aD)aw.Disabled=aD if aw.TooltipTable then aw.TooltipTable.Disabled=aw.
-Disabled end for aE,aF in aw.Addons do if aF.Type=='KeyPicker'and aF.
-SyncToggleState then aF:Update()end end ax.Active=not aw.Disabled aw:Display()
-end aw.SetVisible=function(aC,aD)aw.Visible=aD ax.Visible=aw.Visible au:Resize()
-end aw.SetText=function(aC,aD)aw.Text=aD ay.Text=aD end ax.MouseButton1Click:
-Connect(function()if aw.Disabled then return end aw:SetValue(not aw.Value)end)if
-typeof(aw.Tooltip)=='string'or typeof(aw.DisabledTooltip)=='string'then aw.
-TooltipTable=z:AddTooltip(aw.Tooltip,aw.DisabledTooltip,ax)aw.TooltipTable.
-Disabled=aw.Disabled end if aw.Risky then ay.TextColor3=z.Scheme.RedColor z.
-Registry[ay].TextColor3='RedColor'end aw:Display()au:Resize()aw.TextLabel=ay aw.
-Container=av setmetatable(aw,ao)aw.Holder=ax table.insert(au.Elements,aw)aw.
-Default=aw.Value t[as]=aw return aw end aq.AddInput=function(ar,as,at)if typeof(
-at)=='table'and(typeof(at.VerifyValue)=='function'and at.Finished~=true)then at.
-Finished=true end at=z:Validate(at,A.Input)local au=ar local av,aw=au.Container,
-{Text=at.Text,Value=at.Default,Finished=at.Finished,Numeric=at.Numeric,
-ClearTextOnFocus=at.ClearTextOnFocus,ClearTextOnBlur=at.ClearTextOnBlur,
-Placeholder=at.Placeholder,AllowEmpty=at.AllowEmpty,EmptyReset=at.EmptyReset,
-Tooltip=at.Tooltip,DisabledTooltip=at.DisabledTooltip,TooltipTable=nil,Callback=
-at.Callback,Changed=at.Changed,VerifyValue=at.VerifyValue,Disabled=at.Disabled,
-Visible=at.Visible,Type='Input'}local ax=U('Frame',{BackgroundTransparency=1,
-Size=UDim2.new(1,0,0,39),Visible=aw.Visible,Parent=av})local ay,az=U('TextLabel'
-,{BackgroundTransparency=1,Size=UDim2.new(1,0,0,14),Text=aw.Text,TextSize=14,
-TextXAlignment=Enum.TextXAlignment.Left,Parent=ax}),U('TextBox',{AnchorPoint=
-Vector2.new(0,1),BackgroundColor3='MainColor',ClearTextOnFocus=not aw.Disabled
-and aw.ClearTextOnFocus,PlaceholderText=aw.Placeholder,Position=UDim2.fromScale(
-0,1),Size=UDim2.new(1,0,0,21),Text=aw.Value,TextEditable=not aw.Disabled,
-TextScaled=true,TextXAlignment=Enum.TextXAlignment.Left,Parent=ax})U('UIPadding'
-,{PaddingBottom=UDim.new(0,3),PaddingLeft=UDim.new(0,8),PaddingRight=UDim.new(0,
-8),PaddingTop=UDim.new(0,4),Parent=az})U('UIStroke',{Color='OutlineColor',Parent
-=az})table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius
-/2),Parent=az}))aw.UpdateColors=function(aA)if z.Unloaded then return end ay.
-TextTransparency=aw.Disabled and 0.8 or 0 az.TextTransparency=aw.Disabled and
-0.8 or 0 end aw.OnChanged=function(aA,aB)aw.Changed=aB end aw.SetValue=function(
-aA,aB)if not aw.AllowEmpty and O(aB)==''then aB=aw.EmptyReset end if at.
-MaxLength and#aB>at.MaxLength then aB=aB:sub(1,at.MaxLength)end if aw.Numeric
-then if#tostring(aB)>0 and not tonumber(aB)then aB=aw.Value end end if typeof(at
-.VerifyValue)=='function'and(aB~=aw.EmptyReset and at.VerifyValue(aB)~=true)then
-aB=aw.EmptyReset end aw.Value=aB az.Text=aB if not aw.Disabled then z:
-SafeCallback(aw.Callback,aw.Value)z:SafeCallback(aw.Changed,aw.Value)end end aw.
-SetDisabled=function(aA,aB)aw.Disabled=aB if aw.TooltipTable then aw.
-TooltipTable.Disabled=aw.Disabled end az.ClearTextOnFocus=not aw.Disabled and aw
-.ClearTextOnFocus az.TextEditable=not aw.Disabled aw:UpdateColors()end aw.
-SetVisible=function(aA,aB)aw.Visible=aB ax.Visible=aw.Visible au:Resize()end aw.
-SetText=function(aA,aB)aw.Text=aB ay.Text=aB end if aw.Finished then az.
-FocusLost:Connect(function(aA)if not aA then if aw.ClearTextOnBlur then az.Text=
-aw.Value end return end aw:SetValue(az.Text)end)else az:GetPropertyChangedSignal
-'Text':Connect(function()if az.Text==aw.Value then return end aw:SetValue(az.
-Text)end)end if typeof(aw.Tooltip)=='string'or typeof(aw.DisabledTooltip)==
-'string'then aw.TooltipTable=z:AddTooltip(aw.Tooltip,aw.DisabledTooltip,az)aw.
-TooltipTable.Disabled=aw.Disabled end au:Resize()aw.Holder=ax table.insert(au.
-Elements,aw)aw.Default=aw.Value if typeof(at.VerifyValue)=='function'and(aw.
-Default~=aw.EmptyReset and at.VerifyValue(aw.Default)~=true)then aw:SetValue(aw.
-EmptyReset)aw.Default=aw.EmptyReset end u[as]=aw return aw end aq.AddSlider=
-function(ar,as,at)at=z:Validate(at,A.Slider)local au=ar local av,aw=au.Container
-,{Text=at.Text,Value=at.Default,Min=at.Min,Max=at.Max,Prefix=at.Prefix,Suffix=at
-.Suffix,Compact=at.Compact,Rounding=at.Rounding,HideMax=at.HideMax,Tooltip=at.
-Tooltip,DisabledTooltip=at.DisabledTooltip,TooltipTable=nil,Callback=at.Callback
-,Changed=at.Changed,Disabled=at.Disabled,Visible=at.Visible,Type='Slider'}local
-ax,ay=(U('Frame',{BackgroundTransparency=1,Size=UDim2.new(1,0,0,at.Compact and
-15 or 33),Visible=aw.Visible,Parent=av}))if not at.Compact then ay=U('TextLabel'
-,{BackgroundTransparency=1,Size=UDim2.new(1,0,0,14),Text=aw.Text,TextSize=14,
-TextXAlignment=Enum.TextXAlignment.Left,Parent=ax})end local az=U('TextButton',{
-Active=not aw.Disabled,AnchorPoint=Vector2.new(0,1),BackgroundColor3='MainColor'
-,Position=UDim2.fromScale(0,1),Size=UDim2.new(1,0,0,15),Text='',Parent=ax})U(
-'UIStroke',{Color='OutlineColor',Parent=az})local aA=U('TextLabel',{
-BackgroundTransparency=1,Size=UDim2.fromScale(1,1),Text='',TextSize=14,ZIndex=2,
-Parent=az})U('UIStroke',{ApplyStrokeMode=Enum.ApplyStrokeMode.Contextual,Color=
-'DarkColor',LineJoinMode=Enum.LineJoinMode.Miter,Parent=aA})local aB=U('Frame',{
-BackgroundColor3='AccentColor',Size=UDim2.fromScale(0.5,1),Parent=az})table.
-insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius/2),Parent=
-az}))table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius
-/2),Parent=aB}))aw.UpdateColors=function(aC)if z.Unloaded then return end if ay
-then ay.TextTransparency=aw.Disabled and 0.8 or 0 end aA.TextTransparency=aw.
-Disabled and 0.8 or 0 aB.BackgroundColor3=aw.Disabled and z.Scheme.OutlineColor
-or z.Scheme.AccentColor z.Registry[aB].BackgroundColor3=aw.Disabled and
-'OutlineColor'or'AccentColor'end aw.Display=function(aC)if z.Unloaded then
-return end local aD if at.FormatDisplayValue then aD=at.FormatDisplayValue(aw,aw
-.Value)end if aD then aA.Text=tostring(aD)else if at.Compact then aA.Text=string
-.format('%s: %s%s%s',aw.Text,aw.Prefix,aw.Value,aw.Suffix)elseif at.HideMax then
-aA.Text=string.format('%s%s%s',aw.Prefix,aw.Value,aw.Suffix)else aA.Text=string.
-format('%s%s%s/%s%s%s',aw.Prefix,aw.Value,aw.Suffix,aw.Prefix,aw.Max,aw.Suffix)
-end end local aE=(aw.Value-aw.Min)/(aw.Max-aw.Min)aB.Size=UDim2.fromScale(aE,1)
-end aw.OnChanged=function(aC,aD)aw.Changed=aD end aw.SetMax=function(aC,aD)
-assert(aD>aw.Min,'Max value cannot be less than the current min value.')aw:
-SetValue(math.clamp(aw.Value,aw.Min,aD))aw.Max=aD aw:Display()end aw.SetMin=
-function(aC,aD)assert(aD<aw.Max,
-'Min value cannot be greater than the current max value.')aw:SetValue(math.
-clamp(aw.Value,aD,aw.Max))aw.Min=aD aw:Display()end aw.SetValue=function(aC,aD)
-if aw.Disabled then return end local aE=tonumber(aD)if not aE or aE==aw.Value
-then return end aE=math.clamp(aE,aw.Min,aw.Max)aw.Value=aE aw:Display()z:
-SafeCallback(aw.Callback,aw.Value)z:SafeCallback(aw.Changed,aw.Value)end aw.
-SetDisabled=function(aC,aD)aw.Disabled=aD if aw.TooltipTable then aw.
-TooltipTable.Disabled=aw.Disabled end az.Active=not aw.Disabled aw:UpdateColors(
-)end aw.SetVisible=function(aC,aD)aw.Visible=aD ax.Visible=aw.Visible au:Resize(
-)end aw.SetText=function(aC,aD)aw.Text=aD if ay then ay.Text=aD return end aw:
-Display()end aw.SetPrefix=function(aC,aD)aw.Prefix=aD aw:Display()end aw.
-SetSuffix=function(aC,aD)aw.Suffix=aD aw:Display()end az.InputBegan:Connect(
-function(aC)if not I(aC)or aw.Disabled then return end if z.ActiveTab then for
-aD,aE in z.ActiveTab.Sides do aE.ScrollingEnabled=false end end if z.
-ActiveLoading and z.ActiveLoading.Sidebar then z.ActiveLoading.Sidebar.Container
-.ScrollingEnabled=false end while L(aC)do local aD=q.X local aE,aF=math.clamp((
-aD-az.AbsolutePosition.X)/az.AbsoluteSize.X,0,1),aw.Value aw.Value=P(aw.Min+((aw
-.Max-aw.Min)*aE),aw.Rounding)aw:Display()if aw.Value~=aF then z:SafeCallback(aw.
-Callback,aw.Value)z:SafeCallback(aw.Changed,aw.Value)end f.RenderStepped:Wait()
-end if z.ActiveTab then for aD,aE in z.ActiveTab.Sides do aE.ScrollingEnabled=
-true end end if z.ActiveLoading and z.ActiveLoading.Sidebar then z.ActiveLoading
-.Sidebar.Container.ScrollingEnabled=true end end)if typeof(aw.Tooltip)=='string'
-or typeof(aw.DisabledTooltip)=='string'then aw.TooltipTable=z:AddTooltip(aw.
-Tooltip,aw.DisabledTooltip,az)aw.TooltipTable.Disabled=aw.Disabled end aw:
-UpdateColors()aw:Display()au:Resize()aw.Holder=ax table.insert(au.Elements,aw)aw
-.Default=aw.Value u[as]=aw return aw end aq.AddDropdown=function(ar,as,at)at=z:
-Validate(at,A.Dropdown)local au=ar local av=au.Container if at.SpecialType==
-'Player'then at.Values=R(at.ExcludeLocalPlayer)at.AllowNull=true elseif at.
-SpecialType=='Team'then at.Values=S()at.AllowNull=true end local aw={Text=
-typeof(at.Text)=='string'and at.Text or nil,Value=at.Multi and{}or nil,Values=at
-.Values,DisabledValues=at.DisabledValues,ValueImages=at.ValueImages,Multi=at.
-Multi,SpecialType=at.SpecialType,ExcludeLocalPlayer=at.ExcludeLocalPlayer,
-EnablePlayerImages=at.EnablePlayerImages,Tooltip=at.Tooltip,RichText=at.RichText
-,DisabledTooltip=at.DisabledTooltip,TooltipTable=nil,Callback=at.Callback,
-Changed=at.Changed,Disabled=at.Disabled,Visible=at.Visible,Type='Dropdown'}local
-ax=U('Frame',{BackgroundTransparency=1,Size=UDim2.new(1,0,0,aw.Text and 39 or 21
-),Visible=aw.Visible,Parent=av})local ay,az=U('TextLabel',{
-BackgroundTransparency=1,Size=UDim2.new(1,0,0,14),Text=aw.Text,TextSize=14,
-TextXAlignment=Enum.TextXAlignment.Left,Visible=not not at.Text,ZIndex=3,Parent=
-ax}),U('TextButton',{AnchorPoint=Vector2.new(0,1),BackgroundColor3='MainColor',
-Position=UDim2.fromScale(0,1),Size=UDim2.new(1,0,0,21),Text='',TextTransparency=
-1,ZIndex=2,Parent=ax})U('UIPadding',{PaddingLeft=UDim.new(0,8),PaddingRight=UDim
-.new(0,4),Parent=az})U('UIStroke',{Color='OutlineColor',Parent=az})if z.
-CornerRadiusDropdown==true then table.insert(z.Corners,U('UICorner',{
-CornerRadius=UDim.new(0,z.CornerRadius/2),Parent=az}))end local aA,aB,aC,aD=U(
-'ImageLabel',{BackgroundTransparency=1,Position=UDim2.fromOffset(-4,3),Size=
-UDim2.fromOffset(16,16),Image='',ImageTransparency=1,ZIndex=2,Parent=az}),U(
-'TextButton',{Active=not aw.Disabled,BackgroundTransparency=1,Size=UDim2.new(1,0
-,0,21),Text='---',TextSize=14,TextXAlignment=Enum.TextXAlignment.Left,
-TextTruncate=Enum.TextTruncate.AtEnd,RichText=at.RichText,ZIndex=2,Parent=az}),(
-U('ImageLabel',{AnchorPoint=Vector2.new(1,0.5),Image=ak and ak.Url or'',
-ImageColor3='FontColor',ImageRectOffset=ak and ak.ImageRectOffset or Vector2.
-zero,ImageRectSize=ak and ak.ImageRectSize or Vector2.zero,ImageTransparency=0.5
-,Position=UDim2.fromScale(1,0.5),Size=UDim2.fromOffset(16,16),Parent=az}))if at.
-Searchable then aD=U('TextBox',{BackgroundTransparency=1,PlaceholderText=
-'Search...',Position=UDim2.fromOffset(-8,0),Size=UDim2.new(1,-12,1,0),TextSize=
-14,TextXAlignment=Enum.TextXAlignment.Left,Visible=false,Parent=aB})U(
-'UIPadding',{PaddingLeft=UDim.new(0,8),Parent=aD})end local aE,aF=function(aE)if
-not aE then return nil end local aF if aw.SpecialType=='Player'and aw.
-EnablePlayerImages==true then if typeof(aE)=='Instance'and aE:IsA'Player'then aF
-={Url=string.format('rbxthumb://type=AvatarHeadShot&id=%s&w=48&h=48',tostring(aE
-.UserId))}end else if at.ValueImages and at.ValueImages[aE]then aF=z:
-GetCustomIcon(at.ValueImages[aE])end end return aF end,z:AddContextMenu(az,
-function()return UDim2.fromOffset((az.AbsoluteSize.X/z.DPIScale)+1,0)end,
-function()return{0.5,az.AbsoluteSize.Y+1.5}end,2,function(aE)aB.TextTransparency
-=(aE and aD)and 1 or 0 aC.ImageTransparency=aE and 0 or 0.5 aC.Rotation=aE and
-180 or 0 if aD then aD.Text=''aD.Visible=aE end end,true)aw.Menu=aF local aG={}
-aw.RecalculateListSize=function(aH,aI)local aJ,aK=math.clamp((aI or M(aw.Values)
-)*21,0,at.MaxVisibleDropdownItems*21),(az.AbsoluteSize.X/z.DPIScale)+1 for aL in
-aG do local aM=at.RichText and Q(aL.Text)or aL.Text local aN=z:GetTextBounds(aM,
-aL.FontFace,aL.TextSize,math.huge)if aN>aK then aK=aN end end aF:SetSize(
-function()return UDim2.fromOffset(aK,aJ)end)end aw.UpdateColors=function(aH)if z
-.Unloaded then return end ay.TextTransparency=aw.Disabled and 0.8 or 0 aB.
-TextTransparency=aw.Disabled and 0.8 or 0 aA.ImageTransparency=aw.Disabled and
-0.8 or 0 aC.ImageTransparency=aw.Disabled and 0.8 or aF.Active and 0 or 0.5 end
-aw.Display=function(aH)if z.Unloaded then return end local aI,aJ=''if at.Multi
-then for aK,aL in aw.Values do if aw.Value[aL]then if not aJ then aJ=aE(aL)end
-aI=aI..(at.FormatDisplayValue and tostring(at.FormatDisplayValue(aL))or
-tostring(aL))..', 'end end aI=aI:sub(1,#aI-2)else aJ=aE(aw.Value)aI=aw.Value and
-tostring(aw.Value)or''if aI~=''and at.FormatDisplayValue then aI=tostring(at.
-FormatDisplayValue(aI))end end aB.Text=(aI==''and'---'or aI)if aJ then aA.Image=
-aJ.Url aA.ImageRectOffset=aJ.ImageRectOffset or Vector2.zero aA.ImageRectSize=aJ
-.ImageRectSize or Vector2.zero aA.ImageTransparency=0 else aA.Image=''aA.
-ImageTransparency=1 end aB.Size=aJ and UDim2.new(1,-8,0,21)or UDim2.new(1,0,0,21
-)aB.Position=aJ and UDim2.fromOffset(14,0)or UDim2.fromOffset(0,0)end aw.
-OnChanged=function(aH,aI)aw.Changed=aI end aw.GetActiveValues=function(aH)if at.
-Multi then local aI={}for aJ,aK in aw.Value do table.insert(aI,aJ)end return aI
-end return aw.Value and 1 or 0 end aw.BuildDropdownList=function(aH)local aI,aJ=
-aw.Values,aw.DisabledValues if aw.UtilityButtonsHolder then aw.
-UtilityButtonsHolder:Destroy()aw.UtilityButtonsHolder=nil end for aK,aL in aG do
-aK.Parent:Destroy()end table.clear(aG)local aK=0 if aw.Multi and next(aw.Values)
-and(not aD or aD.Text:len()==0)then aK=1 local aL=U('Frame',{
-BackgroundTransparency=1,Size=UDim2.new(1,0,0,21),Parent=aF.Menu})aw.
-UtilityButtonsHolder=aL U('UIListLayout',{Parent=aL,Padding=UDim.new(0,8),
-FillDirection=Enum.FillDirection.Horizontal,HorizontalAlignment=Enum.
-HorizontalAlignment.Center,VerticalAlignment=Enum.VerticalAlignment.Center})
-local aM=function(aM,aN)local aO=U('TextButton',{BackgroundColor3='MainColor',
-Size=UDim2.fromScale(0.45,0.8),Text=aM,TextSize=13,TextTransparency=0.4,Parent=
-aL})U('UIStroke',{Color='OutlineColor',Parent=aO})table.insert(z.Corners,U(
-'UICorner',{CornerRadius=UDim.new(0,z.CornerRadius/2),Parent=aO}))aO.
-MouseButton1Click:Connect(aN)end aM('Select All',function()local aN={}for aO,aP
-in aw.Values do aN[aP]=true end aw:SetValue(aN)end)aM('Deselect All',function()
-aw:SetValue{}end)end for aL,aM in aI do local aN=tostring(at.FormatListValue and
-at.FormatListValue(aM)or(at.FormatDisplayValue and at.FormatDisplayValue(aM)or
-aM))local aO=at.RichText and Q(aN)or aN if aD and not aO:lower():match(aD.Text:
-lower())then continue end aK=aK+1 local aP,aQ,aR=table.find(aJ,aM),{},aE(aM)
-local aS=U('Frame',{BackgroundColor3='MainColor',BackgroundTransparency=1,
-LayoutOrder=aP and 1 or 0,Size=UDim2.new(1,0,0,21),Parent=aF.Menu})local aT,aU=
-aR and U('ImageLabel',{BackgroundTransparency=1,Image=aR.Url,ImageRectOffset=aR.
-ImageRectOffset,ImageRectSize=aR.ImageRectSize,ImageTransparency=0.5,Size=UDim2.
-fromOffset(16,16),Position=UDim2.fromOffset(4,3),Parent=aS}),U('TextButton',{
-BackgroundTransparency=1,RichText=at.RichText,Size=aR and UDim2.new(1,-18,0,21)
-or UDim2.new(1,0,0,21),Position=aR and UDim2.fromOffset(18,0)or UDim2.
-fromOffset(0,0),Text=aN,TextSize=14,TextTransparency=0.5,TextXAlignment=Enum.
-TextXAlignment.Left,Parent=aS})U('UIPadding',{PaddingLeft=UDim.new(0,7),
-PaddingRight=UDim.new(0,7),Parent=aU})local aV if at.Multi then aV=aw.Value[aM]
-else aV=aw.Value==aM end aQ.UpdateButton=function(aW)if at.Multi then aV=aw.
-Value[aM]else aV=aw.Value==aM end aS.BackgroundTransparency=aV and 0 or 1 aU.
-TextTransparency=aP and 0.8 or aV and 0 or 0.5 if aT then aT.ImageTransparency=
-aP and 0.8 or aV and 0 or 0.5 end end if not aP then aU.MouseButton1Click:
-Connect(function()local aW=not aV if not(aw:GetActiveValues()==1 and not aW and
-not at.AllowNull)then aV=aW if at.Multi then aw.Value[aM]=aV and true or nil
-else aw.Value=aV and aM or nil end for aX,aY in aG do aY:UpdateButton()end end
-aQ:UpdateButton()aw:Display()z:UpdateDependencyBoxes()z:SafeCallback(aw.Callback
-,aw.Value)z:SafeCallback(aw.Changed,aw.Value)end)end aQ:UpdateButton()aw:
-Display()aG[aU]=aQ end aw:RecalculateListSize(aK)end aw.SetValue=function(aH,aI)
-if at.Multi then local aJ={}for aK,aL in aI or{}do if typeof(aL)~='boolean'then
-aJ[aL]=true elseif aL and table.find(aw.Values,aK)then aJ[aK]=true end end aw.
-Value=aJ else if table.find(aw.Values,aI)then aw.Value=aI elseif not aI then aw.
-Value=nil end end aw:Display()for aJ,aK in aG do aK:UpdateButton()end if not aw.
-Disabled then z:UpdateDependencyBoxes()z:SafeCallback(aw.Callback,aw.Value)z:
-SafeCallback(aw.Changed,aw.Value)end end aw.SetValues=function(aH,aI)aw.Values=
-aI aw:BuildDropdownList()end aw.AddValues=function(aH,aI)if typeof(aI)=='table'
-then for aJ,aK in aI do table.insert(aw.Values,aK)end elseif typeof(aI)==
-'string'then table.insert(aw.Values,aI)else return end aw:BuildDropdownList()end
-aw.SetDisabledValues=function(aH,aI)aw.DisabledValues=aI aw:BuildDropdownList()
-end aw.AddDisabledValues=function(aH,aI)if typeof(aI)=='table'then for aJ,aK in
-aI do table.insert(aw.DisabledValues,aK)end elseif typeof(aI)=='string'then
-table.insert(aw.DisabledValues,aI)else return end aw:BuildDropdownList()end aw.
-SetValueImages=function(aH,aI)if typeof(aI)~='table'then return end aw.
-ValueImages=aI aw:BuildDropdownList()end aw.AddValueImages=function(aH,aI)if
-typeof(aI)~='table'then return end for aJ,aK in aI do aw.ValueImages[aJ]=aK end
-aw:BuildDropdownList()end aw.SetDisabled=function(aH,aI)aw.Disabled=aI if aw.
-TooltipTable then aw.TooltipTable.Disabled=aw.Disabled end aF:Close()aB.Active=
-not aw.Disabled aw:UpdateColors()end aw.SetVisible=function(aH,aI)aw.Visible=aI
-ax.Visible=aw.Visible au:Resize()end aw.SetText=function(aH,aI)aw.Text=aI ax.
-Size=UDim2.new(1,0,0,aI and 39 or 21)ay.Text=aI and aI or''ay.Visible=not not aI
-end local aH=function()if aw.Disabled then return end aF:Toggle()end az.
-MouseButton1Click:Connect(aH)aB.MouseButton1Click:Connect(aH)if aD then aD:
-GetPropertyChangedSignal'Text':Connect(aw.BuildDropdownList)end local aI={}if
-typeof(at.Default)=='string'then local aJ=table.find(aw.Values,at.Default)if aJ
-then table.insert(aI,aJ)end elseif typeof(at.Default)=='table'then for aJ,aK in
-next,at.Default do local aL=table.find(aw.Values,aK)if aL then table.insert(aI,
-aL)end end elseif aw.Values[at.Default]~=nil then table.insert(aI,at.Default)end
-if next(aI)then for aJ=1,#aI do local aK=aI[aJ]if at.Multi then aw.Value[aw.
-Values[aK] ]=true else aw.Value=aw.Values[aK]end if not at.Multi then break end
-end end if typeof(aw.Tooltip)=='string'or typeof(aw.DisabledTooltip)=='string'
-then aw.TooltipTable=z:AddTooltip(aw.Tooltip,aw.DisabledTooltip,az)aw.
-TooltipTable.Disabled=aw.Disabled end aw:UpdateColors()aw:Display()aw:
-BuildDropdownList()au:Resize()aw.Holder=ax table.insert(au.Elements,aw)aw.
-Default=aI aw.DefaultValues=aw.Values u[as]=aw return aw end aq.AddViewport=
-function(ar,as,at)at=z:Validate(at,A.Viewport)local au=ar local av,aw,ax,ay,az,
-aA=au.Container,false,false,0,(at.Object)if at.Clone and typeof(at.Object)==
-'Instance'then if at.Object.Archivable then az=az:Clone()else at.Object.
-Archivable=true az=az:Clone()at.Object.Archivable=false end end local aB={Object
-=az,Camera=(not at.Camera and{(Instance.new'Camera')}or{(at.Camera)})[1],
-Interactive=at.Interactive,AutoFocus=at.AutoFocus,Visible=at.Visible,Type=
-'Viewport'}assert(typeof(aB.Object)=='Instance'and(aB.Object:IsA'BasePart'or aB.
-Object:IsA'Model'),'Instance must be a BasePart or Model.')assert(typeof(aB.
-Camera)=='Instance'and aB.Camera:IsA'Camera',
-'Camera must be a valid Camera instance.')local aC=function(aC)if aC:IsA
-'BasePart'then return aC.Size end return select(2,aC:GetBoundingBox())end local
-aD,aE=function()local aD=aC(aB.Object)local aE=math.max(aD.X,aD.Y,aD.Z)local aF,
-aG=aE*2,aB.Object:GetPivot().Position aB.Camera.CFrame=CFrame.new(aG+Vector3.
-new(0,aE/2,aF),aG)end,U('Frame',{BackgroundTransparency=1,Size=UDim2.new(1,0,0,
-at.Height),Visible=aB.Visible,Parent=av})local aF=U('Frame',{AnchorPoint=Vector2
-.new(0,1),BackgroundColor3='MainColor',BorderColor3='OutlineColor',
-BorderSizePixel=1,Position=UDim2.fromScale(0,1),Size=UDim2.fromScale(1,1),Parent
-=aE})U('UIPadding',{PaddingBottom=UDim.new(0,3),PaddingLeft=UDim.new(0,8),
-PaddingRight=UDim.new(0,8),PaddingTop=UDim.new(0,4),Parent=aF})local aG=U(
-'ViewportFrame',{BackgroundTransparency=1,Size=UDim2.fromScale(1,1),Parent=aF,
-CurrentCamera=aB.Camera,Active=aB.Interactive})aG.MouseEnter:Connect(function()
-if not aB.Interactive then return end for aH,aI in au.Tab.Sides do aI.
-ScrollingEnabled=false end end)aG.MouseLeave:Connect(function()if not aB.
-Interactive then return end for aH,aI in au.Tab.Sides do aI.ScrollingEnabled=
-true end end)aG.InputBegan:Connect(function(aH)if not aB.Interactive then return
-end if aH.UserInputType==Enum.UserInputType.MouseButton2 then aw=true aA=aH.
-Position elseif aH.UserInputType==Enum.UserInputType.Touch and not ax then aw=
-true aA=aH.Position end end)z:GiveSignal(h.InputEnded:Connect(function(aH)if z.
-Unloaded then return end if not aB.Interactive then return end if aH.
-UserInputType==Enum.UserInputType.MouseButton2 then aw=false elseif aH.
-UserInputType==Enum.UserInputType.Touch then aw=false end end))z:GiveSignal(h.
-InputChanged:Connect(function(aH)if z.Unloaded then return end if not aB.
-Interactive or not aw or ax then return end if aH.UserInputType==Enum.
-UserInputType.MouseMovement or aH.UserInputType==Enum.UserInputType.Touch then
-local aI=aH.Position-aA aA=aH.Position local aJ,aK,aL=aB.Object:GetPivot().
-Position,aB.Camera,CFrame.fromAxisAngle(Vector3.new(0,1,0),-aI.X*0.01)aK.CFrame=
-CFrame.new(aJ)*aL*CFrame.new(-aJ)*aK.CFrame local aM=CFrame.fromAxisAngle(aK.
-CFrame.RightVector,-aI.Y*0.01)local aN=CFrame.new(aJ)*aM*CFrame.new(-aJ)*aK.
-CFrame if aN.UpVector.Y>0.1 then aK.CFrame=aN end end end))aG.InputChanged:
-Connect(function(aH)if not aB.Interactive then return end if aH.UserInputType==
-Enum.UserInputType.MouseWheel then local aI=aH.Position.Z*2 do local
-__DARKLUA_VAR=aB.Camera __DARKLUA_VAR.CFrame=__DARKLUA_VAR.CFrame+aB.Camera.
-CFrame.LookVector*aI end end end)z:GiveSignal(h.TouchPinch:Connect(function(aH,
-aI,aJ,aK)if z.Unloaded then return end if not aB.Interactive or not z:
-MouseIsOverFrame(aG,aH[1])then return end if aK==Enum.UserInputState.Begin then
-ax=true aw=false ay=(aH[1]-aH[2]).Magnitude elseif aK==Enum.UserInputState.
-Change then local aL=(aH[1]-aH[2]).Magnitude local aM=(aL-ay)*0.1 ay=aL do local
-__DARKLUA_VAR=aB.Camera __DARKLUA_VAR.CFrame=__DARKLUA_VAR.CFrame+aB.Camera.
-CFrame.LookVector*aM end elseif aK==Enum.UserInputState.End or aK==Enum.
-UserInputState.Cancel then ax=false end end))aB.Object.Parent=aG if aB.AutoFocus
-then aD()end aB.SetObject=function(aH,aI,aJ)assert(aI,'Object cannot be nil.')if
-aJ then aI=aI:Clone()end if aB.Object then aB.Object:Destroy()end aB.Object=aI
-aB.Object.Parent=aG au:Resize()end aB.SetHeight=function(aH,aI)assert(aI>0,
-'Height must be greater than 0.')aE.Size=UDim2.new(1,0,0,aI)au:Resize()end aB.
-Focus=function(aH)if not aB.Object then return end aD()end aB.SetCamera=function
-(aH,aI)assert(aI and typeof(aI)=='Instance'and aI:IsA'Camera',
-'Camera must be a valid Camera instance.')aB.Camera=aI aG.CurrentCamera=aI end
-aB.SetInteractive=function(aH,aI)aB.Interactive=aI aG.Active=aI end aB.
-SetVisible=function(aH,aI)aB.Visible=aI aE.Visible=aB.Visible au:Resize()end au:
-Resize()aB.Holder=aE table.insert(au.Elements,aB)u[as]=aB return aB end aq.
-AddImage=function(ar,as,at)at=z:Validate(at,A.Image)local au=ar local av,aw=au.
-Container,{Image=at.Image,Color=at.Color,RectOffset=at.RectOffset,RectSize=at.
-RectSize,Outline=at.Outline,Height=at.Height,ScaleType=at.ScaleType,Transparency
-=at.Transparency,BackgroundTransparency=at.BackgroundTransparency,Visible=at.
-Visible,Type='Image'}local ax=U('Frame',{BackgroundTransparency=1,Size=UDim2.
-new(1,0,0,at.Height),Visible=aw.Visible,Parent=av})local ay=U('Frame',{
-AnchorPoint=Vector2.new(0,1),BackgroundColor3='MainColor',BorderColor3=
-'OutlineColor',BorderSizePixel=1,BackgroundTransparency=aw.
-BackgroundTransparency,Position=UDim2.fromScale(0,1),Size=UDim2.fromScale(1,1),
-Parent=ax})if aw.Outline then z:AddOutline(ay)end U('UIPadding',{PaddingBottom=
-UDim.new(0,3),PaddingLeft=UDim.new(0,8),PaddingRight=UDim.new(0,8),PaddingTop=
-UDim.new(0,4),Parent=ay})local az={BackgroundTransparency=1,Size=UDim2.
-fromScale(1,1),Image=aw.Image,ImageTransparency=aw.Transparency,ImageColor3=aw.
-Color,ImageRectOffset=aw.RectOffset,ImageRectSize=aw.RectSize,ScaleType=aw.
-ScaleType,Parent=ay}local aA=z:GetCustomIcon(az.Image)assert(aA,
-[[Image must be a valid Roblox asset or a valid URL or a valid lucide icon.]])az
-.Image=aA.Url az.ImageRectOffset=aA.ImageRectOffset az.ImageRectSize=aA.
-ImageRectSize local aB=U('ImageLabel',az)aw.SetHeight=function(aC,aD)assert(aD>0
-,'Height must be greater than 0.')aw.Height=aD ax.Size=UDim2.new(1,0,0,aD)au:
-Resize()end aw.SetImage=function(aC,aD)assert(typeof(aD)=='string',
-'Image must be a string.')local aE=z:GetCustomIcon(aD)assert(aE,
-[[Image must be a valid Roblox asset or a valid URL or a valid lucide icon.]])aD
-=aE.Url aw.RectOffset=aE.ImageRectOffset aw.RectSize=aE.ImageRectSize aB.Image=
-aD aw.Image=aD end aw.SetColor=function(aC,aD)assert(typeof(aD)=='Color3',
-'Color must be a Color3 value.')aB.ImageColor3=aD aw.Color=aD end aw.
-SetRectOffset=function(aC,aD)assert(typeof(aD)=='Vector2',
-'RectOffset must be a Vector2 value.')aB.ImageRectOffset=aD aw.RectOffset=aD end
-aw.SetRectSize=function(aC,aD)assert(typeof(aD)=='Vector2',
-'RectSize must be a Vector2 value.')aB.ImageRectSize=aD aw.RectSize=aD end aw.
-SetScaleType=function(aC,aD)assert(typeof(aD)=='EnumItem'and aD:IsA'ScaleType',
-'ScaleType must be a valid Enum.ScaleType.')aB.ScaleType=aD aw.ScaleType=aD end
-aw.SetTransparency=function(aC,aD)assert(typeof(aD)=='number',
-'Transparency must be a number between 0 and 1.')assert(aD>=0 and aD<=1,
-'Transparency must be between 0 and 1.')aB.ImageTransparency=aD aw.Transparency=
-aD end aw.SetVisible=function(aC,aD)aw.Visible=aD ax.Visible=aw.Visible au:
-Resize()end au:Resize()aw.Holder=ax table.insert(au.Elements,aw)u[as]=aw return
-aw end aq.AddVideo=function(ar,as,at)at=z:Validate(at,A.Video)local au=ar local
-av,aw=au.Container,{Video=at.Video,Looped=at.Looped,Playing=at.Playing,Volume=at
-.Volume,Height=at.Height,Visible=at.Visible,Type='Video'}local ax=U('Frame',{
-BackgroundTransparency=1,Size=UDim2.new(1,0,0,at.Height),Visible=aw.Visible,
-Parent=av})local ay=U('Frame',{AnchorPoint=Vector2.new(0,1),BackgroundColor3=
-'MainColor',BorderColor3='OutlineColor',BorderSizePixel=1,Position=UDim2.
-fromScale(0,1),Size=UDim2.fromScale(1,1),Parent=ax})U('UIPadding',{PaddingBottom
-=UDim.new(0,3),PaddingLeft=UDim.new(0,8),PaddingRight=UDim.new(0,8),PaddingTop=
-UDim.new(0,4),Parent=ay})local az=U('VideoFrame',{BackgroundTransparency=1,Size=
-UDim2.fromScale(1,1),Video=aw.Video,Looped=aw.Looped,Volume=aw.Volume,Parent=ay}
-)az.Playing=aw.Playing aw.SetHeight=function(aA,aB)assert(aB>0,
-'Height must be greater than 0.')aw.Height=aB ax.Size=UDim2.new(1,0,0,aB)au:
-Resize()end aw.SetVideo=function(aA,aB)assert(typeof(aB)=='string',
-'Video must be a string.')az.Video=aB aw.Video=aB end aw.SetLooped=function(aA,
-aB)assert(typeof(aB)=='boolean','Looped must be a boolean.')az.Looped=aB aw.
-Looped=aB end aw.SetVolume=function(aA,aB)assert(typeof(aB)=='number',
-'Volume must be a number between 0 and 10.')az.Volume=aB aw.Volume=aB end aw.
-SetPlaying=function(aA,aB)assert(typeof(aB)=='boolean',
-'Playing must be a boolean.')az.Playing=aB aw.Playing=aB end aw.Play=function(aA
-)az.Playing=true aw.Playing=true end aw.Pause=function(aA)az.Playing=false aw.
-Playing=false end aw.SetVisible=function(aA,aB)aw.Visible=aB ax.Visible=aw.
-Visible au:Resize()end au:Resize()aw.Holder=ax aw.VideoFrame=az table.insert(au.
-Elements,aw)u[as]=aw return aw end aq.AddUIPassthrough=function(ar,as,at)at=z:
-Validate(at,A.UIPassthrough)local au=ar local av=au.Container assert(at.Instance
-,'Instance must be provided.')assert(typeof(at.Instance)=='Instance'and at.
-Instance:IsA'GuiBase2d','Instance must inherit from GuiBase2d.')assert(typeof(at
-.Height)=='number'and at.Height>0,'Height must be a number greater than 0.')
-local aw={Instance=at.Instance,Height=at.Height,Visible=at.Visible,Type=
-'UIPassthrough'}local ax=U('Frame',{BackgroundTransparency=1,Size=UDim2.new(1,0,
-0,at.Height),Visible=aw.Visible,Parent=av})aw.Instance.Parent=ax au:Resize()aw.
-SetHeight=function(ay,az)assert(typeof(az)=='number'and az>0,
-'Height must be a number greater than 0.')aw.Height=az ax.Size=UDim2.new(1,0,0,
-az)au:Resize()end aw.SetInstance=function(ay,az)assert(az,
-'Instance must be provided.')assert(typeof(az)=='Instance'and az:IsA'GuiBase2d',
-'Instance must inherit from GuiBase2d.')if aw.Instance then aw.Instance.Parent=
-nil end aw.Instance=az aw.Instance.Parent=ax end aw.SetVisible=function(ay,az)aw
-.Visible=az ax.Visible=aw.Visible au:Resize()end aw.Holder=ax table.insert(au.
-Elements,aw)u[as]=aw return aw end aq.AddDependencyBox=function(ar)local as=ar
-local at,au,av=(as.Container)do au=U('Frame',{BackgroundTransparency=1,Size=
-UDim2.fromScale(1,1),Visible=false,Parent=at})av=U('UIListLayout',{Padding=UDim.
-new(0,8),Parent=au})end local aw={Visible=false,Dependencies={},Holder=au,
-Container=au,Elements={},DependencyBoxes={}}aw.Resize=function(ax)au.Size=UDim2.
-new(1,0,0,av.AbsoluteContentSize.Y/z.DPIScale)as:Resize()end aw.Update=function(
-ax,ay)for az,aA in aw.Dependencies do local aB,aC=aA[1],aA[2]if aB.Type==
-'Toggle'and aB.Value~=aC then au.Visible=false aw.Visible=false return elseif aB
-.Type=='Dropdown'then if typeof(aB.Value)=='table'then if not aB.Value[aC]then
-au.Visible=false aw.Visible=false return end else if aB.Value~=aC then au.
-Visible=false aw.Visible=false return end end end end aw.Visible=true au.Visible
-=true if not z.Searching then task.defer(function()aw:Resize()end)elseif not ay
-then z:UpdateSearch(z.SearchText)end end av:GetPropertyChangedSignal
-'AbsoluteContentSize':Connect(function()if not aw.Visible then return end aw:
-Resize()end)aw.SetupDependencies=function(ax,ay)for az,aA in ay do assert(
-typeof(aA)=='table','Dependency should be a table.')assert(aA[1]~=nil,
-'Dependency is missing element.')assert(aA[2]~=nil,
-'Dependency is missing expected value.')end aw.Dependencies=ay aw:Update()end au
-:GetPropertyChangedSignal'Visible':Connect(function()aw:Resize()end)
-setmetatable(aw,ap)table.insert(as.DependencyBoxes,aw)table.insert(z.
-DependencyBoxes,aw)return aw end aq.AddDependencyGroupbox=function(ar)local as=
-ar local at,au,av,aw=as.Tab,(as.BoxHolder)do av=U('Frame',{BackgroundColor3=
-'BackgroundColor',Size=UDim2.fromScale(1,0),Visible=false,Parent=au})table.
-insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius),Parent=av
-}))z:AddOutline(av)aw=U('UIListLayout',{Padding=UDim.new(0,8),Parent=av})U(
-'UIPadding',{PaddingBottom=UDim.new(0,7),PaddingLeft=UDim.new(0,7),PaddingRight=
-UDim.new(0,7),PaddingTop=UDim.new(0,7),Parent=av})end local ax={Visible=false,
-Dependencies={},BoxHolder=au,Holder=av,Container=av,Tab=at,Elements={},
-DependencyBoxes={}}ax.Resize=function(ay)av.Size=UDim2.new(1,0,0,(aw.
-AbsoluteContentSize.Y/z.DPIScale)+18)end ax.Update=function(ay,az)for aA,aB in
-ax.Dependencies do local aC,aD=aB[1],aB[2]if aC.Type=='Toggle'and aC.Value~=aD
-then av.Visible=false ax.Visible=false return elseif aC.Type=='Dropdown'then if
-typeof(aC.Value)=='table'then if not aC.Value[aD]then av.Visible=false ax.
-Visible=false return end else if aC.Value~=aD then av.Visible=false ax.Visible=
-false return end end end end ax.Visible=true if not z.Searching then av.Visible=
-true ax:Resize()elseif not az then z:UpdateSearch(z.SearchText)end end ax.
-SetupDependencies=function(ay,az)for aA,aB in az do assert(typeof(aB)=='table',
-'Dependency should be a table.')assert(aB[1]~=nil,
-'Dependency is missing element.')assert(aB[2]~=nil,
-'Dependency is missing expected value.')end ax.Dependencies=az ax:Update()end
-setmetatable(ax,ap)table.insert(at.DependencyGroupboxes,ax)table.insert(z.
-DependencyBoxes,ax)return ax end ap.__index=aq ap.__namecall=function(ar,as,...)
-return aq[as](...)end end z.SetFont=function(aq,ar)if typeof(ar)=='EnumItem'then
-ar=Font.fromEnum(ar)end z.Scheme.Font=ar z:UpdateColorsUsingRegistry()end z.
-SetNotifySide=function(aq,ar)z.NotifySide=ar if ar:lower()=='left'then ae.
-AnchorPoint=Vector2.new(0,0)ae.Position=UDim2.fromOffset(6,6)af.
-HorizontalAlignment=Enum.HorizontalAlignment.Left else ae.AnchorPoint=Vector2.
-new(1,0)ae.Position=UDim2.new(1,-6,0,6)af.HorizontalAlignment=Enum.
-HorizontalAlignment.Right end end z.Notify=function(aq,...)local ar,as={},
-select(1,...)if typeof(as)=='table'then ar.Title=tostring(as.Title)ar.
-Description=tostring(as.Description)ar.Time=as.Time or 5 ar.SoundId=as.SoundId
-ar.Steps=as.Steps ar.Persist=as.Persist ar.Icon=as.Icon ar.BigIcon=as.BigIcon ar
-.IconColor=as.IconColor else ar.Description=tostring(as)ar.Time=select(2,...)or
-5 ar.SoundId=select(3,...)end ar.Destroyed=false local at,au=false if typeof(ar.
-Time)=='Instance'then au=ar.Time.Destroying:Connect(function()at=true au:
-Disconnect()au=nil end)end local av=U('Frame',{AutomaticSize=Enum.AutomaticSize.
-Y,BackgroundTransparency=1,Size=UDim2.fromScale(1,0),Visible=false,Parent=ae})
-local aw=U('Frame',{AutomaticSize=Enum.AutomaticSize.Y,BackgroundColor3=
-'MainColor',Position=z.NotifySide:lower()=='left'and UDim2.new(-1,-8,0,-2)or
-UDim2.new(1,8,0,-2),Size=UDim2.fromScale(1,1),ZIndex=5,Parent=av})table.insert(z
-.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius),Parent=aw}))U(
-'UIListLayout',{Padding=UDim.new(0,4),Parent=aw})U('UIPadding',{PaddingBottom=
-UDim.new(0,8),PaddingLeft=UDim.new(0,8),PaddingRight=UDim.new(0,8),PaddingTop=
-UDim.new(0,8),Parent=aw})z:AddOutline(aw)local ax=U('Frame',{
-BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.XY,Size=UDim2.
-fromScale(1,0),Parent=aw})if ar.BigIcon then U('UIListLayout',{Padding=UDim.new(
-0,8),FillDirection=Enum.FillDirection.Horizontal,VerticalAlignment=Enum.
-VerticalAlignment.Center,Parent=ax})end local ay if ar.BigIcon then local az=z:
-GetCustomIcon(ar.BigIcon)if az then ay=U('ImageLabel',{BackgroundTransparency=1,
-Size=UDim2.fromOffset(24,24),Image=az.Url,ImageColor3=ar.IconColor or
-'AccentColor',ImageRectOffset=az.ImageRectOffset,ImageRectSize=az.ImageRectSize,
-Parent=ax})end end local az=U('Frame',{BackgroundTransparency=1,AutomaticSize=
-Enum.AutomaticSize.XY,Size=UDim2.fromScale(0,0),Parent=ax})U('UIListLayout',{
-Padding=UDim.new(0,4),Parent=az})local aA if ar.Title then aA=U('Frame',{
-BackgroundTransparency=1,Size=UDim2.fromScale(0,0),Parent=az})end local aB if ar
-.Icon and aA then local aC=z:GetCustomIcon(ar.Icon)if aC then aB=U('ImageLabel',
-{BackgroundTransparency=1,AnchorPoint=Vector2.new(0,0.5),Position=UDim2.new(0,0,
-0.5,1),Size=UDim2.fromOffset(15,15),Image=aC.Url,ImageColor3=ar.IconColor or
-'FontColor',ImageRectOffset=aC.ImageRectOffset,ImageRectSize=aC.ImageRectSize,
-Parent=aA})end end local aC,aD,aE,aF,aG=0,0 if ar.Title then aE=U('TextLabel',{
-AutomaticSize=Enum.AutomaticSize.None,BackgroundTransparency=1,AnchorPoint=
-Vector2.new(0,0.5),Position=UDim2.new(0,(ar.Icon and 21 or 0),0.5,0),Size=UDim2.
-fromScale(0,0),Text=ar.Title,TextSize=15,TextXAlignment=Enum.TextXAlignment.Left
-,TextYAlignment=Enum.TextYAlignment.Center,TextWrapped=true,Parent=aA})end if ar
-.Description then aF=U('TextLabel',{AutomaticSize=Enum.AutomaticSize.None,
-BackgroundTransparency=1,Size=UDim2.fromScale(0,0),Text=ar.Description,TextSize=
-14,TextXAlignment=Enum.TextXAlignment.Left,TextWrapped=true,Parent=az})end ar.
-Resize=function(aH)local aI,aJ=ay and 32 or 0,aB and 21 or 0 if aE then local aK
-,aL=z:GetTextBounds(aE.Text,aE.FontFace,aE.TextSize,(ae.AbsoluteSize.X/z.
-DPIScale)-24-aI-aJ)aE.Size=UDim2.fromOffset(aK,aL)aC=aK+aJ aA.Size=UDim2.
-fromOffset(aC,math.max(aL,aB and 16 or 0))end if aF then local aK,aL=z:
-GetTextBounds(aF.Text,aF.FontFace,aF.TextSize,(ae.AbsoluteSize.X/z.DPIScale)-24-
-aI)aF.Size=UDim2.fromOffset(aK,aL)aD=aK end av.Size=UDim2.fromOffset(math.max(aC
-,aD)+24+aI,0)end ar.ChangeTitle=function(aH,aI)if aE then ar.Title=tostring(aI)
-aE.Text=ar.Title ar:Resize()end end ar.ChangeDescription=function(aH,aI)if aF
-then ar.Description=tostring(aI)aF.Text=ar.Description ar:Resize()end end ar.
-ChangeStep=function(aH,aI)if aG and ar.Steps then aI=math.clamp(aI or 0,0,ar.
-Steps)aG.Size=UDim2.fromScale(aI/ar.Steps,1)end end ar.Destroy=function(aH)ar.
-Destroyed=true if typeof(ar.Time)=='Instance'then pcall(ar.Time.Destroy,ar.Time)
-end if au then au:Disconnect()end k:Create(aw,z.NotifyTweenInfo,{Position=z.
-NotifySide:lower()=='left'and UDim2.new(-1,-8,0,-2)or UDim2.new(1,8,0,-2)}):
-Play()task.delay(z.NotifyTweenInfo.Time,function()z.Notifications[av]=nil av:
-Destroy()end)end ar:Resize()local aH=U('Frame',{BackgroundTransparency=1,Size=
-UDim2.new(1,0,0,7),Visible=(ar.Persist~=true and typeof(ar.Time)~='Instance')or
-typeof(ar.Steps)=='number',Parent=aw})local aI=U('Frame',{BackgroundColor3=
-'BackgroundColor',BorderColor3='OutlineColor',BorderSizePixel=1,Position=UDim2.
-fromOffset(0,3),Size=UDim2.new(1,0,0,2),Parent=aH})aG=U('Frame',{
-BackgroundColor3='AccentColor',Size=UDim2.fromScale(1,1),Parent=aI})if typeof(ar
-.Time)=='Instance'then aG.Size=UDim2.fromScale(0,1)end if ar.SoundId then local
-aJ=ar.SoundId if typeof(aJ)=='number'then aJ=string.format('rbxassetid://%d',aJ)
-end U('Sound',{SoundId=aJ,Volume=3,PlayOnRemove=true,Parent=g}):Destroy()end z.
-Notifications[av]=ar av.Visible=true k:Create(aw,z.NotifyTweenInfo,{Position=
-UDim2.fromOffset(0,0)}):Play()task.delay(z.NotifyTweenInfo.Time,function()if ar.
-Persist then return elseif typeof(ar.Time)=='Instance'then repeat task.wait()
-until at or ar.Destroyed else k:Create(aG,TweenInfo.new(ar.Time,Enum.EasingStyle
-.Linear,Enum.EasingDirection.InOut),{Size=UDim2.fromScale(0,1)}):Play()task.
-wait(ar.Time)end if not ar.Destroyed then ar:Destroy()end end)return ar end z.
-CreateWindow=function(aq,ar)ar=z:Validate(ar,A.Window)local as=workspace.
-CurrentCamera.ViewportSize if f:IsStudio()and as.X<=5 and as.Y<=5 then repeat as
-=workspace.CurrentCamera.ViewportSize task.wait()until as.X>5 and as.Y>5 end
-local at,au=as.X-64,as.Y-64 z.OriginalMinSize=Vector2.new(math.min(z.
-OriginalMinSize.X,at),math.min(z.OriginalMinSize.Y,au))z.MinSize=z.
-OriginalMinSize ar.Size=UDim2.fromOffset(math.clamp(ar.Size.X.Offset,z.MinSize.X
-,at),math.clamp(ar.Size.Y.Offset,z.MinSize.Y,au))if typeof(ar.Font)=='EnumItem'
-then ar.Font=Font.fromEnum(ar.Font)end ar.CornerRadius=math.min(ar.CornerRadius,
-20)if ar.Compact~=nil then ar.SidebarCompacted=ar.Compact end if ar.
-SidebarMinWidth~=nil then ar.MinSidebarWidth=ar.SidebarMinWidth end ar.
-MinSidebarWidth=math.max(64,ar.MinSidebarWidth)ar.SidebarCompactWidth=math.max(
-48,ar.SidebarCompactWidth)ar.SidebarCollapseThreshold=math.clamp(ar.
-SidebarCollapseThreshold,0.1,0.9)ar.CompactWidthActivation=math.max(48,ar.
-CompactWidthActivation)z.CornerRadius=ar.CornerRadius z:SetNotifySide(ar.
-NotifySide)z.ShowCustomCursor=ar.ShowCustomCursor z.Scheme.Font=ar.Font z.
-ToggleKeybind=ar.ToggleKeybind z.GlobalSearch=ar.GlobalSearch local av,aw,ax,ay,
-az,aA,aB,aC,aD,aE,aF,aG,aH,aI,aJ,aK,aL,aM,aN=ar.SearchbarSize==UDim2.fromScale(1
-,1),math.ceil(ar.Size.X.Offset*0.3),(ar.SidebarCompacted)local aO=aw do z.
-KeybindFrame,z.KeybindContainer=z:AddDraggableMenu'Keybinds'z.KeybindFrame.
-AnchorPoint=Vector2.new(0,0.5)z.KeybindFrame.Position=UDim2.new(0,6,0.5,0)z.
-KeybindFrame.Visible=false ay=U('TextButton',{BackgroundColor3=function()return
-z:GetBetterColor(z.Scheme.BackgroundColor,-1)end,Name='Main',Text='',Position=ar
-.Position,Size=ar.Size,Visible=false,Parent=X})table.insert(z.Corners,U(
-'UICorner',{CornerRadius=UDim.new(0,ar.CornerRadius),Parent=ay}))table.insert(z.
-Scales,U('UIScale',{Parent=ay}))z:AddOutline(ay)z:MakeLine(ay,{Position=UDim2.
-fromOffset(0,48),Size=UDim2.new(1,0,0,1)})az=U('Frame',{BackgroundColor3=
-'OutlineColor',Position=UDim2.fromOffset(aw,0),Size=UDim2.new(0,1,1,-21),Parent=
-ay})if ar.BackgroundImage then aL=U('ImageLabel',{Image=ar.BackgroundImage,
-Position=UDim2.fromScale(0,0),Size=UDim2.fromScale(1,1),ScaleType=Enum.ScaleType
-.Stretch,ZIndex=999,BackgroundTransparency=1,ImageTransparency=0.75,Parent=ay})
-table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,ar.CornerRadius),
-Parent=aL}))end if ar.Center then ay.Position=UDim2.new(0.5,-ay.Size.X.Offset/2,
-0.5,-ay.Size.Y.Offset/2)end local aP=U('Frame',{BackgroundTransparency=1,Size=
-UDim2.new(1,0,0,48),Parent=ay})z:MakeDraggable(ay,aP,false,true)aA=U('Frame',{
-BackgroundTransparency=1,Size=UDim2.new(0,aw,1,0),Parent=aP})U('UIListLayout',{
-FillDirection=Enum.FillDirection.Horizontal,HorizontalAlignment=Enum.
-HorizontalAlignment.Center,VerticalAlignment=Enum.VerticalAlignment.Center,
-Padding=UDim.new(0,6),Parent=aA})if ar.Icon then local aQ=z:GetCustomIcon(ar.
-Icon)aC=U('ImageLabel',{Image=aQ.Url,ImageRectOffset=aQ.ImageRectOffset,
-ImageRectSize=aQ.ImageRectSize,Size=ar.IconSize,Parent=aA})else aC=U('TextLabel'
-,{BackgroundTransparency=1,Size=ar.IconSize,Text=ar.Title:sub(1,1),TextScaled=
-true,Visible=false,Parent=aA})end local aQ=z:GetTextBounds(ar.Title,z.Scheme.
-Font,20,aA.AbsoluteSize.X-(ar.Icon and ar.IconSize.X.Offset+6 or 0)-12)aB=U(
-'TextLabel',{BackgroundTransparency=1,Size=UDim2.new(0,aQ,1,0),Text=ar.Title,
-TextSize=20,Parent=aA})aD=U('Frame',{AnchorPoint=Vector2.new(1,0.5),
-BackgroundTransparency=1,Position=UDim2.new(1,-49,0.5,0),Size=UDim2.new(1,-aw-57
--1,1,-16),Parent=aP})U('UIListLayout',{FillDirection=Enum.FillDirection.
-Horizontal,HorizontalAlignment=Enum.HorizontalAlignment.Left,VerticalAlignment=
-Enum.VerticalAlignment.Center,Padding=UDim.new(0,8),Parent=aD})aF=U('Frame',{
-Size=UDim2.fromScale(ar.DisableSearch and 1 or 0.5,1),Visible=false,
-BackgroundTransparency=1,Parent=aD})U('UIFlexItem',{FlexMode=Enum.UIFlexMode.
-Grow,Parent=aF})U('UIListLayout',{FillDirection=Enum.FillDirection.Vertical,
-HorizontalAlignment=Enum.HorizontalAlignment.Left,VerticalAlignment=Enum.
-VerticalAlignment.Center,Parent=aF})U('UIPadding',{PaddingBottom=UDim.new(0,8),
-PaddingLeft=UDim.new(0,8),PaddingRight=UDim.new(0,8),PaddingTop=UDim.new(0,8),
-Parent=aF})aG=U('TextLabel',{BackgroundTransparency=1,Size=UDim2.fromScale(1,0),
-AutomaticSize=Enum.AutomaticSize.Y,Text='',TextSize=14,TextXAlignment=Enum.
-TextXAlignment.Left,Parent=aF})aH=U('TextLabel',{BackgroundTransparency=1,Size=
-UDim2.fromScale(1,0),AutomaticSize=Enum.AutomaticSize.Y,Text='',TextWrapped=true
-,TextSize=14,TextXAlignment=Enum.TextXAlignment.Left,TextTransparency=0.5,Parent
-=aF})aE=U('TextBox',{BackgroundColor3='MainColor',PlaceholderText='Search',Size=
-ar.SearchbarSize,TextScaled=true,Visible=not(ar.DisableSearch or false),Parent=
-aD})U('UIFlexItem',{FlexMode=Enum.UIFlexMode.Shrink,Parent=aE})table.insert(z.
-Corners,U('UICorner',{CornerRadius=UDim.new(0,ar.CornerRadius),Parent=aE}))U(
-'UIPadding',{PaddingBottom=UDim.new(0,8),PaddingLeft=UDim.new(0,8),PaddingRight=
-UDim.new(0,8),PaddingTop=UDim.new(0,8),Parent=aE})U('UIStroke',{Color=
-'OutlineColor',Parent=aE})local aR=z:GetIcon'search'if aR then U('ImageLabel',{
-Image=aR.Url,ImageColor3='FontColor',ImageRectOffset=aR.ImageRectOffset,
-ImageRectSize=aR.ImageRectSize,ImageTransparency=0.5,Size=UDim2.fromScale(1,1),
-SizeConstraint=Enum.SizeConstraint.RelativeYY,Parent=aE})end if an then U(
-'ImageLabel',{AnchorPoint=Vector2.new(1,0.5),Image=an.Url,ImageColor3=
-'OutlineColor',ImageRectOffset=an.ImageRectOffset,ImageRectSize=an.ImageRectSize
-,Position=UDim2.new(1,-10,0.5,0),Size=UDim2.fromOffset(28,28),SizeConstraint=
-Enum.SizeConstraint.RelativeYY,Parent=aP})end aM=U('Frame',{AnchorPoint=Vector2.
-new(0,1),BackgroundColor3=function()return z:GetBetterColor(z.Scheme.
-BackgroundColor,4)end,Position=UDim2.fromScale(0,1),Size=UDim2.new(1,0,0,20+ar.
-CornerRadius),Parent=ay})z:MakeLine(ay,{AnchorPoint=Vector2.new(0,1),Position=
-UDim2.new(0,0,1,-20),Size=UDim2.new(1,0,0,1)})local aS=U('Frame',{AnchorPoint=
-Vector2.new(0,1),BackgroundTransparency=1,Position=UDim2.fromScale(0,1),Size=
-UDim2.new(1,0,0,20),Parent=ay})table.insert(z.Corners,U('UICorner',{CornerRadius
-=UDim.new(0,ar.CornerRadius),Parent=aM}))aN=U('TextLabel',{
-BackgroundTransparency=1,Size=UDim2.fromScale(1,1),Text=ar.Footer,TextSize=14,
-TextTransparency=0.5,Parent=aS})if ar.Resizable then aI=U('TextButton',{
-AnchorPoint=Vector2.new(1,0),BackgroundTransparency=1,Position=UDim2.new(1,-ar.
-CornerRadius/4,0,0),Size=UDim2.fromScale(1,1),SizeConstraint=Enum.SizeConstraint
-.RelativeYY,Text='',Parent=aS})z:MakeResizable(ay,aI,function()for aT,aU in z.
-Tabs do aU:Resize(true)end end)end U('ImageLabel',{Image=al and al.Url or'',
-ImageColor3='FontColor',ImageRectOffset=al and al.ImageRectOffset or Vector2.
-zero,ImageRectSize=al and al.ImageRectSize or Vector2.zero,ImageTransparency=0.5
-,Position=UDim2.fromOffset(2,2),Size=UDim2.new(1,-4,1,-4),Parent=aI})aJ=U(
-'ScrollingFrame',{AutomaticCanvasSize=Enum.AutomaticSize.Y,BackgroundColor3=
-'BackgroundColor',CanvasSize=UDim2.fromScale(0,0),Position=UDim2.fromOffset(0,49
-),ScrollBarThickness=0,Size=UDim2.new(0,aw,1,-70),Parent=ay})U('UIListLayout',{
-Parent=aJ})aK=U('Frame',{AnchorPoint=Vector2.new(1,0),BackgroundColor3=function(
-)return z:GetBetterColor(z.Scheme.BackgroundColor,1)end,Name='Container',
-Position=UDim2.new(1,0,0,49),Size=UDim2.new(1,-aw-1,1,-70),Parent=ay})U(
-'UIPadding',{PaddingBottom=UDim.new(0,0),PaddingLeft=UDim.new(0,6),PaddingRight=
-UDim.new(0,6),PaddingTop=UDim.new(0,0),Parent=aK})end local aP={}aP.ChangeTitle=
-function(aQ,aR)assert(typeof(aR)=='string','Expected string for title got: '..
-typeof(aR))aB.Text=aR ar.Title=aR end if ar.BackgroundImage then aP.
-SetBackgroundImage=function(aQ,aR)assert(typeof(aR)=='string',
-'Expected string for Image got: '..typeof(aR))aL.Image=aR ar.BackgroundImage=aR
-end end aP.SetFooter=function(aQ,aR)assert(typeof(aR)=='string',
-'Expected string for footer got: '..typeof(aR))aN.Text=aR ar.Footer=aR end aP.
-SetCornerRadius=function(aQ,aR)assert(typeof(aR)=='number',
-'Expected number for Radius got: '..typeof(aR))aR=math.min(aR,20)for aS,aT in z.
-Corners do if aT.CornerRadius.Offset==z.CornerRadius/2 then aT.CornerRadius=UDim
-.new(0,aR/2)else aT.CornerRadius=UDim.new(0,aR)end end z.CornerRadius=aR ar.
-CornerRadius=aR aI.Position=UDim2.new(1,-aR/4,0,0)aM.Size=UDim2.new(1,0,0,20+aR)
-for aS,aT in z.Tabs do if aT.IsKeyTab then continue end for aU,aV in aT.Tabboxes
-do aV:UpdateCorners()end end end local aQ=function()ax=aP:GetSidebarWidth()==ar.
-SidebarCompactWidth if ar.DisableCompactingSnap then ax=aP:GetSidebarWidth()<=ar
-.CompactWidthActivation end aB.Visible=not ax if not ar.Icon then aC.Visible=ax
-end for aQ,aR in z.TabButtons do if not aR.Icon then continue end aR.Label.
-Visible=not ax aR.Padding.PaddingBottom=UDim.new(0,ax and 6 or 11)aR.Padding.
-PaddingLeft=UDim.new(0,ax and 6 or 12)aR.Padding.PaddingRight=UDim.new(0,ax and
-6 or 12)aR.Padding.PaddingTop=UDim.new(0,ax and 6 or 11)aR.Icon.SizeConstraint=
-ax and Enum.SizeConstraint.RelativeXY or Enum.SizeConstraint.RelativeYY end end
-aP.IsSidebarCompacted=function(aR)return ax end aP.SetCompact=function(aR,aS)aP:
-SetSidebarWidth(aS and ar.SidebarCompactWidth or aO)end aP.GetSidebarWidth=
-function(aR)return aJ.Size.X.Offset end aP.SetSidebarWidth=function(aR,aS)aS=
-math.clamp(aS,48,ay.Size.X.Offset-ar.MinContainerWidth-1)az.Position=UDim2.
-fromOffset(aS,0)aA.Size=UDim2.new(0,aS,1,0)aD.Size=UDim2.new(1,-aS-57-1,1,-16)aJ
-.Size=UDim2.new(0,aS,1,-70)aK.Size=UDim2.new(1,-aS-1,1,-70)if ar.
-EnableCompacting then aQ()end if not ax then aO=aS end end aP.ShowTabInfo=
-function(aR,aS,aT)aG.Text=aS aH.Text=aT if av then aE.Size=UDim2.fromScale(0.5,1
-)end aF.Visible=true end aP.HideTabInfo=function(aR)aF.Visible=false if av then
-aE.Size=UDim2.fromScale(1,1)end end aP.AddTab=function(aR,...)local aS,aT,aU if
-select('#',...)==1 and typeof(...)=='table'then local aV=select(1,...)aS=aV.Name
-or'Tab'aT=aV.Icon aU=aV.Description else aS=select(1,...)aT=select(2,...)aU=
-select(3,...)end local aV,aW,aX,aY,aZ,a_ aT=z:GetCustomIcon(aT)do aV=U(
-'TextButton',{BackgroundColor3='MainColor',BackgroundTransparency=1,Size=UDim2.
-new(1,0,0,40),Text='',Parent=aJ})local a0=U('UIPadding',{PaddingBottom=UDim.new(
-0,ax and 6 or 11),PaddingLeft=UDim.new(0,ax and 6 or 12),PaddingRight=UDim.new(0
-,ax and 6 or 12),PaddingTop=UDim.new(0,ax and 6 or 11),Parent=aV})aW=U(
-'TextLabel',{BackgroundTransparency=1,Position=UDim2.fromOffset(30,0),Size=UDim2
-.new(1,-30,1,0),Text=aS,TextSize=16,TextTransparency=0.5,TextXAlignment=Enum.
-TextXAlignment.Left,Visible=not ax,Parent=aV})if aT then aX=U('ImageLabel',{
-Image=aT.Url,ImageColor3=aT.Custom and'WhiteColor'or'AccentColor',
-ImageRectOffset=aT.ImageRectOffset,ImageRectSize=aT.ImageRectSize,
-ImageTransparency=0.5,ScaleType=Enum.ScaleType.Fit,Size=UDim2.fromScale(1,1),
-SizeConstraint=ax and Enum.SizeConstraint.RelativeXY or Enum.SizeConstraint.
-RelativeYY,Parent=aV})end table.insert(z.TabButtons,{Label=aW,Padding=a0,Icon=aX
-})aY=U('Frame',{BackgroundTransparency=1,Size=UDim2.fromScale(1,1),Visible=false
-,Parent=aK})aZ=U('ScrollingFrame',{AutomaticCanvasSize=Enum.AutomaticSize.Y,
-BackgroundTransparency=1,CanvasSize=UDim2.fromScale(0,0),
-ScrollBarImageTransparency=1,ScrollBarThickness=0,Size=UDim2.new(0.5,-3,1,0),
-Parent=aY})U('UIListLayout',{Padding=UDim.new(0,2),Parent=aZ})U('UIPadding',{
-PaddingBottom=UDim.new(0,2),PaddingLeft=UDim.new(0,2),PaddingRight=UDim.new(0,2)
-,PaddingTop=UDim.new(0,2),Parent=aZ})do U('Frame',{BackgroundTransparency=1,
-LayoutOrder=-1,Parent=aZ})U('Frame',{BackgroundTransparency=1,LayoutOrder=1,
-Parent=aZ})end a_=U('ScrollingFrame',{AnchorPoint=Vector2.new(1,0),
-AutomaticCanvasSize=Enum.AutomaticSize.Y,BackgroundTransparency=1,CanvasSize=
-UDim2.fromScale(0,0),Position=UDim2.fromScale(1,0),ScrollBarImageTransparency=1,
-ScrollBarThickness=0,Size=UDim2.new(0.5,-3,1,0),Parent=aY})U('UIListLayout',{
-Padding=UDim.new(0,2),Parent=a_})U('UIPadding',{PaddingBottom=UDim.new(0,2),
-PaddingLeft=UDim.new(0,2),PaddingRight=UDim.new(0,2),PaddingTop=UDim.new(0,2),
-Parent=a_})do U('Frame',{BackgroundTransparency=1,LayoutOrder=-1,Parent=a_})U(
-'Frame',{BackgroundTransparency=1,LayoutOrder=1,Parent=a_})end end local a0,a1,
-a2,a3,a4,a5,a6,a7=(U('Frame',{AutomaticSize=Enum.AutomaticSize.Y,
-BackgroundTransparency=1,Position=UDim2.fromOffset(0,7),Size=UDim2.fromScale(1,0
-),Visible=false,Parent=aY}))do a1=U('Frame',{BackgroundColor3='BackgroundColor',
-Position=UDim2.fromOffset(2,0),Size=UDim2.new(1,-5,0,0),Parent=a0})table.insert(
-z.Corners,U('UICorner',{CornerRadius=UDim.new(0,ar.CornerRadius),Parent=a1}))a2,
-a3=z:AddOutline(a1)a4=U('ScrollingFrame',{BackgroundTransparency=1,
-BorderSizePixel=0,Size=UDim2.fromScale(1,1),CanvasSize=UDim2.new(0,0,0,0),
-ScrollBarThickness=3,ScrollingDirection=Enum.ScrollingDirection.Y,Parent=a1})U(
-'UIPadding',{PaddingBottom=UDim.new(0,4),PaddingLeft=UDim.new(0,6),PaddingRight=
-UDim.new(0,6),PaddingTop=UDim.new(0,4),Parent=a4})a5=U('TextLabel',{
-BackgroundTransparency=1,Size=UDim2.new(1,-4,0,14),Text='',TextColor3=Color3.
-fromRGB(255,50,50),TextSize=14,TextXAlignment=Enum.TextXAlignment.Left,Parent=a4
-})a6=U('UIStroke',{ApplyStrokeMode=Enum.ApplyStrokeMode.Contextual,Color=Color3.
-fromRGB(169,0,0),LineJoinMode=Enum.LineJoinMode.Miter,Parent=a5})a7=U(
-'TextLabel',{BackgroundTransparency=1,Position=UDim2.fromOffset(0,16),Size=UDim2
-.new(1,-4,0,0),Text='',TextSize=14,TextWrapped=true,Parent=a4,TextXAlignment=
-Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top})U('UIStroke',{
-ApplyStrokeMode=Enum.ApplyStrokeMode.Contextual,Color='DarkColor',LineJoinMode=
-Enum.LineJoinMode.Miter,Parent=a7})end local a8={Groupboxes={},Tabboxes={},
-DependencyGroupboxes={},Description=aU,Sides={aZ,a_},WarningBox={IsNormal=false,
-LockSize=false,Visible=false,Title='WARNING',Text=''}}a8.UpdateWarningBox=
-function(a9,ba)if typeof(ba.IsNormal)=='boolean'then a8.WarningBox.IsNormal=ba.
-IsNormal end if typeof(ba.LockSize)=='boolean'then a8.WarningBox.LockSize=ba.
-LockSize end if typeof(ba.Visible)=='boolean'then a8.WarningBox.Visible=ba.
-Visible end if typeof(ba.Title)=='string'then a8.WarningBox.Title=ba.Title end
-if typeof(ba.Text)=='string'then a8.WarningBox.Text=ba.Text end a0.Visible=a8.
-WarningBox.Visible a5.Text=a8.WarningBox.Title a7.Text=a8.WarningBox.Text a8:
-Resize(true)a1.BackgroundColor3=a8.WarningBox.IsNormal==true and z.Scheme.
-BackgroundColor or Color3.fromRGB(127,0,0)a3.Color=a8.WarningBox.IsNormal==true
-and z.Scheme.DarkColor or Color3.fromRGB(85,0,0)a2.Color=a8.WarningBox.IsNormal
-==true and z.Scheme.OutlineColor or Color3.fromRGB(255,50,50)a5.TextColor3=a8.
-WarningBox.IsNormal==true and z.Scheme.FontColor or Color3.fromRGB(255,50,50)a6.
-Color=a8.WarningBox.IsNormal==true and z.Scheme.OutlineColor or Color3.fromRGB(
-169,0,0)if not z.Registry[a1]then z:AddToRegistry(a1,{})end if not z.Registry[a3
-]then z:AddToRegistry(a3,{})end if not z.Registry[a2]then z:AddToRegistry(a2,{})
-end if not z.Registry[a5]then z:AddToRegistry(a5,{})end if not z.Registry[a6]
-then z:AddToRegistry(a6,{})end z.Registry[a1].BackgroundColor3=function()return
-a8.WarningBox.IsNormal==true and z.Scheme.BackgroundColor or Color3.fromRGB(127,
-0,0)end z.Registry[a3].Color=function()return a8.WarningBox.IsNormal==true and z
-.Scheme.DarkColor or Color3.fromRGB(85,0,0)end z.Registry[a2].Color=function()
-return a8.WarningBox.IsNormal==true and z.Scheme.OutlineColor or Color3.fromRGB(
-255,50,50)end z.Registry[a5].TextColor3=function()return a8.WarningBox.IsNormal
-==true and z.Scheme.FontColor or Color3.fromRGB(255,50,50)end z.Registry[a6].
-Color=function()return a8.WarningBox.IsNormal==true and z.Scheme.OutlineColor or
-Color3.fromRGB(169,0,0)end end a8.RefreshSides=function(a9)local ba=a0.Visible
-and a1.Size.Y.Offset+8 or 0 for bb,bc in a8.Sides do bc.Position=UDim2.new(bc.
-Position.X.Scale,0,0,ba)bc.Size=UDim2.new(0.5,-3,1,-ba)end end a8.Resize=
-function(a9,ba)if ba then local bb,bc,bd=math.floor(aY.AbsoluteSize.Y/3.25),z:
-GetTextBounds(a7.Text,z.Scheme.Font,a7.TextSize,a7.AbsoluteSize.X)local be=24+bd
-if a8.WarningBox.LockSize==true and be>=bb then a4.CanvasSize=UDim2.fromOffset(0
-,be)be=bb else a4.CanvasSize=UDim2.fromOffset(0,0)end a7.Size=UDim2.new(1,-4,0,
-bd)a1.Size=UDim2.new(1,-5,0,be+4)end a8:RefreshSides()end a8.AddGroupbox=
-function(a9,ba)local bb=U('Frame',{AutomaticSize=Enum.AutomaticSize.Y,
-BackgroundTransparency=1,Size=UDim2.fromScale(1,0),Parent=ba.Side==1 and aZ or
-a_})U('UIListLayout',{Padding=UDim.new(0,6),Parent=bb})U('UIPadding',{
-PaddingBottom=UDim.new(0,4),PaddingTop=UDim.new(0,4),Parent=bb})local bc,bd,be,
-bf do bc=U('Frame',{BackgroundColor3='BackgroundColor',Size=UDim2.fromScale(1,0)
-,Parent=bb})table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,ar.
-CornerRadius),Parent=bc}))z:AddOutline(bc)z:MakeLine(bc,{Position=UDim2.
-fromOffset(0,34),Size=UDim2.new(1,0,0,1)})local bg=z:GetCustomIcon(ba.IconName)
-if bg then U('ImageLabel',{Image=bg.Url,ImageColor3=bg.Custom and'WhiteColor'or
-'AccentColor',ImageRectOffset=bg.ImageRectOffset,ImageRectSize=bg.ImageRectSize,
-Position=UDim2.fromOffset(6,6),Size=UDim2.fromOffset(22,22),Parent=bc})end bd=U(
-'TextLabel',{BackgroundTransparency=1,Position=UDim2.fromOffset(bg and 24 or 0,0
-),Size=UDim2.new(1,0,0,34),Text=ba.Name,TextSize=15,TextXAlignment=Enum.
-TextXAlignment.Left,Parent=bc})U('UIPadding',{PaddingLeft=UDim.new(0,12),
-PaddingRight=UDim.new(0,12),Parent=bd})be=U('Frame',{BackgroundTransparency=1,
-Position=UDim2.fromOffset(0,35),Size=UDim2.new(1,0,1,-35),Parent=bc})bf=U(
-'UIListLayout',{Padding=UDim.new(0,8),Parent=be})U('UIPadding',{PaddingBottom=
-UDim.new(0,7),PaddingLeft=UDim.new(0,7),PaddingRight=UDim.new(0,7),PaddingTop=
-UDim.new(0,7),Parent=be})end local bg={BoxHolder=bb,Holder=bc,Container=be,Tab=
-a8,DependencyBoxes={},Elements={}}bg.Resize=function(bh)bc.Size=UDim2.new(1,0,0,
-(bf.AbsoluteContentSize.Y/z.DPIScale)+49)end setmetatable(bg,ap)bg:Resize()a8.
-Groupboxes[ba.Name]=bg return bg end a8.AddLeftGroupbox=function(a9,ba,bb)return
-a8:AddGroupbox{Side=1,Name=ba,IconName=bb}end a8.AddRightGroupbox=function(a9,ba
-,bb)return a8:AddGroupbox{Side=2,Name=ba,IconName=bb}end a8.AddTabbox=function(
-a9,ba)local bb=U('Frame',{AutomaticSize=Enum.AutomaticSize.Y,
-BackgroundTransparency=1,Size=UDim2.fromScale(1,0),Parent=ba.Side==1 and aZ or
-a_})U('UIListLayout',{Padding=UDim.new(0,6),Parent=bb})U('UIPadding',{
-PaddingBottom=UDim.new(0,4),PaddingTop=UDim.new(0,4),Parent=bb})local bc,bd do
-bc=U('Frame',{BackgroundColor3='BackgroundColor',Size=UDim2.fromScale(1,0),
-Parent=bb})table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,ar.
-CornerRadius),Parent=bc}))z:AddOutline(bc)bd=U('Frame',{BackgroundTransparency=1
-,Size=UDim2.new(1,0,0,34),Parent=bc})U('UIListLayout',{FillDirection=Enum.
-FillDirection.Horizontal,HorizontalFlex=Enum.UIFlexAlignment.Fill,Parent=bd})end
-local be,bf,bg=0,1,{ActiveTab=nil,BoxHolder=bb,Holder=bc,Tabs={}}bg.
-UpdateCorners=function(bh)for bi,bj in bg.Tabs do bj:UpdateCorners()end end bg.
-AddTab=function(bh,bi,bj)local bk=bf be=be+1 bf=bf+1 local bl,bm=z:
-GetCustomIcon(bj),U('TextButton',{BackgroundColor3='MainColor',
-BackgroundTransparency=0,Size=UDim2.fromOffset(0,34),Text='',Parent=bd})table.
-insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,ar.CornerRadius),Parent=
-bm}))local bn,bo,bp,bq=U('Frame',{Name='BottomCover',BackgroundColor3=
-'MainColor',BorderSizePixel=0,Position=UDim2.new(0,0,1,-ar.CornerRadius),Size=
-UDim2.new(1,0,0,ar.CornerRadius),Parent=bm}),U('Frame',{Name='LeftCover',
-BackgroundColor3='MainColor',BorderSizePixel=0,Position=UDim2.new(0,0,0,0),Size=
-UDim2.new(0,ar.CornerRadius,1,0),Visible=false,Parent=bm}),U('Frame',{Name=
-'RightCover',AnchorPoint=Vector2.new(1,0),BackgroundColor3='MainColor',
-BorderSizePixel=0,Position=UDim2.new(1,0,0,0),Size=UDim2.new(0,ar.CornerRadius,1
-,0),Visible=false,Parent=bm}),U('Frame',{AnchorPoint=Vector2.new(0.5,0.5),
-AutomaticSize=Enum.AutomaticSize.X,BackgroundTransparency=1,Position=UDim2.
-fromScale(0.5,0.5),Size=UDim2.fromOffset(0,16),Parent=bm})U('UIListLayout',{
-FillDirection=Enum.FillDirection.Horizontal,HorizontalAlignment=Enum.
-HorizontalAlignment.Center,VerticalAlignment=Enum.VerticalAlignment.Center,
-Padding=UDim.new(0,8),Parent=bq})local br if bl then br=U('ImageLabel',{Image=bl
-.Url,ImageColor3=bl.Custom and'WhiteColor'or'AccentColor',ImageRectOffset=bl.
-ImageRectOffset,ImageRectSize=bl.ImageRectSize,ImageTransparency=0.5,Size=UDim2.
-fromOffset(16,16),Parent=bq})end local bs,bt,bu=U('TextLabel',{AutomaticSize=
-Enum.AutomaticSize.X,BackgroundTransparency=1,Size=UDim2.fromOffset(0,16),Text=
-bi,TextSize=15,TextTransparency=0.5,Parent=bq}),z:MakeLine(bm,{AnchorPoint=
-Vector2.new(0,1),Position=UDim2.new(0,0,1,1),Size=UDim2.new(1,0,0,1)}),U('Frame'
-,{BackgroundTransparency=1,Position=UDim2.fromOffset(0,35),Size=UDim2.new(1,0,1,
--35),Visible=false,Parent=bc})local bv=U('UIListLayout',{Padding=UDim.new(0,8),
-Parent=bu})U('UIPadding',{PaddingBottom=UDim.new(0,7),PaddingLeft=UDim.new(0,7),
-PaddingRight=UDim.new(0,7),PaddingTop=UDim.new(0,7),Parent=bu})local bw={
-ButtonHolder=bm,Container=bu,ButtonCovers={BottomCover=bn,LeftCover=bo,
-RightCover=bp},Tab=a8,Elements={},DependencyBoxes={}}bw.Show=function(bx)if bg.
-ActiveTab then bg.ActiveTab:Hide()end bm.BackgroundTransparency=1 bn.
-BackgroundTransparency=1 bo.BackgroundTransparency=1 bp.BackgroundTransparency=1
-bs.TextTransparency=0 if br then br.ImageTransparency=0 end bt.Visible=false bu.
-Visible=true bg.ActiveTab=bw bw:Resize()end bw.Hide=function(bx)bm.
-BackgroundTransparency=0 bn.BackgroundTransparency=0 bo.BackgroundTransparency=0
-bp.BackgroundTransparency=0 bs.TextTransparency=0.5 if br then br.
-ImageTransparency=0.5 end bt.Visible=true bu.Visible=false bg.ActiveTab=nil end
-bw.Resize=function(bx)if bg.ActiveTab~=bw then return end bc.Size=UDim2.new(1,0,
-0,(bv.AbsoluteContentSize.Y/z.DPIScale)+49)end bw.UpdateCorners=function(bx)bo.
-Visible=bk~=1 bp.Visible=bk~=be bn.Position=UDim2.new(0,0,1,-ar.CornerRadius)bn.
-Size=UDim2.new(1,0,0,ar.CornerRadius)bo.Size=UDim2.new(0,ar.CornerRadius,1,0)bp.
-Size=UDim2.new(0,ar.CornerRadius,1,0)end if not bg.ActiveTab then bw:Show()end
-bm.MouseButton1Click:Connect(bw.Show)setmetatable(bw,ap)bg.Tabs[bi]=bw bg:
-UpdateCorners()return bw end if ba.Name then a8.Tabboxes[ba.Name]=bg else table.
-insert(a8.Tabboxes,bg)end return bg end a8.AddLeftTabbox=function(a9,ba)return
-a8:AddTabbox{Side=1,Name=ba}end a8.AddRightTabbox=function(a9,ba)return a8:
-AddTabbox{Side=2,Name=ba}end a8.Hover=function(a9,ba)if z.ActiveTab==a8 then
-return end k:Create(aW,z.TweenInfo,{TextTransparency=ba and 0.25 or 0.5}):Play()
-if aX then k:Create(aX,z.TweenInfo,{ImageTransparency=ba and 0.25 or 0.5}):Play(
-)end end a8.Show=function(a9)if z.ActiveTab then z.ActiveTab:Hide()end k:Create(
-aV,z.TweenInfo,{BackgroundTransparency=0}):Play()k:Create(aW,z.TweenInfo,{
-TextTransparency=0}):Play()if aX then k:Create(aX,z.TweenInfo,{ImageTransparency
-=0}):Play()end if aU then aP:ShowTabInfo(aS,aU)end aY.Visible=true a8:
-RefreshSides()z.ActiveTab=a8 if z.Searching then z:UpdateSearch(z.SearchText)end
-end a8.Hide=function(a9)k:Create(aV,z.TweenInfo,{BackgroundTransparency=1}):
-Play()k:Create(aW,z.TweenInfo,{TextTransparency=0.5}):Play()if aX then k:Create(
-aX,z.TweenInfo,{ImageTransparency=0.5}):Play()end aY.Visible=false aP:
-HideTabInfo()z.ActiveTab=nil end a8.SetVisible=function(a9,ba)aV.Visible=ba if
-not ba and z.ActiveTab==a8 then a8:Hide()end end if not z.ActiveTab then a8:
-Show()end aV.MouseEnter:Connect(function()a8:Hover(true)end)aV.MouseLeave:
-Connect(function()a8:Hover(false)end)aV.MouseButton1Click:Connect(a8.Show)z.Tabs
-[aS]=a8 return a8 end aP.AddKeyTab=function(aR,...)local aS,aT,aU if select('#',
-...)==1 and typeof(...)=='table'then local aV=select(1,...)aS=aV.Name or'Tab'aT=
-aV.Icon aU=aV.Description else aS=select(1,...)or'Tab'aT=select(2,...)aU=select(
-3,...)end aT=aT or'key'local aV,aW,aX,aY aT=(aT=='key'and{am}or{(z:
-GetCustomIcon(aT))})[1]do aV=U('TextButton',{BackgroundColor3='MainColor',
-BackgroundTransparency=1,Size=UDim2.new(1,0,0,40),Text='',Parent=aJ})local aZ=U(
-'UIPadding',{PaddingBottom=UDim.new(0,ax and 6 or 11),PaddingLeft=UDim.new(0,ax
-and 6 or 12),PaddingRight=UDim.new(0,ax and 6 or 12),PaddingTop=UDim.new(0,ax
-and 6 or 11),Parent=aV})aW=U('TextLabel',{BackgroundTransparency=1,Position=
-UDim2.fromOffset(30,0),Size=UDim2.new(1,-30,1,0),Text=aS,TextSize=16,
-TextTransparency=0.5,TextXAlignment=Enum.TextXAlignment.Left,Visible=not ax,
-Parent=aV})if aT then aX=U('ImageLabel',{Image=aT.Url,ImageColor3=aT.Custom and
-'WhiteColor'or'AccentColor',ImageRectOffset=aT.ImageRectOffset,ImageRectSize=aT.
-ImageRectSize,ImageTransparency=0.5,Size=UDim2.fromScale(1,1),SizeConstraint=ax
-and Enum.SizeConstraint.RelativeXY or Enum.SizeConstraint.RelativeYY,Parent=aV})
-end table.insert(z.TabButtons,{Label=aW,Padding=aZ,Icon=aX})aY=U(
-'ScrollingFrame',{AutomaticCanvasSize=Enum.AutomaticSize.Y,
-BackgroundTransparency=1,CanvasSize=UDim2.fromScale(0,0),ScrollBarThickness=0,
-Size=UDim2.fromScale(1,1),Visible=false,Parent=aK})U('UIListLayout',{
-HorizontalAlignment=Enum.HorizontalAlignment.Center,Padding=UDim.new(0,8),
-VerticalAlignment=Enum.VerticalAlignment.Center,Parent=aY})U('UIPadding',{
-PaddingLeft=UDim.new(0,1),PaddingRight=UDim.new(0,1),Parent=aY})end local aZ={
-Elements={},Description=aU,IsKeyTab=true}aZ.AddKeyBox=function(a_,a0)assert(
-typeof(a0)=='function','Callback must be a function')local a1=U('Frame',{
-BackgroundTransparency=1,Size=UDim2.new(0.75,0,0,21),Parent=aY})local a2=U(
-'TextBox',{BackgroundColor3='MainColor',PlaceholderText='Key',Size=UDim2.new(1,-
-71,1,0),TextSize=14,TextXAlignment=Enum.TextXAlignment.Left,Parent=a1})U(
-'UIPadding',{PaddingLeft=UDim.new(0,8),PaddingRight=UDim.new(0,8),Parent=a2})U(
-'UIStroke',{Color='OutlineColor',Parent=a2})table.insert(z.Corners,U('UICorner',
-{CornerRadius=UDim.new(0,z.CornerRadius/2),Parent=a2}))local a3=U('TextButton',{
-AnchorPoint=Vector2.new(1,0),BackgroundColor3='MainColor',Position=UDim2.
-fromScale(1,0),Size=UDim2.new(0,63,1,0),Text='Execute',TextSize=14,Parent=a1})U(
-'UIStroke',{Color='OutlineColor',Parent=a3})table.insert(z.Corners,U('UICorner',
-{CornerRadius=UDim.new(0,z.CornerRadius/2),Parent=a3}))a3.InputBegan:Connect(
-function(a4)if not I(a4)then return end if not z:MouseIsOverFrame(a3,a4.Position
-)then return end a0(a2.Text)end)end aZ.RefreshSides=function(a_)end aZ.Resize=
-function(a_)end aZ.UpdateCorners=function(a_)end aZ.Hover=function(a_,a0)if z.
-ActiveTab==aZ then return end k:Create(aW,z.TweenInfo,{TextTransparency=a0 and
-0.25 or 0.5}):Play()if aX then k:Create(aX,z.TweenInfo,{ImageTransparency=a0 and
-0.25 or 0.5}):Play()end end aZ.Show=function(a_)if z.ActiveTab then z.ActiveTab:
-Hide()end k:Create(aV,z.TweenInfo,{BackgroundTransparency=0}):Play()k:Create(aW,
-z.TweenInfo,{TextTransparency=0}):Play()if aX then k:Create(aX,z.TweenInfo,{
-ImageTransparency=0}):Play()end aY.Visible=true if aU then aP:ShowTabInfo(aS,aU)
-end aZ:RefreshSides()z.ActiveTab=aZ if z.Searching then z:UpdateSearch(z.
-SearchText)end end aZ.Hide=function(a_)k:Create(aV,z.TweenInfo,{
-BackgroundTransparency=1}):Play()k:Create(aW,z.TweenInfo,{TextTransparency=0.5})
-:Play()if aX then k:Create(aX,z.TweenInfo,{ImageTransparency=0.5}):Play()end aY.
-Visible=false aP:HideTabInfo()z.ActiveTab=nil end aZ.SetVisible=function(a_,a0)
-aV.Visible=a0 if not a0 and z.ActiveTab==aZ then aZ:Hide()end end if not z.
-ActiveTab then aZ:Show()end aV.MouseEnter:Connect(function()aZ:Hover(true)end)aV
-.MouseLeave:Connect(function()aZ:Hover(false)end)aV.MouseButton1Click:Connect(aZ
-.Show)aZ.Container=aY setmetatable(aZ,ap)z.Tabs[aS]=aZ return aZ end aP.
-AddDialog=function(aR,aS,aT)aT=z:Validate(aT,A.Dialog)local aU,aV,aW,aX,aY={}aW=
-U('TextButton',{AutoButtonColor=false,BackgroundColor3='DarkColor',
-BackgroundTransparency=1,Size=UDim2.fromScale(1,1),Text='',Active=false,ZIndex=
-9000,Visible=true,Parent=ay})k:Create(aW,z.TweenInfo,{BackgroundTransparency=0.5
-}):Play()aV=U('TextButton',{AnchorPoint=Vector2.new(0.5,0.5),BackgroundColor3=
-'BackgroundColor',Position=UDim2.fromScale(0.5,0.5),Size=UDim2.fromOffset(300,0)
-,AutomaticSize=Enum.AutomaticSize.Y,Text='',AutoButtonColor=false,ZIndex=9001,
-Parent=aW})table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,ar.
-CornerRadius),Parent=aV}))z:AddOutline(aV)local aZ,a_=U('Frame',{
-BackgroundTransparency=1,Size=UDim2.fromScale(1,0),AutomaticSize=Enum.
-AutomaticSize.Y,ZIndex=9002,Parent=aV}),U('UIScale',{Scale=0.95,Parent=aV})k:
-Create(a_,z.TweenInfo,{Scale=1}):Play()local a0,a1,a2=U('UIPadding',{
-PaddingBottom=UDim.new(0,15),PaddingLeft=UDim.new(0,15),PaddingRight=UDim.new(0,
-15),PaddingTop=UDim.new(0,15),Parent=aZ}),U('UIListLayout',{Padding=UDim.new(0,
-10),SortOrder=Enum.SortOrder.LayoutOrder,Parent=aZ}),U('Frame',{
-BackgroundTransparency=1,Size=UDim2.fromScale(1,0),AutomaticSize=Enum.
-AutomaticSize.Y,LayoutOrder=1,ZIndex=9002,Parent=aZ})U('UIListLayout',{Padding=
-UDim.new(0,6),SortOrder=Enum.SortOrder.LayoutOrder,Parent=a2})U('UIPadding',{
-PaddingBottom=UDim.new(0,5),Parent=a2})local a3=U('Frame',{
-BackgroundTransparency=1,Size=UDim2.new(1,0,0,20),AutomaticSize=Enum.
-AutomaticSize.Y,LayoutOrder=1,ZIndex=9002,Parent=a2})U('UIListLayout',{Padding=
-UDim.new(0,6),FillDirection=Enum.FillDirection.Horizontal,VerticalAlignment=Enum
-.VerticalAlignment.Center,SortOrder=Enum.SortOrder.LayoutOrder,Parent=a3})if aT.
-Icon then local a4=z:GetCustomIcon(aT.Icon)if a4 then local a5=U('ImageLabel',{
-BackgroundTransparency=1,Size=UDim2.fromOffset(16,16),Image=a4.Url,ImageColor3=
-'FontColor',ImageRectOffset=a4.ImageRectOffset,ImageRectSize=a4.ImageRectSize,
-LayoutOrder=1,ZIndex=9002,Parent=a3})if aT.TitleColor then a5.ImageColor3=aT.
-TitleColor end end end local a4=U('TextLabel',{BackgroundTransparency=1,Size=
-UDim2.new(1,0,0,18),AutomaticSize=Enum.AutomaticSize.Y,Text=aT.Title,TextSize=18
-,TextXAlignment=Enum.TextXAlignment.Left,LayoutOrder=2,ZIndex=9002,Parent=a3})if
-aT.TitleColor then a4.TextColor3=aT.TitleColor end local a5=U('TextLabel',{
-BackgroundTransparency=1,Size=UDim2.new(1,0,0,14),AutomaticSize=Enum.
-AutomaticSize.Y,Text=aT.Description,TextSize=14,TextTransparency=aT.
-DescriptionColor and 0 or 0.2,TextXAlignment=Enum.TextXAlignment.Left,
-TextWrapped=true,LayoutOrder=2,ZIndex=9002,Parent=a2})if aT.DescriptionColor
-then a5.TextColor3=aT.DescriptionColor end aX=U('Frame',{BackgroundTransparency=
-1,Size=UDim2.fromScale(1,0),AutomaticSize=Enum.AutomaticSize.Y,LayoutOrder=4,
-ZIndex=9002,Parent=aZ})U('UIListLayout',{Padding=UDim.new(0,8),SortOrder=Enum.
-SortOrder.LayoutOrder,Parent=aX})U('UIPadding',{PaddingBottom=UDim.new(0,5),
-Parent=aX})local a6=U('Frame',{BackgroundColor3='OutlineColor',
-BackgroundTransparency=0,BorderSizePixel=0,Size=UDim2.new(1,0,0,1),LayoutOrder=5
-,ZIndex=9002,Parent=aZ})aY=U('Frame',{BackgroundTransparency=1,Size=UDim2.new(1,
-0,0,0),AutomaticSize=Enum.AutomaticSize.Y,LayoutOrder=6,ZIndex=9002,Parent=aZ})
-U('UIListLayout',{Padding=UDim.new(0,8),FillDirection=Enum.FillDirection.
-Horizontal,HorizontalAlignment=Enum.HorizontalAlignment.Right,Wraps=true,
-SortOrder=Enum.SortOrder.LayoutOrder,Parent=aY})U('UIPadding',{PaddingTop=UDim.
-new(0,5),Parent=aY})local a7={Elements={},Container=aX}a7.Resize=function(a8)
-local a9,ba,bb,bc,bd=ay.AbsoluteSize.X*0.75,400,0,0,false for be,bf in aU do bd=
-true bc=bc+1 bb=bb+bf.Container.Size.X.Offset end local be=ba if bd then local
-bf=bb+((bc-1)*8)+30 be=math.max(ba,math.min(bf,a9))end aV.Size=UDim2.fromOffset(
-be,0)local bf,bg=z:GetTextBounds(a5.Text,z.Scheme.Font,14,be-30)a5.Size=UDim2.
-new(1,0,0,bg)local bh=false for bi,bj in aX:GetChildren()do if not bj:IsA
-'UIListLayout'and not bj:IsA'UIPadding'then bh=true break end end aX.Visible=bh
-aY.Visible=bd a6.Visible=bd end a7.SetTitle=function(a8,a9)a4.Text=a9 a7:Resize(
-)end a7.SetDescription=function(a8,a9)a5.Text=a9 a7:Resize()end a7.Dismiss=
-function(a8)z.ActiveDialog=nil local a9=k:Create(a_,z.TweenInfo,{Scale=0.95})k:
-Create(aW,z.TweenInfo,{BackgroundTransparency=1}):Play()a9:Play()task.delay(z.
-TweenInfo.Time,function()aW:Destroy()end)z.Dialogues[aS]=nil end aW.
-MouseButton1Click:Connect(function()if aT.OutsideClickDismiss then a7:Dismiss()
-end end)a7.RemoveFooterButton=function(a8,a9)if aU[a9]then aU[a9].Container:
-Destroy()aU[a9]=nil end end a7.SetButtonDisabled=function(a8,a9,ba)if aU[a9]and
-type(aU[a9].SetDisabled)=='function'then aU[a9]:SetDisabled(ba)end end a7.
-SetButtonOrder=function(a8,a9,ba)if aU[a9]and aU[a9].Container then aU[a9].
-Container.LayoutOrder=ba end end a7.AddFooterButton=function(a8,a9,ba)a7:
-RemoveFooterButton(a9)local bb,bc,bd,be,bf=ba.WaitTime or 0,U('Frame',{
-BackgroundTransparency=1,Size=UDim2.fromOffset(0,26),LayoutOrder=ba.Order or 0,
-ZIndex=9002,Parent=aY}),'MainColor','OutlineColor',ba.Variant or'Primary'if bf==
-'Primary'then bd='FontColor'be='FontColor'elseif bf=='Secondary'then bd=
-'MainColor'be='OutlineColor'elseif bf=='Destructive'then bd='DestructiveColor'be
-='DestructiveColor'elseif bf=='Ghost'then bd='BackgroundColor'be=
-'BackgroundColor'end local bg=U('TextButton',{BackgroundColor3=bd,BorderColor3=
-be,BackgroundTransparency=bb>0 and 0.5 or 0,Size=UDim2.fromOffset(0,26),Text='',
-AutoButtonColor=false,ZIndex=9002,Parent=bc})z:AddOutline(bg)table.insert(z.
-Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius),Parent=bg}))local
-bh,bi=U('UIPadding',{PaddingLeft=UDim.new(0,15),PaddingRight=UDim.new(0,15),
-Parent=bg}),z.Scheme.FontColor if bf=='Primary'then bi=z.Scheme.BackgroundColor
-elseif bf=='Destructive'then bi=Color3.new(1,1,1)end local bj=U('TextLabel',{
-BackgroundTransparency=1,Size=UDim2.fromScale(1,1),Text=ba.Title or a9,
-TextColor3=bi,TextTransparency=bb>0 and 0.5 or 0,TextSize=14,ZIndex=9002,Parent=
-bg})local bk=z:GetTextBounds(bj.Text,z.Scheme.Font,14,250)bc.Size=UDim2.
-fromOffset(bk+30,26)bg.Size=UDim2.fromOffset(bk+30,26)local bl if bb>0 then bl=
-U('Frame',{BackgroundColor3='AccentColor',BorderSizePixel=0,Position=UDim2.new(0
-,0,1,-2),Size=UDim2.new(0,0,0,2),ZIndex=2,Parent=bg})table.insert(z.Corners,U(
-'UICorner',{CornerRadius=UDim.new(0,z.CornerRadius),Parent=bl}))end local bm=bb
-<=0 local bn,bo={Container=bc,SetDisabled=function(bn,bo)bm=not bo if bo then k:
-Create(bg,z.TweenInfo,{BackgroundTransparency=0.5}):Play()k:Create(bj,z.
-TweenInfo,{TextTransparency=0.5}):Play()else k:Create(bg,z.TweenInfo,{
-BackgroundTransparency=0}):Play()k:Create(bj,z.TweenInfo,{TextTransparency=0}):
-Play()end end},typeof(bd)=='Color3'and bd or z.Scheme[bd]local bp=bf=='Ghost'and
-z.Scheme.MainColor or z:GetBetterColor(bo,10)bg.MouseEnter:Connect(function()if
-not bm then return end k:Create(bg,z.TweenInfo,{BackgroundColor3=bp}):Play()end)
-bg.MouseLeave:Connect(function()if not bm then return end k:Create(bg,z.
-TweenInfo,{BackgroundColor3=bo}):Play()end)bg.MouseButton1Click:Connect(function
-()if not bm then return end if ba.Callback then ba.Callback(a7)end if aT.
-AutoDismiss then a7:Dismiss()end end)if bb>0 then k:Create(bl,TweenInfo.new(bb,
-Enum.EasingStyle.Linear),{Size=UDim2.new(1,0,0,2)}):Play()task.delay(bb,function
-()bn:SetDisabled(false)if bl then k:Create(bl,z.TweenInfo,{
-BackgroundTransparency=1}):Play()end end)end aU[a9]=bn end for a8,a9 in aT.
-FooterButtons do if type(a8)=='number'and a9.Id then a8=a9.Id end a7:
-AddFooterButton(a8,a9)end setmetatable(a7,ap)z.Dialogues[aS]=a7 a7:Resize()z.
-ActiveDialog=a7 return a7 end aP.Toggle=function(aR,aS)if z.ActiveLoading then
-if aS==true then return end if not z.Toggled then return end end if typeof(aS)==
-'boolean'then z.Toggled=aS else z.Toggled=not z.Toggled end ay.Visible=z.Toggled
-if ar.UnlockMouseWhileOpen then Y.Modal=z.Toggled end if z.Toggled and not z.
-IsMobile then local aT,aU=h.MouseIconEnabled,z.ShowCursorBinding pcall(function(
-)f:UnbindFromRenderStep(aU)end)f:BindToRenderStep(aU,Enum.RenderPriority.Last.
-Value,function()h.MouseIconEnabled=not z.ShowCustomCursor Z.Position=UDim2.
-fromOffset(q.X,q.Y)Z.Visible=z.ShowCustomCursor if not(z.Toggled and X and X.
-Parent)then h.MouseIconEnabled=aT Z.Visible=false f:UnbindFromRenderStep(aU)end
-end)elseif not z.Toggled then ah.Visible=false for aT,aU in z.Options do if aU.
-Type=='ColorPicker'then aU.ColorMenu:Close()aU.ContextMenu:Close()elseif aU.Type
-=='Dropdown'or aU.Type=='KeyPicker'then aU.Menu:Close()end end end end z.Toggle=
-function(aR,aS)return aP:Toggle(aS)end if ar.EnableSidebarResize then local aR,
-aS,aT,aU,aV,aW=(ar.MinSidebarWidth+ar.SidebarCompactWidth)*ar.
-SidebarCollapseThreshold,false,(U('TextButton',{AnchorPoint=Vector2.new(0.5,0),
-BackgroundTransparency=1,Position=UDim2.fromScale(0.5,0),Size=UDim2.new(0,8,1,0)
-,Text='',Parent=az}))aT.MouseEnter:Connect(function()k:Create(az,z.TweenInfo,{
-BackgroundColor3=z:GetLighterColor(z.Scheme.OutlineColor)}):Play()end)aT.
-MouseLeave:Connect(function()if aS then return end k:Create(az,z.TweenInfo,{
-BackgroundColor3=z.Scheme.OutlineColor}):Play()end)aT.InputBegan:Connect(
-function(aX)if not I(aX)then return end z.CantDragForced=true aU=aX.Position aV=
-aP:GetSidebarWidth()aS=true aW=aX.Changed:Connect(function()if aX.UserInputState
-~=Enum.UserInputState.End then return end z.CantDragForced=false k:Create(az,z.
-TweenInfo,{BackgroundColor3=z.Scheme.OutlineColor}):Play()aS=false if aW and aW.
-Connected then aW:Disconnect()aW=nil end end)end)z:GiveSignal(h.InputChanged:
-Connect(function(aX)if not z.Toggled or not(X and X.Parent)then aS=false if aW
-and aW.Connected then aW:Disconnect()aW=nil end return end if aS and J(aX)then
-local aY=aX.Position-aU local aZ=aV+aY.X if ar.DisableCompactingSnap then aP:
-SetSidebarWidth(aZ)return end if aZ>aR then aP:SetSidebarWidth(math.max(aZ,ar.
-MinSidebarWidth))else aP:SetSidebarWidth(ar.SidebarCompactWidth)end end end))end
-if ar.EnableCompacting and ar.SidebarCompacted then aP:SetSidebarWidth(ar.
-SidebarCompactWidth)end if ar.AutoShow and not z.ActiveLoading then task.spawn(z
-.Toggle)end if z.IsMobile then local aR,aS=z:AddDraggableButton('Toggle',
-function()z:Toggle()end,true),z:AddDraggableButton('Lock',function(aR)z.
-CantDragForced=not z.CantDragForced aR:SetText(z.CantDragForced and'Unlock'or
-'Lock')end,true)if ar.MobileButtonsSide=='Right'then aR.Button.Position=UDim2.
-new(1,-6,0,6)aR.Button.AnchorPoint=Vector2.new(1,0)aS.Button.Position=UDim2.new(
-1,-6,0,46)aS.Button.AnchorPoint=Vector2.new(1,0)else aS.Button.Position=UDim2.
-fromOffset(6,46)end if ar.ShowMobileButtons==false then aR.Button.Visible=false
-aS.Button.Visible=false end end aE:GetPropertyChangedSignal'Text':Connect(
-function()z:UpdateSearch(aE.Text)end)z:GiveSignal(h.InputBegan:Connect(function(
-aR)if z.Unloaded then return end if h:GetFocusedTextBox()then return end if(
-typeof(z.ToggleKeybind)=='table'and z.ToggleKeybind.Type=='KeyPicker'and aR.
-KeyCode.Name==z.ToggleKeybind.Value)or aR.KeyCode==z.ToggleKeybind then z.
-Toggle()end end))z:GiveSignal(h.WindowFocused:Connect(function()z.
-IsRobloxFocused=true end))z:GiveSignal(h.WindowFocusReleased:Connect(function()z
-.IsRobloxFocused=false end))return aP end z.CreateLoading=function(aq,ar)if z.
-ActiveLoading then warn
-[[Loading GUI already exists, you cannot create multiple Loading GUIs.]]return z
-.ActiveLoading end ar=z:Validate(ar,A.Loading)local as,at={CurrentStep=ar.
-CurrentStep,TotalSteps=ar.TotalSteps,ShowSidebar=ar.ShowSidebar,AutoResizeHeight
-=ar.AutoResizeHeight,IsError=false,Destroyed=false,WindowWidth=ar.WindowWidth,
-WindowHeight=ar.WindowHeight,BaseWindowHeight=ar.WindowHeight,WindowErrorHeight=
-ar.WindowHeight,ContentWidth=ar.ContentWidth,SidebarWidth=ar.SidebarWidth},U(
-'ScreenGui',{Name='ObsidianLoading',DisplayOrder=999,ResetOnSpawn=false})W(at)as
-.ScreenGui=at at.DescendantRemoving:Connect(function(au)z:RemoveFromRegistry(au)
-end)local au=U('TextButton',{Name='Main',AnchorPoint=Vector2.new(0.5,0.5),
-BackgroundColor3=function()return z:GetBetterColor(z.Scheme.BackgroundColor,-1)
-end,Position=UDim2.fromScale(0.5,0.5),Size=UDim2.fromOffset(as.ShowSidebar and(
-as.ContentWidth+as.SidebarWidth)or as.WindowWidth,as.WindowHeight),
-ClipsDescendants=true,Text='',AutoButtonColor=false,Parent=at})z:AddOutline(au)
-table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius),
-Parent=au}))local av=U('UIScale',{Scale=z.IsMobile and 0.8 or 1,Parent=au})table
-.insert(z.Scales,av)z.ScalesOffset[av]=z.IsMobile and 0.2 or 0 local aw,ax=U(
-'Frame',{Name='Content',BackgroundTransparency=1,Position=UDim2.fromOffset(0,0),
-Size=UDim2.new(0,as.ContentWidth,1,0),Parent=au}),U('Frame',{Name='SideBar',
-BackgroundTransparency=1,Position=UDim2.fromOffset(as.ContentWidth,0),Size=UDim2
-.new(0,as.ShowSidebar and as.SidebarWidth or 0,1,0),ClipsDescendants=true,
-Visible=as.ShowSidebar,Parent=au})local ay=U('UICorner',{CornerRadius=UDim.new(0
-,z.CornerRadius),Parent=ax})table.insert(z.Corners,ay)z:AddOutline(ax)local az,
-aA=U('Frame',{BackgroundColor3='OutlineColor',BorderSizePixel=0,Position=UDim2.
-fromOffset(0,0),Size=UDim2.new(0,1,1,0),Visible=as.ShowSidebar,Parent=ax}),U(
-'Frame',{Name='TopBar',BackgroundTransparency=1,Size=UDim2.new(1,0,0,48),ZIndex=
-2,Parent=aw})z:MakeDraggable(au,aA,true,true)local aB=U('Frame',{
-BackgroundTransparency=1,Size=UDim2.new(1,0,1,0),Parent=aA})U('UIListLayout',{
-FillDirection=Enum.FillDirection.Horizontal,HorizontalAlignment=Enum.
-HorizontalAlignment.Left,VerticalAlignment=Enum.VerticalAlignment.Center,Padding
-=UDim.new(0,6),Parent=aB})U('UIPadding',{PaddingLeft=UDim.new(0,12),Parent=aB})
-if ar.Icon then local aC=z:GetCustomIcon(ar.Icon)U('ImageLabel',{Image=aC.Url,
-ImageRectOffset=aC.ImageRectOffset,ImageRectSize=aC.ImageRectSize,Size=ar.
-IconSize,Parent=aB})else U('TextLabel',{BackgroundTransparency=1,Size=ar.
-IconSize,Text=ar.Title:sub(1,1),TextScaled=true,Visible=false,Parent=aB})end
-local aC=z:GetTextBounds(ar.Title,z.Scheme.Font,20,aB.AbsoluteSize.X-(ar.Icon
-and(ar.IconSize.X.Offset+6)or 0)-12)U('TextLabel',{BackgroundTransparency=1,Size
-=UDim2.new(0,aC,1,0),Text=ar.Title,TextSize=20,Parent=aB})z:MakeLine(aw,{
-Position=UDim2.fromOffset(0,48),Size=UDim2.new(1,0,0,1)})local aD=U('Frame',{
-Name='InnerContent',BackgroundTransparency=1,Position=UDim2.fromOffset(0,49),
-Size=UDim2.new(1,0,1,-49),Parent=aw})U('UIListLayout',{FillDirection=Enum.
-FillDirection.Vertical,HorizontalAlignment=Enum.HorizontalAlignment.Center,
-VerticalAlignment=Enum.VerticalAlignment.Center,Padding=UDim.new(0,12),Parent=aD
-})local aE,aF=U('Frame',{Name='IconHolder',BackgroundTransparency=1,Size=UDim2.
-fromOffset(64,64),Parent=aD}),z:GetCustomIcon(ar.LoadingIcon)local aG,aH=(U(
-'ImageLabel',{Name='LoaderIcon',AnchorPoint=Vector2.new(0.5,0.5),
-BackgroundTransparency=1,Position=UDim2.fromScale(0.5,0.5),Size=UDim2.fromScale(
-1,1),Image=aF.Url,ImageRectOffset=aF.ImageRectOffset,ImageRectSize=aF.
-ImageRectSize,ImageColor3=ar.LoadingIconColor or((ar.LoadingIcon==A.Loading.
-LoadingIcon)and'AccentColor'or'WhiteColor'),Parent=aE}))if ar.
-LoadingIconTweenTime>0 then aH=k:Create(aG,TweenInfo.new(ar.LoadingIconTweenTime
-,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,-1),{Rotation=360})aH:Play()
-end local aI,aJ,aK=U('TextLabel',{BackgroundTransparency=1,AutomaticSize=as.
-AutoResizeHeight and Enum.AutomaticSize.Y or Enum.AutomaticSize.XY,Size=as.
-AutoResizeHeight and UDim2.new(1,-60,0,0)or UDim2.fromOffset(0,0),Text='',
-TextSize=18,TextWrapped=as.AutoResizeHeight,Parent=aD}),U('TextLabel',{
-BackgroundTransparency=1,AutomaticSize=as.AutoResizeHeight and Enum.
-AutomaticSize.Y or Enum.AutomaticSize.XY,Size=as.AutoResizeHeight and UDim2.new(
-1,-60,0,0)or UDim2.fromOffset(0,0),Text='',TextSize=14,TextTransparency=0.5,
-TextWrapped=as.AutoResizeHeight,Parent=aD}),U('Frame',{BackgroundColor3=
-'MainColor',Size=UDim2.new(0.7,0,0,15),Parent=aD})z:AddOutline(aK)table.insert(z
-.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.CornerRadius/2),Parent=aK}))
-local aL=U('Frame',{BackgroundColor3='AccentColor',BorderSizePixel=0,Size=UDim2.
-fromScale(0,1),Parent=aK})table.insert(z.Corners,U('UICorner',{CornerRadius=UDim
-.new(0,z.CornerRadius/2),Parent=aL}))local aM=U('TextLabel',{
-BackgroundTransparency=1,Size=UDim2.fromScale(1,1),Text='',TextSize=14,ZIndex=2,
-Parent=aK})U('UIStroke',{ApplyStrokeMode=Enum.ApplyStrokeMode.Contextual,Color=
-'DarkColor',LineJoinMode=Enum.LineJoinMode.Miter,Parent=aM})local aN=U(
-'ScrollingFrame',{BackgroundTransparency=1,BorderSizePixel=0,CanvasSize=UDim2.
-new(0,0,0,0),Size=UDim2.fromScale(1,1),ScrollBarThickness=2,ScrollBarImageColor3
-='OutlineColor',Parent=ax})local aO=U('UIListLayout',{Padding=UDim.new(0,8),
-SortOrder=Enum.SortOrder.LayoutOrder,Parent=aN})U('UIPadding',{PaddingBottom=
-UDim.new(0,12),PaddingLeft=UDim.new(0,12),PaddingRight=UDim.new(0,12),PaddingTop
-=UDim.new(0,12),Parent=aN})local aP={Elements={},DependencyBoxes={},Tabboxes={},
-BoxHolder=aN,Container=aN,Resize=function(aP)aN.CanvasSize=UDim2.fromOffset(0,aO
-.AbsoluteContentSize.Y+24)end,Tab={Elements={},DependencyBoxes={},
-DependencyGroupboxes={},Tabboxes={}}}aO:GetPropertyChangedSignal
-'AbsoluteContentSize':Connect(function()aP:Resize()end)setmetatable(aP,ap)as.
-Sidebar=aP local aQ=U('Frame',{Name='Error',BackgroundTransparency=1,Position=
-UDim2.fromOffset(0,49),Size=UDim2.new(1,0,1,-49),ClipsDescendants=true,Visible=
-false,Parent=aw})local aR,aS,aT,aU=U('TextLabel',{BackgroundTransparency=1,
-Position=UDim2.fromOffset(15,15),Size=UDim2.new(1,-30,0,18),Text='Error',
-TextColor3='RedColor',TextSize=18,TextXAlignment=Enum.TextXAlignment.Left,Parent
-=aQ}),U('TextLabel',{BackgroundTransparency=1,Position=UDim2.fromOffset(15,39),
-Size=UDim2.new(1,-30,1,-90),Text='Error Message',TextSize=14,TextTransparency=
-0.2,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum
-.TextYAlignment.Top,Parent=aQ}),U('Frame',{BackgroundColor3='OutlineColor',
-BackgroundTransparency=0,BorderSizePixel=0,AnchorPoint=Vector2.new(0.5,0),
-Position=UDim2.new(0.5,0,1,-48),Size=UDim2.new(1,-30,0,1),Visible=false,Parent=
-aQ}),U('Frame',{AnchorPoint=Vector2.new(0.5,1),BackgroundTransparency=1,Position
-=UDim2.new(0.5,0,1,0),Size=UDim2.new(1,0,0,42),Visible=false,Parent=aQ})U(
-'UIListLayout',{Padding=UDim.new(0,8),FillDirection=Enum.FillDirection.
-Horizontal,HorizontalAlignment=Enum.HorizontalAlignment.Right,VerticalAlignment=
-Enum.VerticalAlignment.Center,SortOrder=Enum.SortOrder.LayoutOrder,Parent=aU})U(
-'UIPadding',{PaddingTop=UDim.new(0,5),PaddingBottom=UDim.new(0,15),PaddingRight=
-UDim.new(0,15),Parent=aU})as.UpdateLayout=function(aV)if as.IsError then as:
-RecalculateErrorHeight()end local aW=as.ShowSidebar local aX,aY=aW and(as.
-ContentWidth+as.SidebarWidth)or as.WindowWidth,as.IsError and as.
-WindowErrorHeight or as.WindowHeight if aW then ax.Visible=true az.Visible=true
-end k:Create(au,z.TweenInfo,{Size=UDim2.fromOffset(aX,aY)}):Play()k:Create(ax,z.
-TweenInfo,{Position=UDim2.fromOffset(as.ContentWidth,0),Size=UDim2.new(0,aW and
-as.SidebarWidth or 0,1,0)}):Play()k:Create(aw,z.TweenInfo,{Size=UDim2.new(0,aW
-and as.ContentWidth or as.WindowWidth,1,0)}):Play()if not aW then task.delay(z.
-TweenInfo.Time,function()if not as.ShowSidebar then ax.Visible=false az.Visible=
-false end end)end end as.RecalculateLoadingHeight=function(aV)if not as.
-AutoResizeHeight then return end local aW=97+aD.UIListLayout.AbsoluteContentSize
-.Y as.WindowHeight=math.max(as.BaseWindowHeight,aW)end as.SetMessage=function(aV
-,aW)aI.Text=aW if as.AutoResizeHeight then as:RecalculateLoadingHeight()as:
-UpdateLayout()end end as.SetDescription=function(aV,aW)aJ.Text=aW if as.
-AutoResizeHeight then as:RecalculateLoadingHeight()as:UpdateLayout()end end as.
-SetLoadingIcon=function(aV,aW)local aX=z:GetCustomIcon(aW)aG.Image=aX.Url aG.
-ImageRectOffset=aX.ImageRectOffset aG.ImageRectSize=aX.ImageRectSize end as.
-SetLoadingIconTweenTime=function(aV,aW)if aH then aH:Cancel()aH:Destroy()end if
-aW>0 then aH=k:Create(aG,TweenInfo.new(aW,Enum.EasingStyle.Linear,Enum.
-EasingDirection.Out,-1),{Rotation=360})aH:Play()else aG.Rotation=0 end end as.
-SetLoadingIconColor=function(aV,aW)aG.ImageColor3=aW end as.SetCurrentStep=
-function(aV,aW)as.CurrentStep=math.clamp(aW,0,as.TotalSteps)local aX=as.
-CurrentStep/as.TotalSteps k:Create(aL,z.TweenInfo,{Size=UDim2.fromScale(aX,1)}):
-Play()aM.Text=string.format('%d/%d',as.CurrentStep,as.TotalSteps)end as.
-SetTotalSteps=function(aV,aW)as.TotalSteps=aW as:SetCurrentStep(as.CurrentStep)
-end as.SetWindowHeight=function(aV,aW)as.WindowHeight=aW as:UpdateLayout()end as
-.SetWindowWidth=function(aV,aW)as.WindowWidth=aW as:UpdateLayout()end as.
-SetContentWidth=function(aV,aW)as.ContentWidth=aW as:UpdateLayout()end as.
-SetSidebarWidth=function(aV,aW)as.SidebarWidth=aW as:UpdateLayout()end as.
-ShowSidebarPage=function(aV,aW)as.ShowSidebar=aW as:UpdateLayout()end as.
-ShowErrorPage=function(aV,aW)as.IsError=aW aD.Visible=not aW aQ.Visible=aW if as
-.ShowSidebar then as:ShowSidebarPage(not aW)else as:UpdateLayout()end end as.
-RecalculateErrorHeight=function(aV)local aW=(as.ShowSidebar and as.ContentWidth
-or as.WindowWidth)-30 local aX,aY=z:GetTextBounds(aS.Text,z.Scheme.Font,14,aW)aS
-.Size=UDim2.new(1,-30,0,aY)local aZ=aU.Visible local a_=88+aY+15+(aZ and 48 or 0
-)as.WindowErrorHeight=a_ end as.SetErrorMessage=function(aV,aW)aS.Text=aW as:
-UpdateLayout()end as.SetErrorButtons=function(aV,aW)assert(typeof(aW)=='table',
-'Buttons must be a table')for aX,aY in aU:GetChildren()do if aY:IsA'Frame'then
-aY:Destroy()end end local aX=M(aW)>0 aU.Visible=aX aT.Visible=aX for aY,aZ in aW
-do local a_,a0,a1,a2=U('Frame',{BackgroundTransparency=1,Size=UDim2.fromOffset(0
-,26),Parent=aU}),'MainColor','OutlineColor',aZ.Variant or'Primary'if a2==
-'Primary'then a0='FontColor'a1='FontColor'elseif a2=='Secondary'then a0=
-'MainColor'a1='OutlineColor'elseif a2=='Destructive'then a0='DestructiveColor'a1
-='DestructiveColor'elseif a2=='Ghost'then a0='BackgroundColor'a1=
-'BackgroundColor'end local a3=U('TextButton',{BackgroundColor3=a0,BorderColor3=
-a1,Size=UDim2.fromOffset(0,26),Text='',AutoButtonColor=false,Parent=a_})z:
-AddOutline(a3)table.insert(z.Corners,U('UICorner',{CornerRadius=UDim.new(0,z.
-CornerRadius),Parent=a3}))U('UIPadding',{PaddingLeft=UDim.new(0,15),PaddingRight
-=UDim.new(0,15),Parent=a3})local a4=z.Scheme.FontColor if a2=='Primary'then a4=z
-.Scheme.BackgroundColor elseif a2=='Destructive'then a4=Color3.new(1,1,1)end
-local a5=U('TextLabel',{BackgroundTransparency=1,Size=UDim2.fromScale(1,1),Text=
-aZ.Title or aY,TextColor3=a4,TextSize=14,Parent=a3})local a6=z:GetTextBounds(a5.
-Text,z.Scheme.Font,14,250)a_.Size=UDim2.fromOffset(a6+30,26)a3.Size=UDim2.
-fromOffset(a6+30,26)local a7=typeof(a0)=='Color3'and a0 or z.Scheme[a0]local a8=
-a2=='Ghost'and z.Scheme.MainColor or z:GetBetterColor(a7,10)a3.MouseEnter:
-Connect(function()k:Create(a3,z.TweenInfo,{BackgroundColor3=a8}):Play()end)a3.
-MouseLeave:Connect(function()k:Create(a3,z.TweenInfo,{BackgroundColor3=a7}):
-Play()end)a3.MouseButton1Click:Connect(function()if aZ.Callback then aZ.
-Callback(as)end end)end as:UpdateLayout()end as.Destroy=function(aV)if aH then
-aH:Cancel()end at:Destroy()as.Destroyed=true z.ActiveLoading=nil if z.Toggle and
-z.Toggled==false and z.Unloaded~=true then z:Toggle(true)end end as.Continue=as.
-Destroy if z.Toggle and z.Toggled and z.Unloaded~=true then z:Toggle(false)end
-as:SetCurrentStep(as.CurrentStep)z.ActiveLoading=as return as end local aq,ar=
-function()if z.Unloaded then return end local aq,ar=R(),R(true)for as,at in u do
-if at.Type=='Dropdown'and at.SpecialType=='Player'then at:SetValues(at.
-ExcludeLocalPlayer and ar or aq)end end end,function()if z.Unloaded then return
-end local aq=S()for ar,as in u do if as.Type=='Dropdown'and as.SpecialType==
-'Team'then as:SetValues(aq)end end end z:GiveSignal(e.PlayerAdded:Connect(aq))z:
-GiveSignal(e.PlayerRemoving:Connect(aq))z:GiveSignal(j.ChildAdded:Connect(ar))z:
-GiveSignal(j.ChildRemoved:Connect(ar))l().Library=z return z end end)()end,[12]=
-function()a(12)return(function(...)return function(aa)local ab,ac=(cloneref or
-clonereference or function(ab)return ab end),(clonefunction or copyfunction or
-function(ab)return ab end)local ad,ae,af,ag=ab(game:GetService'HttpService'),
-isfolder,isfile,listfiles if typeof(ac)=='function'then local ah,ai,aj=ac(ae),
-ac(af),ac(ag)local ak,al=pcall(function()return ah('test'..tostring(math.random(
-1000000,9999999)))end)if ak==false or typeof(al)~='boolean'then ae=function(am)
-local an,ao=pcall(ah,am)return((an and{ao}or{false})[1])end af=function(am)local
-an,ao=pcall(ai,am)return((an and{ao}or{false})[1])end ag=function(am)local an,ao
-=pcall(aj,am)return((an and{ao}or{{}})[1])end end end local ah={}do ah.Folder=
-'ObsidianLibSettings'ah.SubFolder=''ah.Ignore={}ah.Library=nil ah.
-UseLoadingOrder=false ah.LoadingOrder={}ah.Parser={Toggle={Save=function(ai,aj)
-return{type='Toggle',idx=ai,value=aj.Value}end,Load=function(ai,aj)local ak=ah.
-Library.Toggles[ai]if ak and ak.Value~=aj.value then ak:SetValue(aj.value)end
-end},Slider={Save=function(ai,aj)return{type='Slider',idx=ai,value=tostring(aj.
-Value)}end,Load=function(ai,aj)local ak=ah.Library.Options[ai]if ak and ak.Value
-~=aj.value then ak:SetValue(aj.value)end end},Dropdown={Save=function(ai,aj)
-return{type='Dropdown',idx=ai,value=aj.Value,multi=aj.Multi}end,Load=function(ai
-,aj)local ak=ah.Library.Options[ai]if ak and ak.Value~=aj.value then ak:
-SetValue(aj.value)end end},ColorPicker={Save=function(ai,aj)return{type=
-'ColorPicker',idx=ai,value=aj.Value:ToHex(),transparency=aj.Transparency}end,
-Load=function(ai,aj)if ah.Library.Options[ai]then ah.Library.Options[ai]:
-SetValueRGB(Color3.fromHex(aj.value),aj.transparency)end end},KeyPicker={Save=
-function(ai,aj)return{type='KeyPicker',idx=ai,mode=aj.Mode,key=aj.Value,
-modifiers=aj.Modifiers}end,Load=function(ai,aj)if ah.Library.Options[ai]then ah.
-Library.Options[ai]:SetValue{aj.key,aj.mode,aj.modifiers}end end},Input={Save=
-function(ai,aj)return{type='Input',idx=ai,text=aj.Value}end,Load=function(ai,aj)
-local ak=ah.Library.Options[ai]if ak and ak.Value~=aj.text and type(aj.text)==
-'string'then ah.Library.Options[ai]:SetValue(aj.text)end end}}ah.SetLibrary=
-function(ai,aj)ai.Library=aj end ah.SetLoadingOrder=function(ai,aj,ak)ai.
-UseLoadingOrder=aj if typeof(ak)=='table'then ai.LoadingOrder=ak end end ah.
-IgnoreThemeSettings=function(ai)ai:SetIgnoreIndexes{'BackgroundColor',
-'MainColor','AccentColor','OutlineColor','FontColor','FontFace',
-'ThemeManager_ThemeList','ThemeManager_CustomThemeList',
-'ThemeManager_CustomThemeName'}end ah.CheckSubFolder=function(ai,aj)if typeof(ai
-.SubFolder)~='string'or ai.SubFolder==''then return false end if aj==true then
-if not ae(ai.Folder..'/settings/'..ai.SubFolder)then makefolder(ai.Folder..
-'/settings/'..ai.SubFolder)end end return true end ah.GetPaths=function(ai)local
-aj,ak={},ai.Folder:split'/'for al=1,#ak do local am=table.concat(ak,'/',1,al)if
-not table.find(aj,am)then aj[#aj+1]=am end end aj[#aj+1]=ai.Folder..'/themes'aj[
-#aj+1]=ai.Folder..'/settings'if ai:CheckSubFolder(false)then local al=ai.Folder
-..'/settings/'..ai.SubFolder ak=al:split'/'for am=1,#ak do local an=table.
-concat(ak,'/',1,am)if not table.find(aj,an)then aj[#aj+1]=an end end end return
-aj end ah.BuildFolderTree=function(ai)local aj=ai:GetPaths()for ak=1,#aj do
-local al=aj[ak]if ae(al)then continue end makefolder(al)end end ah.
-CheckFolderTree=function(ai)if ae(ai.Folder)then return end ah:BuildFolderTree()
-task.wait(0.1)end ah.SetIgnoreIndexes=function(ai,aj)for ak,al in pairs(aj)do ai
-.Ignore[al]=true end end ah.SetFolder=function(ai,aj)ai.Folder=aj ai:
-BuildFolderTree()end ah.SetSubFolder=function(ai,aj)ai.SubFolder=aj ai:
-BuildFolderTree()end ah.Save=function(ai,aj)if(not aj)then return false,
-'no config file is selected'end ah:CheckFolderTree()local ak=ai.Folder..
-'/settings/'..aj..'.json'if ah:CheckSubFolder(true)then ak=ai.Folder..
-'/settings/'..ai.SubFolder..'/'..aj..'.json'end local al={objects={}}for am,an
-in pairs(ai.Library.Toggles)do if not an.Type then continue end if not ai.Parser
-[an.Type]then continue end if ai.Ignore[am]then continue end table.insert(al.
-objects,ai.Parser[an.Type].Save(am,an))end for am,an in pairs(ai.Library.Options
-)do if not an.Type then continue end if not ai.Parser[an.Type]then continue end
-if ai.Ignore[am]then continue end table.insert(al.objects,ai.Parser[an.Type].
-Save(am,an))end local am,an=pcall(ad.JSONEncode,ad,al)if not am then return
-false,'failed to encode data'end writefile(ak,an)return true end ah.Load=
-function(ai,aj)if(not aj)then return false,'no config file is selected'end ah:
-CheckFolderTree()local ak=ai.Folder..'/settings/'..aj..'.json'if ah:
-CheckSubFolder(true)then ak=ai.Folder..'/settings/'..ai.SubFolder..'/'..aj..
-'.json'end if not af(ak)then return false,'invalid file'end local al,am=pcall(ad
-.JSONDecode,ad,readfile(ak))if not al then return false,'decode error'end if ai.
-UseLoadingOrder==true and typeof(ai.LoadingOrder)=='table'then table.sort(am.
-objects,function(an,ao)local ap,aq=table.find(ai.LoadingOrder,an.type)or math.
-huge,table.find(ai.LoadingOrder,ao.type)or math.huge return ap<aq end)end for an
-,ao in am.objects do if not ao.type then continue end if not ai.Parser[ao.type]
-then continue end if ai.Ignore[ao.idx]then continue end task.spawn(ai.Parser[ao.
-type].Load,ao.idx,ao)end return true end ah.Delete=function(ai,aj)if(not aj)then
-return false,'no config file is selected'end local ak=ai.Folder..'/settings/'..
-aj..'.json'if ah:CheckSubFolder(true)then ak=ai.Folder..'/settings/'..ai.
-SubFolder..'/'..aj..'.json'end if not af(ak)then return false,'invalid file'end
-local al=pcall(delfile,ak)if not al then return false,'delete file error'end
-return true end ah.RefreshConfigList=function(ai)local aj,ak=pcall(function()ah:
-CheckFolderTree()local aj,ak={},{}if ah:CheckSubFolder(true)then aj=ag(ai.Folder
-..'/settings/'..ai.SubFolder)else aj=ag(ai.Folder..'/settings')end if typeof(aj)
-~='table'then aj={}end for al=1,#aj do local am=aj[al]if am:sub(-5)=='.json'then
-local an=am:find('.json',1,true)local ao,ap=an,am:sub(an,an)while ap~='/'and ap
-~='\\'and ap~=''do an=an-1 ap=am:sub(an,an)end if ap=='/'or ap=='\\'then table.
-insert(ak,am:sub(an+1,ao-1))end end end return ak end)if(not aj)then if ai.
-Library then ai.Library:Notify('Failed to load config list: '..tostring(ak))else
-warn('Failed to load config list: '..tostring(ak))end return{}end return ak end
-ah.GetAutoloadConfig=function(ai)ah:CheckFolderTree()local aj=ai.Folder..
-'/settings/autoload.txt'if ah:CheckSubFolder(true)then aj=ai.Folder..
-'/settings/'..ai.SubFolder..'/autoload.txt'end if af(aj)then local ak,al=pcall(
-readfile,aj)if not ak then return'none'end al=tostring(al)return al==''and'none'
-or al end return'none'end ah.LoadAutoloadConfig=function(ai)ah:CheckFolderTree()
-local aj=ai.Folder..'/settings/autoload.txt'if ah:CheckSubFolder(true)then aj=ai
-.Folder..'/settings/'..ai.SubFolder..'/autoload.txt'end if af(aj)then local ak,
-al=pcall(readfile,aj)if not ak then ai.Library:Notify
-'Failed to load autoload config: write file error'return end local am,an=ai:
-Load(al)if not am then ai.Library:Notify('Failed to load autoload config: '..an)
-return end ai.Library:Notify(string.format('Auto loaded config %q',al))end end
-ah.SaveAutoloadConfig=function(ai,aj)ah:CheckFolderTree()local ak=ai.Folder..
-'/settings/autoload.txt'if ah:CheckSubFolder(true)then ak=ai.Folder..
-'/settings/'..ai.SubFolder..'/autoload.txt'end local al=pcall(writefile,ak,aj)if
-not al then return false,'write file error'end return true,''end ah.
-DeleteAutoLoadConfig=function(ai)ah:CheckFolderTree()local aj=ai.Folder..
-'/settings/autoload.txt'if ah:CheckSubFolder(true)then aj=ai.Folder..
-'/settings/'..ai.SubFolder..'/autoload.txt'end local ak=pcall(delfile,aj)if not
-ak then return false,'delete file error'end return true,''end ah.
-BuildConfigSection=function(ai,aj)assert(ai.Library,
-'Must set SaveManager.Library')local ak=aj:AddRightGroupbox('Configuration',
-'folder-cog')ak:AddInput('SaveManager_ConfigName',{Text='Config name'})ak:
-AddButton{Text='Create config',Tooltip=
-'creates a new config file with the name entered above',Func=function()local al=
-ai.Library.Options.SaveManager_ConfigName.Value if al:gsub(' ','')==''then ai.
-Library:Notify('Invalid config name (empty)',2)return end local am,an=ai:Save(al
-)if not am then ai.Library:Notify('Failed to create config: '..an)return end ai.
-Library:Notify(string.format('Created config %q',al))ai.Library.Options.
-SaveManager_ConfigList:SetValues(ai:RefreshConfigList())ai.Library.Options.
-SaveManager_ConfigList:SetValue(nil)end}ak:AddDivider{Text='config options'}ak:
-AddDropdown('SaveManager_ConfigList',{Text='Config list',Values=ai:
-RefreshConfigList(),AllowNull=true})ak:AddButton{Text='Load config',Tooltip=
-'loads the selected config from the list',Func=function()local al=ai.Library.
-Options.SaveManager_ConfigList.Value local am,an=ai:Load(al)if not am then ai.
-Library:Notify('Failed to load config: '..an)return end ai.Library:Notify(string
-.format('Loaded config %q',al))end}ak:AddButton{Text='Overwrite config',Tooltip=
-'overwrites the selected config with current settings',Func=function()local al=
-ai.Library.Options.SaveManager_ConfigList.Value local am,an=ai:Save(al)if not am
-then ai.Library:Notify('Failed to overwrite config: '..an)return end ai.Library:
-Notify(string.format('Overwrote config %q',al))end}ak:AddButton{Text=
-'Delete config',Tooltip='permanently deletes the selected config file',Risky=
-true,DoubleClick=true,Func=function()local al=ai.Library.Options.
-SaveManager_ConfigList.Value local am,an=ai:Delete(al)if not am then ai.Library:
-Notify('Failed to delete config: '..an)return end ai.Library:Notify(string.
-format('Deleted config %q',al))ai.Library.Options.SaveManager_ConfigList:
-SetValues(ai:RefreshConfigList())ai.Library.Options.SaveManager_ConfigList:
-SetValue(nil)end}ak:AddButton{Text='Refresh list',Tooltip=
-'refreshes the config list from disk',Func=function()ai.Library.Options.
-SaveManager_ConfigList:SetValues(ai:RefreshConfigList())ai.Library.Options.
-SaveManager_ConfigList:SetValue(nil)end}ak:AddButton{Text='Set as autoload',
-Tooltip=[[sets the selected config to automatically load on next launch]],Func=
-function()local al=ai.Library.Options.SaveManager_ConfigList.Value local am,an=
-ai:SaveAutoloadConfig(al)if not am then ai.Library:Notify(
-'Failed to set autoload config: '..an)return end ai.Library:Notify(string.
-format('Set %q to auto load',al))ai.AutoloadConfigLabel:SetText(
-'Current autoload config: '..al)end}ak:AddButton{Text='Reset autoload',Tooltip=
-'clears the autoload config so nothing loads automatically',Func=function()local
-al,am=ai:DeleteAutoLoadConfig()if not al then ai.Library:Notify(
-'Failed to set autoload config: '..am)return end ai.Library:Notify
-'Set autoload to none'ai.AutoloadConfigLabel:SetText
-'Current autoload config: none'end}ai.AutoloadConfigLabel=ak:AddLabel(
-'Current autoload config: '..ai:GetAutoloadConfig(),true)ai:SetIgnoreIndexes{
-'SaveManager_ConfigList','SaveManager_ConfigName'}end ah:BuildFolderTree()end
-return ah end end)()end,[13]=function()local aa,ab,ac=a(13)return(function(...)
-return function(ad)return{Home=ac(ab.Home)(ad),Settings=ac(ab.Settings)(ad)}end
-end)()end,[14]=function()a(14)return(function(...)return function(aa)local ab,ac
-=aa.Services,getgenv()local ad,ae,af,ag=ab.Players,ab.RunService,ab.
-TeleportService,aa:Get'Constants'local ah,ai,aj,ak,al,am,an,ao,ap,aq,ar=ag.
-Characters,aa:Get'Modules/Places',aa:Get'Modules/Color',aa:Get
-'Modules/TaskManager',aa:Get'Modules/Preference',aa:Get'Functions/Time',aa:Get
-'Functions/Numbers',aa:Get'Functions/Strings',aa:Get'Functions/GetPing',aa:Get
-'Functions/PromptDiscord',ad.LocalPlayer local as,at,au,av,aw,ax=am.now(),Color3
-.fromRGB(255,170,255),Color3.fromRGB(0,170,255),ac.script_key or'abcdef',al.new(
-),function()local as=os.date'*t'.hour if as>=0 and as<6 then return'Night'elseif
-as>=6 and as<12 then return'Morning'elseif as>=12 and as<16 then return
-'Afternoon'elseif as>=16 and as<20 then return'Evening'end return'Night'end
-return function(ay,az)local aA,aB,aC,aD=aa:Get'Modules/Interface'.GetInterface
-'Obsidian',ai.GetPlaceFromId(game.PlaceId),ag.LRM_Constants,ay:AddGroupbox{Side=
-1,Name='Account',IconName='circle-user'}local aE=aD:AddImage('UserImage',{Image=
-'http://www.roblox.com/asset/?id=131927632408540',Height=200,Outline=true,
-ScaleType=Enum.ScaleType.Stretch,BackgroundTransparency=1})task.spawn(function()
-local aF,aG=pcall(ad.GetUserThumbnailAsync,ad,ar.UserId,Enum.ThumbnailType.
-HeadShot,Enum.ThumbnailSize.Size352x352)if aF then aE:SetImage(aG)end end)aD:
-AddLabel{Text=string.format('Good %s, <b>%s</b>!',tostring(ax()),tostring(ar.
-DisplayName)),DoesWrap=true}aD:AddLabel{Text=string.format(
-'Welcome to <b>%s</b>!',tostring(aj.Paint('strelizia.cc',at))),DoesWrap=true}aD:
-AddDivider{Text='account info'}aD:AddLabel{Text=string.format(
-'%s User Id: <b>%s</b>',tostring(ah.BulletPoint),tostring(ar.UserId))}aD:
-AddLabel{Text=string.format('%s Account Age: <b>%s Days</b>',tostring(ah.
-BulletPoint),tostring(ar.AccountAge))}local aF=aD:AddLabel{Text=string.format(
-'%s Friends Online: <b>?</b>',tostring(ah.BulletPoint))}task.spawn(function()
-local aG,aH=pcall(ar.GetFriendsOnlineAsync,ar)if aG then aF:SetText(string.
-format('%s Friends Online: <b>%s</b>',tostring(ah.BulletPoint),tostring(an.
-Comma(#aH))))end end)local aG=ay:AddGroupbox{Side=1,Name='Session',IconName=
-'server'}local aH,aI,aJ,aK=aG:AddLabel{Text=string.format(
-'%s Session Time: <b>00:00:00</b>',tostring(ah.BulletPoint)),DoesWrap=true},aG:
-AddLabel{Text=string.format('%s FPS: <b>?</b>',tostring(ah.BulletPoint)),
-DoesWrap=true},(aG:AddLabel{Text=string.format('%s Ping: <b>? ms</b>',tostring(
-ah.BulletPoint)),DoesWrap=true})do local aL,aM=0,am.now()ak.AddTask(ak.Task.new(
-'FrameCounter',function(aN)aL=aL+1 local aO=am.now()if aO>=aM then aK=aL aL=0 aM
-=aO+1 end end,0))end ak.AddTask(ak.Task.new('SessionGroupboxUpdater',function(aL
-)aH:SetText(string.format('%s Session Time: <b>%s</b>',tostring(ah.BulletPoint),
-tostring(am.FormatDuration(am.now()-as,'%h:%m:%s',true))))aI:SetText(string.
-format('%s FPS: <b>%s</b>',tostring(ah.BulletPoint),tostring(aK or'N/A')))aJ:
-SetText(string.format('%s Ping: <b>%s ms</b>',tostring(ah.BulletPoint),tostring(
-math.floor(ap()*1000))))end,1))aG:AddDivider{Text='server info'}local aL=aG:
-AddLabel{Text=string.format('%s Players Online: ? out of ?',tostring(ah.
-BulletPoint)),DoesWrap=true}do local aM=function()aL:SetText(string.format(
-'%s Players Online: <b>%s</b> out of <b>%s</b>',tostring(ah.BulletPoint),
-tostring(#ad:GetPlayers()),tostring(ad.MaxPlayers)))end local aN,aO=ad.
-PlayerAdded:Connect(aM),ad.PlayerRemoving:Connect(aM)aA.Main:OnUnload(function()
-aN:Disconnect()aO:Disconnect()end)aM()end aG:AddLabel{Text=string.format(
-'%s Place Version: <b>v%s</b>',tostring(ah.BulletPoint),tostring(game.
-PlaceVersion)),DoesWrap=true}aG:AddDivider{Text='session sharing'}local aM=aG:
-AddInput('SessionShareJobId',{Text='Server Job Id',Tooltip=
-[[enter job id of the server you want to join, must be in the same game]],
-Placeholder='click here',ClearTextOnFocus=true})aG:AddButton{Text='Join Server',
-Tooltip='joins the server using the job id from above',DoubleClick=true,Func=
-function()local aN=aM.Value or''if#aN~=36 then return aA.Main:Notify{Title=
-'strelizia.cc',Description='invalid job id',Duration=2}end local aO,aP=pcall(af.
-TeleportToPlaceInstance,af,game.PlaceId,aN,ar)if(not aO)then aA.Main:Notify{
-Title='strelizia.cc',Description=string.format(
-'failed to join server: %s; click to try again',tostring(tostring(aP))),Duration
-=2}end end}aG:AddButton{Text='Copy Job Id',Tooltip=
-'copies the job id from the current server to clipboard',Func=function()
-setclipboard(game.JobId)aA.Main:Notify{Title='strelizia.cc',Description=
-'copied job id to clipboard',Duration=2}end}if aC.Authenticated then local aN,aO
-,aP=ay:AddGroupbox{Side=2,Name='Key Information',IconName='key'},(aC.SecondsLeft
-==-1)or(aC.SecondsLeft==math.huge),am.now()+aC.SecondsLeft aN:AddLabel{Text=
-string.format('%s Key Expiry: <b>%s</b>',tostring(ah.BulletPoint),tostring((aO
-and{(aj.Paint('Never!',au))}or{(am.FormatTime(aP,'MM/DD/YYYY HH:mm'))})[1])),
-DoesWrap=true}aN:AddLabel{Text=string.format('%s Total Executions: <b>%s</b>',
-tostring(ah.BulletPoint),tostring(an.Comma(aC.TotalExecutions))),DoesWrap=true}
-aN:AddLabel{Text=string.format('%s User Note: <b>%s</b>',tostring(ah.BulletPoint
-),tostring(aC.UserNote)),DoesWrap=true}aN:AddDivider{Text='key stuff'}aN:
-AddLabel{Text=string.format('%s Script Key: <b>...%s</b>',tostring(ah.
-BulletPoint),tostring(string.sub(av,-5))),DoesWrap=true}aN:AddButton{Text=
-'Copy Script Key',Tooltip='copies user key to clipboard',Func=function()
-setclipboard(av)aA.Main:Notify{Title='strelizia.cc',Description=
-'copied script key to clipboard',Duration=2}end}end local aN,aO=ay:AddGroupbox{
-Side=2,Name='Credits',IconName='list'},{}for aP,aQ in(aB.Credits or{})do local
-aR=ag.ProductionRoleInfo[aQ.Role]or ag.ProductionRoleInfo.generic table.insert(
-aO,string.format('%s %s - <b>%s</b>',tostring(ah.BulletPoint),tostring(aQ.Name),
-tostring(aj.Paint(aQ.Role,aR.Color))))end aN:AddLabel('CreditsLabel',{Text=table
-.concat(aO,'\n'),DoesWrap=true})aN:AddDivider{Text='discord (pls join)'}local aP
-=aN:AddButton{Text='Join Discord Server',Func=function()aq(ag.DiscordInviteCode,
-true)aA.Main:Notify{Title='strelizia.cc',Description=
-'successfully copied/prompted discord join code!'}end}if(not aw:Read
-'PRESSED_JOIN_DISCORD')then print'mueheheh'task.spawn(function()task.wait(math.
-random(5,10))local aQ=az:AddDialog('DiscordJoinDialog',{Title=
-'sorry for disturbing you',Description=
-[[would you please join our discord? it helps us grow and stay connected with our community. you also benefit from being able to make suggestions, bug reports and stay updated with latest features.]]
-,FooterButtons={Confirm={Title='yes!',Variant='Primary',Callback=function()aw:
-Write('PRESSED_JOIN_DISCORD',true)aP.Func()end},Decline={Title='no, thanks',
-Variant='Secondary',WaitTime=3}}})aQ:AddToggle('DontAskDiscord',{Text=
-"don't ask me again",Tooltip='okay :(',Callback=function(aR)aw:Write(
-'PRESSED_JOIN_DISCORD',aR)end})end)end end end end)()end,[15]=function()a(15)
-return(function(...)return function(aa)local ab=aa:Get'Modules/Places'return
-function(ac)local ad,ae=aa:Get'Modules/Interface'.GetInterface'Obsidian',ab.
-GetPlaceFromId(game.PlaceId)local af,ag,ah,ai=ad.Main,ad.SaveManager,ad.
-ThemeManager,ac:AddGroupbox{Side=1,Name='Menu',IconName='wrench'}ai:AddButton{
-Text='Clear User Key',Tooltip=
-[[clears saved key from the loader allowing you to enter a new one]],Disabled=(
-not isfile'strelizia/key.bin'),DoubleClick=true,Func=function()delfile
-'strelizia/key.bin'af:Notify{Title='strelizia.cc',Description=
-[[successfully deleted the saved key, re-execute the loader in order to enter a new one]]
-,Time=2}end}ai:AddButton{Text='Erase Cache',Tooltip=
-[[deletes cache files used for quality of life, only run if you experience issues]]
-,DoubleClick=true,Func=function()if(not isfolder'strelizia/cache')then return
-end for aj,ak in listfiles'strelizia/cache'do for al,am in listfiles(ak)do
-delfile(am)end end for aj,ak in listfiles'strelizia/pref'do delfile(ak)end af:
-Notify{Title='strelizia.cc',Description='successfully deleted all cached files!'
-,Time=2}end}ai:AddDivider{Text='ui settings'}ai:AddToggle('KeybindMenuOpen',{
-Default=af.KeybindFrame.Visible,Text='Open Keybind Menu',Tooltip=
-'opens menu with keybinds',Callback=function(aj)af.KeybindFrame.Visible=aj end})
-ai:AddToggle('ShowCustomCursor',{Text='Custom Cursor',Tooltip=
-[[determines if roblox cursor will be replaced with a custom one]],Default=true,
-Callback=function(aj)af.ShowCustomCursor=aj end})ai:AddDropdown(
-'NotificationSide',{Values={'Left','Right'},Default='Right',Text=
-'Notification Side',Tooltip=
-'determines on which side will ui notifications pop up',Callback=function(aj)af:
-SetNotifySide(aj)end})ai:AddDropdown('DPIDropdown',{Values={'50%','75%','100%',
-'125%','150%','175%','200%'},Default='100%',Text='DPI Scale',Tooltip=
-'determines the size of the ui',Callback=function(aj)aj=aj:gsub('%%','')local ak
-=tonumber(aj)af:SetDPIScale(ak)end})ai:AddDivider{Text='misc'}ai:AddLabel
-'Menu bind':AddKeyPicker('MenuKeybind',{Default='RightShift',NoUI=true,Text=
-'Menu keybind'})ai:AddButton{Text='Unload',Tooltip='unloads the script',Risky=
-true,DoubleClick=true,Func=function()af:Unload()end}af.ToggleKeybind=af.Options.
-MenuKeybind ah:SetLibrary(af)ag:SetLibrary(af)ag:IgnoreThemeSettings()ag:
-SetIgnoreIndexes{'MenuKeybind','DontAskDiscord','RememberMyChoiceProvider'}ah:
-SetFolder'strelizia/ui'ag:SetFolder(string.format('strelizia/ui/configs/%s',
-tostring(ae.Name)))ag:BuildConfigSection(ac)ah:ApplyToTab(ac)ag:
-LoadAutoloadConfig()end end end)()end,[16]=function()a(16)return(function(...)
-return function(aa)local ab,ac=(cloneref or clonereference or function(ab)return
-ab end),(clonefunction or copyfunction or function(ab)return ab end)local ad,ae,
-af,ag=ab(game:GetService'HttpService'),isfolder,isfile,listfiles if typeof(ac)==
-'function'then local ah,ai,aj=ac(ae),ac(af),ac(ag)local ak,al=pcall(function()
-return ah('test'..tostring(math.random(1000000,9999999)))end)if ak==false or
-typeof(al)~='boolean'then ae=function(am)local an,ao=pcall(ah,am)return((an and{
-ao}or{false})[1])end af=function(am)local an,ao=pcall(ai,am)return((an and{ao}or
-{false})[1])end ag=function(am)local an,ao=pcall(aj,am)return((an and{ao}or{{}})
-[1])end end end local ah={}do local ai={'FontColor','MainColor','AccentColor',
-'BackgroundColor','OutlineColor'}ah.Folder='ObsidianLibSettings'ah.Library=nil
-ah.AppliedToTab=false ah.BuiltInThemes={Default={1,{FontColor='ffffff',MainColor
-='191919',AccentColor='7d55ff',BackgroundColor='0f0f0f',OutlineColor='282828'}},
-BBot={2,{FontColor='ffffff',MainColor='1e1e1e',AccentColor='7e48a3',
-BackgroundColor='232323',OutlineColor='141414'}},Fatality={3,{FontColor='ffffff'
-,MainColor='1e1842',AccentColor='c50754',BackgroundColor='191335',OutlineColor=
-'3c355d'}},Jester={4,{FontColor='ffffff',MainColor='242424',AccentColor='db4467'
-,BackgroundColor='1c1c1c',OutlineColor='373737'}},Mint={5,{FontColor='ffffff',
-MainColor='242424',AccentColor='3db488',BackgroundColor='1c1c1c',OutlineColor=
-'373737'}},['Tokyo Night']={6,{FontColor='ffffff',MainColor='191925',AccentColor
-='6759b3',BackgroundColor='16161f',OutlineColor='323232'}},Ubuntu={7,{FontColor=
-'ffffff',MainColor='3e3e3e',AccentColor='e2581e',BackgroundColor='323232',
-OutlineColor='191919'}},Quartz={8,{FontColor='ffffff',MainColor='232330',
-AccentColor='426e87',BackgroundColor='1d1b26',OutlineColor='27232f'}},Nord={9,{
-FontColor='eceff4',MainColor='3b4252',AccentColor='88c0d0',BackgroundColor=
-'2e3440',OutlineColor='4c566a'}},Dracula={10,{FontColor='f8f8f2',MainColor=
-'44475a',AccentColor='ff79c6',BackgroundColor='282a36',OutlineColor='6272a4'}},
-Monokai={11,{FontColor='f8f8f2',MainColor='272822',AccentColor='f92672',
-BackgroundColor='1e1f1c',OutlineColor='49483e'}},Gruvbox={12,{FontColor='ebdbb2'
-,MainColor='3c3836',AccentColor='fb4934',BackgroundColor='282828',OutlineColor=
-'504945'}},Solarized={13,{FontColor='839496',MainColor='073642',AccentColor=
-'cb4b16',BackgroundColor='002b36',OutlineColor='586e75'}},Catppuccin={14,{
-FontColor='d9e0ee',MainColor='302d41',AccentColor='f5c2e7',BackgroundColor=
-'1e1e2e',OutlineColor='575268'}},['One Dark']={15,{FontColor='abb2bf',MainColor=
-'282c34',AccentColor='c678dd',BackgroundColor='21252b',OutlineColor='5c6370'}},
-Cyberpunk={16,{FontColor='f9f9f9',MainColor='262335',AccentColor='00ff9f',
-BackgroundColor='1a1a2e',OutlineColor='413c5e'}},['Oceanic Next']={17,{FontColor
-='d8dee9',MainColor='1b2b34',AccentColor='6699cc',BackgroundColor='16232a',
-OutlineColor='343d46'}},Material={18,{FontColor='eeffff',MainColor='212121',
-AccentColor='82aaff',BackgroundColor='151515',OutlineColor='424242'}}}ah.
-SetLibrary=function(aj,ak)aj.Library=ak end ah.GetPaths=function(aj)local ak,al=
-{},aj.Folder:split'/'for am=1,#al do ak[#ak+1]=table.concat(al,'/',1,am)end ak[#
-ak+1]=aj.Folder..'/themes'return ak end ah.BuildFolderTree=function(aj)local ak=
-aj:GetPaths()for al=1,#ak do local am=ak[al]if ae(am)then continue end
-makefolder(am)end end ah.CheckFolderTree=function(aj)if ae(aj.Folder)then return
-end aj:BuildFolderTree()task.wait(0.1)end ah.SetFolder=function(aj,ak)aj.Folder=
-ak aj:BuildFolderTree()end ah.ApplyTheme=function(aj,ak)local al=aj:
-GetCustomTheme(ak)local am=al or aj.BuiltInThemes[ak]if not am then return end
-local an=am[2]for ao,ap in pairs(al or an)do if ao=='VideoLink'then continue
-elseif ao=='FontFace'then aj.Library:SetFont(Enum.Font[ap])if aj.Library.Options
-[ao]then aj.Library.Options[ao]:SetValue(ap)end else aj.Library.Scheme[ao]=
-Color3.fromHex(ap)if aj.Library.Options[ao]then aj.Library.Options[ao]:
-SetValueRGB(Color3.fromHex(ap))end end end aj:ThemeUpdate()end ah.ThemeUpdate=
-function(aj)for ak,al in ai do if aj.Library.Options and aj.Library.Options[al]
-then aj.Library.Scheme[al]=aj.Library.Options[al].Value end end aj.Library:
-UpdateColorsUsingRegistry()end ah.GetCustomTheme=function(aj,ak)local al=aj.
-Folder..'/themes/'..ak..'.json'if not af(al)then return nil end local am=
-readfile(al)local an,ao=pcall(ad.JSONDecode,ad,am)if not an then return nil end
-return ao end ah.LoadDefault=function(aj)local ak,al,am='Default',af(aj.Folder..
-'/themes/default.txt')and readfile(aj.Folder..'/themes/default.txt'),true if al
-then if aj.BuiltInThemes[al]then ak=al elseif aj:GetCustomTheme(al)then ak=al am
-=false end elseif aj.BuiltInThemes[aj.DefaultTheme]then ak=aj.DefaultTheme end
-if am then aj.Library.Options.ThemeManager_ThemeList:SetValue(ak)else aj:
-ApplyTheme(ak)end end ah.SaveDefault=function(aj,ak)writefile(aj.Folder..
-'/themes/default.txt',ak)end ah.SetDefaultTheme=function(aj,ak)assert(aj.Library
-,'Must set ThemeManager.Library first!')assert(not aj.AppliedToTab,
-[[Cannot set default theme after applying ThemeManager to a tab!]])local al,am={
-},{}for an,ao in ai do if typeof(ak[ao])=='Color3'then al[ao]='#'..ak[ao]:ToHex(
-)am[ao]=ak[ao]elseif typeof(ak[ao])=='string'then al[ao]=(ak[ao]:sub(1,1)=='#'
-and{(ak[ao])}or{('#'..ak[ao])})[1]am[ao]=Color3.fromHex(ak[ao])else al[ao]=ah.
-BuiltInThemes.Default[2][ao]am[ao]=Color3.fromHex(ah.BuiltInThemes.Default[2][ao
-])end end if typeof(ak.FontFace)=='EnumItem'then al.FontFace=ak.FontFace.Name am
-.Font=Font.fromEnum(ak.FontFace)elseif typeof(ak.FontFace)=='string'then al.
-FontFace=ak.FontFace am.Font=Font.fromEnum(Enum.Font[ak.FontFace])else al.
-FontFace='Code'am.Font=Font.fromEnum(Enum.Font.Code)end for an,ao in{'RedColor',
-'DarkColor','WhiteColor'}do am[ao]=aj.Library.Scheme[ao]end aj.Library.Scheme=am
-aj.BuiltInThemes.Default={1,al}aj.Library:UpdateColorsUsingRegistry()end ah.
-SaveCustomTheme=function(aj,ak)if ak:gsub(' ','')==''then aj.Library:Notify(
-'Invalid file name for theme (empty)',3)return end local al={}for am,an in ai do
-al[an]=aj.Library.Options[an].Value:ToHex()end al.FontFace=aj.Library.Options.
-FontFace.Value writefile(aj.Folder..'/themes/'..ak..'.json',ad:JSONEncode(al))
-end ah.Delete=function(aj,ak)if not ak then return false,
-'no config file is selected'end local al=aj.Folder..'/themes/'..ak..'.json'if
-not af(al)then return false,'invalid file'end local am=pcall(delfile,al)if not
-am then return false,'delete file error'end return true end ah.
-ReloadCustomThemes=function(aj)local ak,al=ag(aj.Folder..'/themes'),{}for am=1,#
-ak do local an=ak[am]if an:sub(-5)=='.json'then local ao=an:find('.json',1,true)
-local ap,aq=ao,an:sub(ao,ao)while aq~='/'and aq~='\\'and aq~=''do ao=ao-1 aq=an:
-sub(ao,ao)end if aq=='/'or aq=='\\'then table.insert(al,an:sub(ao+1,ap-1))end
-end end return al end ah.CreateThemeManager=function(aj,ak)ak:AddLabel
-'Background color':AddColorPicker('BackgroundColor',{Default=aj.Library.Scheme.
-BackgroundColor})ak:AddLabel'Main color':AddColorPicker('MainColor',{Default=aj.
-Library.Scheme.MainColor})ak:AddLabel'Accent color':AddColorPicker('AccentColor'
-,{Default=aj.Library.Scheme.AccentColor})ak:AddLabel'Outline color':
-AddColorPicker('OutlineColor',{Default=aj.Library.Scheme.OutlineColor})ak:
-AddLabel'Font color':AddColorPicker('FontColor',{Default=aj.Library.Scheme.
-FontColor})ak:AddDropdown('FontFace',{Text='Font Face',Default='Code',Values={
-'BuilderSans','Code','Fantasy','Gotham','Jura','Roboto','RobotoMono',
-'SourceSans'}})local al={}for am,an in pairs(aj.BuiltInThemes)do table.insert(al
-,am)end table.sort(al,function(am,an)return aj.BuiltInThemes[am][1]<aj.
-BuiltInThemes[an][1]end)ak:AddDivider{Text='built-in themes'}ak:AddDropdown(
-'ThemeManager_ThemeList',{Text='Theme list',Values=al,Default=1})ak:AddButton{
-Text='Set as default',Tooltip=
-'sets the selected built-in theme as the default on load',Func=function()aj:
-SaveDefault(aj.Library.Options.ThemeManager_ThemeList.Value)aj.Library:Notify(
-string.format('Set default theme to %q',aj.Library.Options.
-ThemeManager_ThemeList.Value))end}aj.Library.Options.ThemeManager_ThemeList:
-OnChanged(function()aj:ApplyTheme(aj.Library.Options.ThemeManager_ThemeList.
-Value)end)ak:AddDivider{Text='custom themes'}ak:AddInput(
-'ThemeManager_CustomThemeName',{Text='Custom theme name'})ak:AddButton{Text=
-'Create theme',Tooltip=
-[[creates a new custom theme from current colors using the name entered above]],
-Func=function()local am=aj.Library.Options.ThemeManager_CustomThemeName.Value if
-am:gsub(' ','')==''then aj.Library:Notify('Invalid theme name (empty)',2)return
-end aj:SaveCustomTheme(am)aj.Library:Notify(string.format('Created theme %q',am)
-)aj.Library.Options.ThemeManager_CustomThemeList:SetValues(aj:
-ReloadCustomThemes())aj.Library.Options.ThemeManager_CustomThemeList:SetValue(
-nil)end}ak:AddDivider{Text='custom theme options'}ak:AddDropdown(
-'ThemeManager_CustomThemeList',{Text='Custom themes',Values=aj:
-ReloadCustomThemes(),AllowNull=true,Default=1})ak:AddButton{Text='Load theme',
-Tooltip='loads the selected custom theme and applies it',Func=function()local am
-=aj.Library.Options.ThemeManager_CustomThemeList.Value aj:ApplyTheme(am)aj.
-Library:Notify(string.format('Loaded theme %q',am))end}ak:AddButton{Text=
-'Overwrite theme',Tooltip=
-'overwrites the selected custom theme with current colors',Func=function()local
-am=aj.Library.Options.ThemeManager_CustomThemeList.Value aj:SaveCustomTheme(am)
-aj.Library:Notify(string.format('Overwrote theme %q',am))end}ak:AddButton{Text=
-'Delete theme',Tooltip='permanently deletes the selected custom theme file',
-Risky=true,DoubleClick=true,Func=function()local am=aj.Library.Options.
-ThemeManager_CustomThemeList.Value local an,ao=aj:Delete(am)if not an then aj.
-Library:Notify('Failed to delete theme: '..ao)return end aj.Library:Notify(
-string.format('Deleted theme %q',am))aj.Library.Options.
-ThemeManager_CustomThemeList:SetValues(aj:ReloadCustomThemes())aj.Library.
-Options.ThemeManager_CustomThemeList:SetValue(nil)end}ak:AddButton{Text=
-'Refresh list',Tooltip='refreshes the custom theme list from disk',Func=function
-()aj.Library.Options.ThemeManager_CustomThemeList:SetValues(aj:
-ReloadCustomThemes())aj.Library.Options.ThemeManager_CustomThemeList:SetValue(
-nil)end}ak:AddButton{Text='Set as default',Tooltip=
-'sets the selected custom theme as the default on load',Func=function()if aj.
-Library.Options.ThemeManager_CustomThemeList.Value~=nil and aj.Library.Options.
-ThemeManager_CustomThemeList.Value~=''then aj:SaveDefault(aj.Library.Options.
-ThemeManager_CustomThemeList.Value)aj.Library:Notify(string.format(
-'Set default theme to %q',aj.Library.Options.ThemeManager_CustomThemeList.Value)
-)end end}ak:AddButton{Text='Reset default',Tooltip=
-[[clears the saved default theme so nothing is applied on load]],Func=function()
-local am=pcall(delfile,aj.Folder..'/themes/default.txt')if not am then aj.
-Library:Notify'Failed to reset default: delete file error'return end aj.Library:
-Notify'Set default theme to nothing'aj.Library.Options.
-ThemeManager_CustomThemeList:SetValues(aj:ReloadCustomThemes())aj.Library.
-Options.ThemeManager_CustomThemeList:SetValue(nil)end}aj:LoadDefault()aj.
-AppliedToTab=true local am=function()aj:ThemeUpdate()end aj.Library.Options.
-BackgroundColor:OnChanged(am)aj.Library.Options.MainColor:OnChanged(am)aj.
-Library.Options.AccentColor:OnChanged(am)aj.Library.Options.OutlineColor:
-OnChanged(am)aj.Library.Options.FontColor:OnChanged(am)aj.Library.Options.
-FontFace:OnChanged(function(an)aj.Library:SetFont(Enum.Font[an])aj.Library:
-UpdateColorsUsingRegistry()end)end ah.CreateGroupBox=function(aj,ak)assert(aj.
-Library,'Must set ThemeManager.Library first!')return ak:AddLeftGroupbox(
-'Themes','paintbrush')end ah.ApplyToTab=function(aj,ak)assert(aj.Library,
-'Must set ThemeManager.Library first!')local al=aj:CreateGroupBox(ak)aj:
-CreateThemeManager(al)end ah.ApplyToGroupbox=function(aj,ak)assert(aj.Library,
-'Must set ThemeManager.Library first!')aj:CreateThemeManager(ak)end ah:
-BuildFolderTree()end getgenv().ObsidianThemeManager=ah return ah end end)()end,[
-17]=function()local aa,ab,ac=a(17)return(function(...)return function(ad)local
-ae={List={}}ae.RecommendedExecutors={{Name='Volt',Paid=true,Price='$20 monthly',
-Note='dev tested'},{Name='Potassium',Paid=true,Price='20$ lifetime',Note=
-'dev tested'},{Name='Velocity',Paid=false},{Name='Delta',Paid=false,Note=
-'emulator only'}}for af,ag in ab:GetChildren()do table.insert(ae.List,ac(ag)(ad)
-)end ae.GetPlaceFromId=function(af)for ag,ah in ae.List do if not ah.Ids[
-tostring(af)]then continue end return ah end return nil end ae.
-IsExecutorBlacklisted=function(af)local ag=(identifyexecutor or getexecutorname)
-if not ag then return true end local ah=ag()if not ah then return true end for
-ai,aj in af or{}do if ah:find(aj,1,true)~=nil then return true end end return
-false end return ae end end)()end,[18]=function()a(18)return(function(...)return
-function(aa)local ab,ac,ad,ae=aa:Get'Modules/Color',Color3.new(0,1,0),Color3.
-new(1,0,0),Color3.new(0,0,1)return{Name='Slime RNG',Ids={['92416421522960']=true
-},Keyless=false,Downtime={Status=false,Message='Placeholder'},
-BlacklistedExecutors={'Solara','Xeno'},Credits={{Name='vma',Role='developer'},{
-Name='felik',Role='contributor'}},Script='d0595bedc8bfc40178f522fe49b5285f',
-Update={Time=1780179066,Log={ab.Paint('[+] Added auto use special dices',ac),ab.
-Paint('[+] Added auto craft slimes',ac),ab.Paint(
-'[+] Added auto find crafting recipe',ac),ab.Paint('[+] Added auto follow UFO',
-ac),ab.Paint('[+] Added auto apply power fruits',ac),ab.Paint(
-'[+] Added auto upgrade power fruits',ac),ab.Paint(
-'[+] Added auto extract power fruits',ac),ab.Paint('[+] Added auto claim codes',
-ac),ab.Paint('[+] Added auto equip best pets',ac),ab.Paint(
-'[+] Added goop gun target priority',ac),ab.Paint(
-'[+] Added manual enemy farming zone',ac),ab.Paint('[+] Added FPS cap',ac),ab.
-Paint('[+] Added disable rendering',ac),ab.Paint(
-'[+] Added rejoin on disconnect',ac),ab.Paint('[+] Added execute on teleport',ac
-),ab.Paint('[+] Added auto load config on teleport',ac),'\n',ab.Paint(
-[[[*] Decoupled enemy farming (auto teleport to zone, auto goop gun)]],ae),ab.
-Paint('[*] Mitigated unexpected auto equip behavior',ae),ab.Paint(
-'[*] Mitigated unexpected XP transfer behavior',ae)}}}end end)()end,[19]=
-function()a(19)return(function(...)return function(aa)local ab,ac,ad,ae=aa:Get
-'Modules/Color',Color3.new(0,1,0),Color3.new(1,0,0),Color3.new(0,0,1)return{Name
-='Kick a Lucky Block',Ids={['89469502395769']=true},Keyless=false,Downtime={
-Status=false,Message='Placeholder'},BlacklistedExecutors={'Solara','Xeno'},
-Credits={{Name='felix',Role='developer'}},Script=
-'dbf4452a0cf919c7bad6aef8117e789f',Update={Time=1763296128,Log={ab.Paint(
-'[+] Released',ac)}}}end end)()end,[20]=function()a(20)return(function(...)
-return function(aa)local ab=aa.Services local ac,ad,ae,af=ab.HttpService,aa:Get
-'Modules/t','strelizia/pref','generic'local ag,ah,ai=ad.union(ad.string,ad.
-number,ad.table,ad.boolean,ad['nil']),ad.optional(ad.string),{}ai.__index=ai ai.
-new=function(aj)aj=aj or af return setmetatable({Path=string.format('%s/%s.json'
-,tostring(ae),tostring(aj))},ai)end ai.Read=function(aj,ak)assert(ah(ak))local
-al=(ak and{nil}or{{}})[1]if(not isfile(aj.Path))then return al end local am,an=
-pcall(ac.JSONDecode,ac,readfile(aj.Path))if(not am)then aj:Erase()return al end
-return(ak and{(an[ak])}or{an})[1]end ai.Write=function(aj,ak,al)assert(ad.
-string(ak))assert(ag(al))local am=aj:Read()am[ak]=al local an,ao=pcall(ac.
-JSONEncode,ac,am)if an then writefile(aj.Path,ao)end return aj end ai.Update=
-function(aj,ak,al)assert(ad.string(ak))assert(ad['function'](al))return aj:
-Write(ak,al(aj:Read(ak)))end ai.Erase=function(aj)writefile(aj.Path,'{}')return
-aj end return ai end end)()end,[21]=function()local aa,ab=a(21)return(function(
-...)return function(ac)return ac.new(ac):Extend(ac.Extensions.Children(ab))end
-end)()end,[22]=function()a(22)return(function(...)return function(aa)local ab={}
-ab.IsDict=function(ac)return ac[1]==nil end ab.Dictionary=function(ac)local ad={
-}for ae,af in ac do ad[af]=true end return ad end ab.Filter=function(ac,ad)local
-ae,af={},ab.IsDict(ac)for ag,ah in ac do local ai=ad(ah,ag)if(not ai)then
-continue end if af then ae[ag]=ah else table.insert(ae,ah)end end return ae end
-ab.Reconcile=function(ac,ad)for ae,af in ad do local ag,ah=ac[ae],typeof(af)if
-ag==nil or typeof(ag)~=ah then ac[ae]=af elseif ah=='table'then ab.Reconcile(ag,
-af)end end return ac end ab.FullMap=function(ac,ad)local ae,af={},ab.IsDict(ac)
-for ag,ah in ac do local ai,aj=ad(ah,ag)if not(ai)then continue end if af then
-ae[aj]=ai else table.insert(ae,ai)end end return ae end ab.JoinArrays=function(
-...)local ac={}for ad=1,select('#',...)do for ae,af in select(ad,...)do ac[#ac+1
-]=af end end return ac end return ab end end)()end,[23]=function()a(23)return(
-function(...)return function(aa)local ab local ac=function(ac,...)local ad=ab ab
-=nil ac(...)ab=ad end local ad,ae=function()while true do ac(coroutine.yield())
-end end,{}ae.__index=ae ae.new=function(af,ag)return setmetatable({_connected=
-true,_signal=af,_fn=ag,_next=false},ae)end ae.Disconnect=function(af)af.
-_connected=false if af._signal._handlerListHead==af then af._signal.
-_handlerListHead=af._next else local ag=af._signal._handlerListHead while ag and
-ag._next~=af do ag=ag._next end if ag then ag._next=af._next end end end
-setmetatable(ae,{__index=function(af,ag)error((
-'Attempt to get Connection::%s (not a valid member)'):format(tostring(ag)),2)end
-,__newindex=function(af,ag,ah)error((
-'Attempt to set Connection::%s (not a valid member)'):format(tostring(ag)),2)end
-})local af={}af.__index=af af.new=function()return setmetatable({
-_handlerListHead=false},af)end af.Connect=function(ag,ah)local ai=ae.new(ag,ah)
-if ag._handlerListHead then ai._next=ag._handlerListHead ag._handlerListHead=ai
-else ag._handlerListHead=ai end return ai end af.DisconnectAll=function(ag)ag.
-_handlerListHead=false end af.Fire=function(ag,...)local ah=ag._handlerListHead
-while ah do if ah._connected then if not ab then ab=coroutine.create(ad)
-coroutine.resume(ab)end task.spawn(ab,ah._fn,...)end ah=ah._next end end af.Wait
-=function(ag)local ah,ai=(coroutine.running())ai=ag:Connect(function(...)ai:
-Disconnect()task.spawn(ah,...)end)return coroutine.yield()end af.Once=function(
-ag,ah)local ai ai=ag:Connect(function(...)if ai._connected then ai:Disconnect()
-end ah(...)end)return ai end setmetatable(af,{__index=function(ag,ah)error((
-'Attempt to get Signal::%s (not a valid member)'):format(tostring(ah)),2)end,
-__newindex=function(ag,ah,ai)error((
-'Attempt to set Signal::%s (not a valid member)'):format(tostring(ah)),2)end})
-return af end end)()end,[24]=function()a(24)return(function(...)return function(
-aa)local ab,ac,ad,ae,af,ag,ah='Non-promise value passed into %s at index %s',
-'Please pass a list of promises to %s','Please pass a handler function to %s!',{
-__mode='k'},function(ab)if type(ab)=='function'then return true end if type(ab)
-=='table'then local ac=getmetatable(ab)if ac and type(rawget(ac,'__call'))==
-'function'then return true end end return false end,function(ab,ac)local ad={}
-for ae,af in ipairs(ac)do ad[af]=af end return setmetatable(ad,{__index=function
-(ae,af)error(string.format('%s is not in %s!',af,ab),2)end,__newindex=function()
-error(string.format('Creating new members in %s is not allowed!',ab),2)end})end
-do ah={Kind=ag('Promise.Error.Kind',{'ExecutionError','AlreadyCancelled',
-'NotResolvedInTime','TimedOut'})}ah.__index=ah ah.new=function(ai,aj)ai=ai or{}
-return setmetatable({error=tostring(ai.error)or'[This error has no error text.]'
-,trace=ai.trace,context=ai.context,kind=ai.kind,parent=aj,createdTick=os.clock()
-,createdTrace=debug.traceback()},ah)end ah.is=function(ai)if type(ai)=='table'
-then local aj=getmetatable(ai)if type(aj)=='table'then return rawget(ai,'error')
-~=nil and type(rawget(aj,'extend'))=='function'end end return false end ah.
-isKind=function(ai,aj)assert(aj~=nil,
-'Argument #2 to Promise.Error.isKind must not be nil')return ah.is(ai)and ai.
-kind==aj end ah.extend=function(ai,aj)aj=aj or{}aj.kind=aj.kind or ai.kind
-return ah.new(aj,ai)end ah.getErrorChain=function(ai)local aj={ai}while aj[#aj].
-parent do table.insert(aj,aj[#aj].parent)end return aj end ah.__tostring=
-function(ai)local aj={string.format('-- Promise.Error(%s) --',ai.kind or'?')}for
-ak,al in ipairs(ai:getErrorChain())do table.insert(aj,table.concat({al.trace or
-al.error,al.context},'\n'))end return table.concat(aj,'\n')end end local ai,aj,
-ak=function(...)return select('#',...),{...}end,function(ai,...)return ai,
-select('#',...),{...}end,function(ai)assert(ai~=nil,'traceback is nil')return
-function(aj)if type(aj)=='table'then return aj end return ah.new{error=aj,kind=
-ah.Kind.ExecutionError,trace=debug.traceback(tostring(aj),2),context=
-'Promise created at:\n\n'..ai}end end local al=function(al,am,...)return aj(
-xpcall(am,ak(al),...))end local am,an,ao=function(am,an,ao,ap)return function(
-...)local aq,ar,as=al(am,an,...)if aq then ao(unpack(as,1,ar))else ap(as[1])end
-end end,function(am)return next(am)==nil end,{Error=ah,Status=ag(
-'Promise.Status',{'Started','Resolved','Rejected','Cancelled'}),_getTime=os.
-clock,_timeEvent=game:GetService'RunService'.Heartbeat,
-_unhandledRejectionCallbacks={}}ao.prototype={}ao.__index=ao.prototype ao._new=
-function(ap,aq,ar)if ar~=nil and not ao.is(ar)then error(
-'Argument #2 to Promise.new must be a promise or nil',2)end local as={_thread=
-nil,_source=ap,_status=ao.Status.Started,_values=nil,_valuesLength=-1,
-_unhandledRejection=true,_queuedResolve={},_queuedReject={},_queuedFinally={},
-_cancellationHook=nil,_parent=ar,_consumers=setmetatable({},ae)}if ar and ar.
-_status==ao.Status.Started then ar._consumers[as]=true end setmetatable(as,ao)
-local at,au,av=function(...)as:_resolve(...)end,function(...)as:_reject(...)end,
-function(at)if at then if as._status==ao.Status.Cancelled then at()else as.
-_cancellationHook=at end end return as._status==ao.Status.Cancelled end as.
-_thread=coroutine.create(function()local aw,ax,ay=al(as._source,aq,at,au,av)if
-not aw then au(ay[1])end end)task.spawn(as._thread)return as end ao.new=function
-(ap)return ao._new(debug.traceback(nil,2),ap)end ao.__tostring=function(ap)
-return string.format('Promise(%s)',ap._status)end ao.defer=function(ap)local aq,
-ar=(debug.traceback(nil,2))ar=ao._new(aq,function(as,at,au)local av av=ao.
-_timeEvent:Connect(function()av:Disconnect()local aw,ax,ay=al(aq,ap,as,at,au)if
-not aw then at(ay[1])end end)end)return ar end ao.async=ao.defer ao.resolve=
-function(...)local ap,aq=ai(...)return ao._new(debug.traceback(nil,2),function(
-ar)ar(unpack(aq,1,ap))end)end ao.reject=function(...)local ap,aq=ai(...)return
-ao._new(debug.traceback(nil,2),function(ar,as)as(unpack(aq,1,ap))end)end ao._try
-=function(ap,aq,...)local ar,as=ai(...)return ao._new(ap,function(at)at(aq(
-unpack(as,1,ar)))end)end ao.try=function(ap,...)return ao._try(debug.traceback(
-nil,2),ap,...)end ao._all=function(ap,aq,ar)if type(aq)~='table'then error(
-string.format(ac,'Promise.all'),3)end for as,at in pairs(aq)do if not ao.is(at)
-then error(string.format(ab,'Promise.all',tostring(as)),3)end end if#aq==0 or ar
-==0 then return ao.resolve{}end return ao._new(ap,function(as,at,au)local av,aw,
-ax,ay,az={},{},0,0,false local aA=function()for aA,aB in ipairs(aw)do aB:cancel(
-)end end local aB=function(aB,...)if az then return end ax=ax+1 if ar==nil then
-av[aB]=...else av[ax]=...end if ax>=(ar or#aq)then az=true as(av)aA()end end au(
-aA)for aC,aD in ipairs(aq)do aw[aC]=aD:andThen(function(...)aB(aC,...)end,
-function(...)ay=ay+1 if ar==nil or#aq-ay<ar then aA()az=true at(...)end end)end
-if az then aA()end end)end ao.all=function(ap)return ao._all(debug.traceback(nil
-,2),ap)end ao.fold=function(ap,aq,ar)assert(type(ap)=='table',
-'Bad argument #1 to Promise.fold: must be a table')assert(af(aq),
-'Bad argument #2 to Promise.fold: must be a function')local as=ao.resolve(ar)
-return ao.each(ap,function(at,au)as=as:andThen(function(av)return aq(av,at,au)
-end)end):andThen(function()return as end)end ao.some=function(ap,aq)assert(type(
-aq)=='number','Bad argument #2 to Promise.some: must be a number')return ao.
-_all(debug.traceback(nil,2),ap,aq)end ao.any=function(ap)return ao._all(debug.
-traceback(nil,2),ap,1):andThen(function(aq)return aq[1]end)end ao.allSettled=
-function(ap)if type(ap)~='table'then error(string.format(ac,'Promise.allSettled'
-),2)end for aq,ar in pairs(ap)do if not ao.is(ar)then error(string.format(ab,
-'Promise.allSettled',tostring(aq)),2)end end if#ap==0 then return ao.resolve{}
-end return ao._new(debug.traceback(nil,2),function(aq,ar,as)local at,au,av={},{}
-,0 local aw=function(aw,...)av=av+1 at[aw]=...if av>=#ap then aq(at)end end as(
-function()for ax,ay in ipairs(au)do ay:cancel()end end)for ax,ay in ipairs(ap)do
-au[ax]=ay:finally(function(...)aw(ax,...)end)end end)end ao.race=function(ap)
-assert(type(ap)=='table',string.format(ac,'Promise.race'))for aq,ar in pairs(ap)
-do assert(ao.is(ar),string.format(ab,'Promise.race',tostring(aq)))end return ao.
-_new(debug.traceback(nil,2),function(aq,ar,as)local at,au={},false local av=
-function()for av,aw in ipairs(at)do aw:cancel()end end local aw=function(aw)
-return function(...)av()au=true return aw(...)end end if as(aw(ar))then return
-end for ax,ay in ipairs(ap)do at[ax]=ay:andThen(aw(aq),aw(ar))end if au then av(
-)end end)end ao.each=function(ap,aq)assert(type(ap)=='table',string.format(ac,
-'Promise.each'))assert(af(aq),string.format(ad,'Promise.each'))return ao._new(
-debug.traceback(nil,2),function(ar,as,at)local au,av,aw={},{},false local ax=
-function()for ax,ay in ipairs(av)do ay:cancel()end end at(function()aw=true ax()
-end)local ay={}for az,aA in ipairs(ap)do if ao.is(aA)then if aA:getStatus()==ao.
-Status.Cancelled then ax()return as(ah.new{error='Promise is cancelled',kind=ah.
-Kind.AlreadyCancelled,context=string.format(
-[[The Promise that was part of the array at index %d passed into Promise.each was already cancelled when Promise.each began.
+----!native
+-- ++++++++ WAX BUNDLED DATA BELOW ++++++++ --
 
-That Promise was created at:
+-- Will be used later for getting flattened globals
+local ImportGlobals
 
-%s]]
-,az,aA._source)})elseif aA:getStatus()==ao.Status.Rejected then ax()return as(
-select(2,aA:await()))end local aB=aA:andThen(function(...)return...end)table.
-insert(av,aB)ay[az]=aB else ay[az]=aA end end for az,aA in ipairs(ay)do if ao.
-is(aA)then local aB aB,aA=aA:await()if not aB then ax()return as(aA)end end if
-aw then return end local aB=ao.resolve(aq(aA,az))table.insert(av,aB)local aC,aD=
-aB:await()if not aC then ax()return as(aD)end au[az]=aD end ar(au)end)end ao.is=
-function(ap)if type(ap)~='table'then return false end local aq=getmetatable(ap)
-if aq==ao then return true elseif aq==nil then return af(ap.andThen)elseif type(
-aq)=='table'and type(rawget(aq,'__index'))=='table'and af(rawget(rawget(aq,
-'__index'),'andThen'))then return true end return false end ao.promisify=
-function(ap)return function(...)return ao._try(debug.traceback(nil,2),ap,...)end
-end do local ap,aq ao.delay=function(ar)assert(type(ar)=='number',
-'Bad argument #1 to Promise.delay, must be a number.')if not(ar>=
-1.6666666666666665E-2)or ar==math.huge then ar=1.6666666666666665E-2 end return
-ao._new(debug.traceback(nil,2),function(as,at,au)local av=ao._getTime()local aw=
-av+ar local ax={resolve=as,startTime=av,endTime=aw}if aq==nil then ap=ax aq=ao.
-_timeEvent:Connect(function()local ay=ao._getTime()while ap~=nil and ap.endTime<
-ay do local az=ap ap=az.next if ap==nil then aq:Disconnect()aq=nil else ap.
-previous=nil end az.resolve(ao._getTime()-az.startTime)end end)else if ap.
-endTime<aw then local ay=ap local az=ay.next while az~=nil and az.endTime<aw do
-ay=az az=ay.next end ay.next=ax ax.previous=ay if az~=nil then ax.next=az az.
-previous=ax end else ax.next=ap ap.previous=ax ap=ax end end au(function()local
-ay=ax.next if ap==ax then if ay==nil then aq:Disconnect()aq=nil else ay.previous
-=nil end ap=ay else local az=ax.previous az.next=ay if ay~=nil then ay.previous=
-az end end end)end)end end ao.prototype.timeout=function(ap,aq,ar)local as=debug
-.traceback(nil,2)return ao.race{ao.delay(aq):andThen(function()return ao.reject(
-ar==nil and ah.new{kind=ah.Kind.TimedOut,error='Timed out',context=string.
-format('Timeout of %d seconds exceeded.\n:timeout() called at:\n\n%s',aq,as)}or
-ar)end),ap}end ao.prototype.getStatus=function(ap)return ap._status end ao.
-prototype._andThen=function(ap,aq,ar,as)ap._unhandledRejection=false if ap.
-_status==ao.Status.Cancelled then local at=ao.new(function()end)at:cancel()
-return at end return ao._new(aq,function(at,au,av)local aw=at if ar then aw=am(
-aq,ar,at,au)end local ax=au if as then ax=am(aq,as,at,au)end if ap._status==ao.
-Status.Started then table.insert(ap._queuedResolve,aw)table.insert(ap.
-_queuedReject,ax)av(function()if ap._status==ao.Status.Started then table.
-remove(ap._queuedResolve,table.find(ap._queuedResolve,aw))table.remove(ap.
-_queuedReject,table.find(ap._queuedReject,ax))end end)elseif ap._status==ao.
-Status.Resolved then aw(unpack(ap._values,1,ap._valuesLength))elseif ap._status
-==ao.Status.Rejected then ax(unpack(ap._values,1,ap._valuesLength))end end,ap)
-end ao.prototype.andThen=function(ap,aq,ar)assert(aq==nil or af(aq),string.
-format(ad,'Promise:andThen'))assert(ar==nil or af(ar),string.format(ad,
-'Promise:andThen'))return ap:_andThen(debug.traceback(nil,2),aq,ar)end ao.
-prototype.catch=function(ap,aq)assert(aq==nil or af(aq),string.format(ad,
-'Promise:catch'))return ap:_andThen(debug.traceback(nil,2),nil,aq)end ao.
-prototype.tap=function(ap,aq)assert(af(aq),string.format(ad,'Promise:tap'))
-return ap:_andThen(debug.traceback(nil,2),function(...)local ar=aq(...)if ao.is(
-ar)then local as,at=ai(...)return ar:andThen(function()return unpack(at,1,as)end
-)end return...end)end ao.prototype.andThenCall=function(ap,aq,...)assert(af(aq),
-string.format(ad,'Promise:andThenCall'))local ar,as=ai(...)return ap:_andThen(
-debug.traceback(nil,2),function()return aq(unpack(as,1,ar))end)end ao.prototype.
-andThenReturn=function(ap,...)local aq,ar=ai(...)return ap:_andThen(debug.
-traceback(nil,2),function()return unpack(ar,1,aq)end)end ao.prototype.cancel=
-function(ap)if ap._status~=ao.Status.Started then return end ap._status=ao.
-Status.Cancelled if ap._cancellationHook then ap._cancellationHook()end
-coroutine.close(ap._thread)if ap._parent then ap._parent:_consumerCancelled(ap)
-end for aq in pairs(ap._consumers)do aq:cancel()end ap:_finalize()end ao.
-prototype._consumerCancelled=function(ap,aq)if ap._status~=ao.Status.Started
-then return end ap._consumers[aq]=nil if next(ap._consumers)==nil then ap:
-cancel()end end ao.prototype._finally=function(ap,aq,ar)ap._unhandledRejection=
-false local as=ao._new(aq,function(as,at,au)local av au(function()ap:
-_consumerCancelled(ap)if av then av:cancel()end end)local aw=as if ar then aw=
-function(...)local ax=ar(...)if ao.is(ax)then av=ax ax:finally(function(ay)if ay
-~=ao.Status.Rejected then as(ap)end end):catch(function(...)at(...)end)else as(
-ap)end end end if ap._status==ao.Status.Started then table.insert(ap.
-_queuedFinally,aw)else aw(ap._status)end end)return as end ao.prototype.finally=
-function(ap,aq)assert(aq==nil or af(aq),string.format(ad,'Promise:finally'))
-return ap:_finally(debug.traceback(nil,2),aq)end ao.prototype.finallyCall=
-function(ap,aq,...)assert(af(aq),string.format(ad,'Promise:finallyCall'))local
-ar,as=ai(...)return ap:_finally(debug.traceback(nil,2),function()return aq(
-unpack(as,1,ar))end)end ao.prototype.finallyReturn=function(ap,...)local aq,ar=
-ai(...)return ap:_finally(debug.traceback(nil,2),function()return unpack(ar,1,aq
-)end)end ao.prototype.awaitStatus=function(ap)ap._unhandledRejection=false if ap
-._status==ao.Status.Started then local aq=coroutine.running()ap:finally(function
-()task.spawn(aq)end):catch(function()end)coroutine.yield()end if ap._status==ao.
-Status.Resolved then return ap._status,unpack(ap._values,1,ap._valuesLength)
-elseif ap._status==ao.Status.Rejected then return ap._status,unpack(ap._values,1
-,ap._valuesLength)end return ap._status end local ap=function(ap,...)return ap==
-ao.Status.Resolved,...end ao.prototype.await=function(aq)return ap(aq:
-awaitStatus())end local aq=function(aq,...)if aq~=ao.Status.Resolved then error(
-(...)==nil and'Expected Promise rejected with no value.'or(...),3)end return...
-end ao.prototype.expect=function(ar)return aq(ar:awaitStatus())end ao.prototype.
-awaitValue=ao.prototype.expect ao.prototype._unwrap=function(ar)if ar._status==
-ao.Status.Started then error('Promise has not resolved or rejected.',2)end local
-as=ar._status==ao.Status.Resolved return as,unpack(ar._values,1,ar._valuesLength
-)end ao.prototype._resolve=function(ar,...)if ar._status~=ao.Status.Started then
-if ao.is((...))then(...):_consumerCancelled(ar)end return end if ao.is((...))
-then if select('#',...)>1 then local as=string.format(
+-- Holds direct closure data (defining this before the DOM tree for line debugging etc)
+local ClosureBindings ,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ObjectTree ,
+
+
+
+
+
+WaxVersion ,
+EnvName ,
+
+
+
+
+string,task,setmetatable,error,next,table,unpack,coroutine,script,type,require,pcall,tostring,tonumber,_VERSION ,LineOffsets = {function()local wax, script, require=ImportGlobals(1)return (function(...)local Vinca = require(script.Vinca)
+return Vinca.new():Extend(Vinca.Extensions.Children(script))
+end)() end,function()local wax, script=ImportGlobals(2)return (function(...)return function(Root)
+	return Root.new(Root):Extend(Root.Extensions.Children(script))
+end
+end)() end,function()local wax, script, require=ImportGlobals(3)return (function(...)return function(Root)
+    -- // Services
+	local Services = Root.Services	
+	local RunService,Lock ,Task ,Trove = Services.RunService,require(script.Lock)(Root),require(script.Task)(Root),Root:Get("RBXUtil/Trove")
+	-- // Module
+	local TaskManager = {
+		Running = false,
+		
+        Connection = nil,
+        Trove = Trove.new(),
+		
+        Tasks = {},
+        PendingTasks = {},
+	}	
+	TaskManager.Task = Task	TaskManager.Lock = Lock	
+	function TaskManager.Begin()
+		if TaskManager.Running then return end		TaskManager.Running = true
+		
+		TaskManager.Connection = RunService.Heartbeat:Connect(function(DeltaTime)
+			if (not TaskManager.Running) then return end			debug.profilebegin('TaskManager')
+			
+			for Identifier, Task in TaskManager.PendingTasks do 
+                TaskManager.PendingTasks[Identifier] = nil                
+				task.spawn(function()
+					local Success = Task:Run()					
+					if (not Success) or (not Task.Interval) then
+						return TaskManager.RemoveTask(Identifier)                    end
+                    
+                    task.wait(Task.Interval)                    
+                    if (TaskManager.Tasks[Identifier]) then
+                        TaskManager.PendingTasks[Identifier] = Task
+                    end				end)
+			end
+			
+			debug.profileend()
+		end)
+	end
+	
+	function TaskManager.Stop()
+		if not TaskManager.Running then return end		TaskManager.Running = false
+		
+		TaskManager.Connection:Disconnect()
+		TaskManager.Connection = nil
+		
+		for Identifier in TaskManager.Tasks do 
+			TaskManager.RemoveTask(Identifier)
+        end
+        
+        TaskManager.Trove:Destroy()	end 
+	
+	function TaskManager.AddTask(Object)
+		assert(Object and Task.is(Object), 'Task must be a Task object!')
+        local Identifier = Object.Identifier        
+        TaskManager.Tasks[Identifier] = Object        TaskManager.PendingTasks[Identifier] = Object		
+		return Identifier
+	end
+	
+	function TaskManager.RemoveTask(Identifier)
+		local Task = TaskManager.Tasks[Identifier]		if (not Task) then return end 
+		
+        TaskManager.Tasks[Identifier] = nil
+        TaskManager.PendingTasks[Identifier] = nil        
+		Task:Destroy()
+	end
+	
+	function TaskManager.GetTasksFromIndex(Index)
+		local Tasks = {}		
+		for Identifier, Task in TaskManager.Tasks do 
+			if Task.Index ~= Index then continue end			
+			Tasks[Identifier] = Task
+		end
+		
+		return Tasks	end
+	
+	function TaskManager.RemoveTasksByIndex(Index)
+		for Identifier in TaskManager.GetTasksFromIndex(Index) do
+			TaskManager.RemoveTask(Identifier)
+		end
+	end
+
+	return TaskManager
+end
+end)() end,function()ImportGlobals(4)return (function(...)return function(Root)
+    local Task = {}    Task.__index = Task 
+local t , Time , OutputMessage , CreateGUID , set_memory_cat , reset_memory_cat , profile_begin , profile_end =Root:Get('Modules/t'), Root:Get('Functions/Time'), Root:Get('Functions/OutputMessage'), Root:Get('Functions/CreateGUID'), debug.setmemorycategory, debug.resetmemorycategory, debug.profilebegin, debug.profileend    
+    local TaskAssertion ,OptionalString = t.tuple(t.string, t['function'], t.optional(t.number), t.optional(t.boolean)),t.optional(t.string)    
+    -- // Task
+    --[[
+        @name Task.new
+        @description Creates a new task.
+        @param Index: string -- The index of the task.
+        @param Callback: function -- The callback function of the task.
+        @param Interval: number? -- The interval of the task. Nil means it only runs once.
+        @param UtilizeLocks: boolean? -- Indicates if task uses locks.
+    ]]
+    function Task.new(Index, Callback, Interval, UtilizeLocks)
+        assert(TaskAssertion(Index, Callback, Interval, UtilizeLocks))
+        
+        return setmetatable({
+            __TASK = true,
+            
+            Index = Index,
+            Identifier = CreateGUID(),
+            
+            Callback = Callback,
+            
+            Running = false,
+            Destroyed = false,
+            
+            Interval = Interval,
+            CurrentStep = nil,
+            Profiling = false,
+            Priority = 1,
+            
+            Locks = if UtilizeLocks then {Groups = {}, Individual = {}} else nil,
+        }, Task)
+    end
+    
+    function Task.is(Object)
+        return typeof(Object) == 'table' and rawget(Object, "__TASK")    end
+    
+    function Task.SetPriority(self, Priority)
+        assert(t.number(Priority))        
+        self.Priority = Priority
+        
+        return self 
+    end
+    
+    function Task.GetPriority(self)
+        return self.Priority
+    end
+
+    function Task.SetStep(self, Step)
+        assert(OptionalString(Step))        
+        local CurrentStep = self.CurrentStep        self.CurrentStep = Step        
+        if CurrentStep then
+            profile_end()        end
+        
+        if Step ~= nil then
+            profile_begin(Step)
+        end
+        
+        return self 
+    end
+    
+    function Task.SetProfiling(self, Enabled)
+        assert(t.boolean(Enabled))        
+        if self.Profiling == Enabled then return self end
+
+        self.Profiling = Enabled
+        if Enabled then
+            profile_begin(self.Index)        else
+            if self.CurrentStep then
+                self:SetStep(nil)            end
+            
+            profile_end()        end
+
+        return self
+    end
+    
+    function Task.Run(self)
+        self.Running = true
+        
+        local Success, Result = pcall(self.Callback, self)        
+        if (not Success) then
+            OutputMessage('Error', `An error has occured during runtime of Thread '{self.Index}' on Step '{tostring(self.CurrentStep)}': {Result}`)
+        end
+        
+        self.Running = false        
+        if self.Profiling then  
+            self:SetProfiling(false)        end
+        
+        return Success, Result
+    end
+    
+    function Task.Destroy(self)
+        self.Destroyed = true        
+        local Locks = self.Locks        if Locks then
+            for Group in Locks.Groups do
+                Group:Release()            end
+            
+            for Individual in Locks.Individual do 
+                Individual:Release()            end
+            
+            table.clear(Locks.Groups)
+            table.clear(Locks.Individual)
+        end 
+        
+        return self    end
+    
+    return {new = Task.new, is = Task.is}
+end
+end)() end,function()ImportGlobals(5)return (function(...)return function(Root)
+	-- // simpler Lock (No queue, just early return)
+
+    -- // Modules
+    local t ,Signal ,TableUtil = Root:Get('Modules/t'),Root:Get('RBXUtil/Signal'),Root:Get('RBXUtil/TableUtil')
+	-- // Variables
+	local Dictionary ,Filter = TableUtil.Dictionary,TableUtil.Filter
+
+	-- // Functions
+
+	local function CompareTasks(TaskOne, TaskTwo)
+		local PriorityOne, PriorityTwo = TaskOne:GetPriority(), TaskTwo:GetPriority()
+		if PriorityOne ~= PriorityTwo then
+			return PriorityOne > PriorityTwo
+		end
+
+		return TaskOne.Identifier > TaskTwo.Identifier	end
+
+	local Lock = {Cache = {}}	Lock.__index = Lock
+
+	function Lock.new(Index)
+		assert(t.string(Index))
+		if Lock.Cache[Index] then
+			return Lock.Cache[Index]
+		end
+
+        local Object = setmetatable({
+            __LOCK = true,
+
+			Index = Index,
+
+			User = nil,
+			UserChanged = Signal.new(),
+
+			TakeoverRecipient = nil,
+			TakeoverInitiated = Signal.new(),
+
+			Aborted = false,
+			Destroyed = false
+		}, Lock)
+
+		Lock.Cache[Index] = Object
+
+		return Object
+	end
+
+	function Lock.is(Object)
+		return typeof(Object) == 'table' and rawget(Object, "__LOCK")	end
+
+	function Lock.CanTake(self, Task)
+		assert(Task and typeof(Task) == 'table', 'Must provide a Task object for evaluation!')		assert(Task.Locks, 'Task must be Lock-utilizing!')
+		local CurrentUser = self.User		if (not CurrentUser) then return true end
+		if (CurrentUser == Task) then
+			return true
+		end
+
+		local TakeoverRecipient = self.TakeoverRecipient		if TakeoverRecipient then
+			return CompareTasks(Task, TakeoverRecipient)
+		end
+
+		return CompareTasks(Task, CurrentUser)
+	end
+
+	function Lock.TakeAsync(self, Task)
+		assert(Task and typeof(Task) == 'table', 'Must provide a Task object for evaluation!')		assert(Task.Locks, 'Task must be Lock-utilizing!')
+		if (not self.User) then
+			self.User = Task
+			self.Aborted = false
+			Task.Locks.Individual[self] = true
+
+			self.UserChanged:Fire(Task, nil)
+
+			return true
+		end
+
+		if (self.User == Task) then
+			return true
+		end
+
+		self.Aborted = true
+		self.TakeoverRecipient = Task
+		self.TakeoverInitiated:Fire(Task, self.User)
+
+		return self.UserChanged:Wait() == Task
+	end
+
+	function Lock.Release(self)
+		if (not self.User) then return self end
+		local OriginalUser ,TakeoverRecipient = self.User,self.TakeoverRecipient
+		self.User = TakeoverRecipient		self.TakeoverRecipient = nil		self.Aborted = false
+		OriginalUser.Locks.Individual[self] = nil
+		if TakeoverRecipient then
+			TakeoverRecipient.Locks.Individual[self] = true		end
+
+		self.UserChanged:Fire(TakeoverRecipient, OriginalUser)
+
+		return self
+	end
+
+	-- // Lock Group
+
+	local Group = {}	Group.__index = Group
+
+	function Group.new(Locks)
+		assert(Locks and typeof(Locks) == 'table', 'Must provide Locks for a Group')
+		local self = setmetatable({
+			User = nil,
+			UserChanged = Signal.new(),
+
+			Locks = Dictionary(Filter(Locks, Lock.is)),
+
+			TakeoverRecipient = nil,
+			TakeoverInitiated = Signal.new(),
+
+			Aborted = false,
+			Connections = {},
+
+			Destroyed = false
+		}, Group)
+
+		for Lock in self.Locks do
+			table.insert(self.Connections, Lock.TakeoverInitiated:Connect(function(Initiator, OriginalUser)
+				if (not self.User) or (self.User ~= OriginalUser) then return end
+				self.Aborted = true
+			end))
+		end
+
+		return self
+	end
+
+	function Group.CanTake(self, Task)
+		for Lock in self.Locks do
+			if Lock:CanTake(Task) then continue end
+			return false
+		end
+
+		return true
+	end
+
+	function Group.TakeAsync(self, Task)
+		local OriginalUser = self.User
+		if (OriginalUser == Task) then
+			return true
+		end
+
+		if OriginalUser then
+			self.TakeoverRecipient = Task
+			self.TakeoverInitiated:Fire(Task, OriginalUser)
+
+			return self.UserChanged:Wait() == Task
+		end
+
+		local Allocated = {}
+		for Lock in self.Locks do
+			if Lock:TakeAsync(Task) then
+				Allocated[Lock] = true				continue
+			end
+
+			for Claimed in Allocated do
+				Claimed:Release()			end
+
+			return false
+		end
+
+		self.User = Task
+		self.Aborted = false
+		Task.Locks.Groups[self] = true
+
+		self.UserChanged:Fire(Task, OriginalUser)
+
+		return true
+	end
+
+	function Group.Release(self)
+		if (not self.User) then return self end
+		local OriginalUser ,TakeoverRecipient = self.User,self.TakeoverRecipient
+		for Lock in self.Locks do
+			if (Lock.User ~= OriginalUser) then continue end
+			if TakeoverRecipient then
+				Lock.User = TakeoverRecipient				Lock.Aborted = false
+				OriginalUser.Locks.Individual[Lock] = nil				TakeoverRecipient.Locks.Individual[Lock] = true			else
+				Lock:Release()			end
+		end
+
+		self.User = TakeoverRecipient		self.TakeoverRecipient = nil		self.Aborted = false
+		OriginalUser.Locks.Groups[self] = nil		if TakeoverRecipient then
+			TakeoverRecipient.Locks.Groups[self] = true		end
+
+		self.UserChanged:Fire(TakeoverRecipient, OriginalUser)
+
+		return self
+	end
+
+	function Group.Destroy(self)
+		if (not self.Destroyed) then
+			self.Destroyed = true
+
+			for _, Connection in self.Connections do
+				Connection:Disconnect()			end
+
+			table.clear(self.Connections)
+		end
+
+		return self
+	end
+
+	return table.freeze({new = Lock.new, Group = Group})
+end
+end)() end,function()ImportGlobals(6)return (function(...)    return function(Root)
+	-- // Modules
+	local t = Root:Get('Modules/t')	
+    -- // Variables
+    
+	local EvaluateSequenceAssert ,PaintAssert ,MergeAssert ,floor = t.tuple(t.ColorSequence, t.numberConstrained(0, 1)),t.tuple(t.string, t.union(t.Color3, t.ColorSequence))
+,t.intersection(t.array(t.Color3), function(value)
+		return #value >= 2, 'Merge requires at least 2 colors'
+	end)
+,math.floor	
+	-- // Functions
+	local function FormatRichText(Text, Color)
+		return `<font color="rgb({floor(Color.R * 255)},{floor(Color.G * 255)},{floor(Color.B * 255)})">{Text}</font>`
+	end
+	
+	-- // Color
+	local Color = {}	
+	function Color.EvaluateColorSequence(Sequence, Time)
+		assert(EvaluateSequenceAssert(Sequence, Time))		
+		local Keypoints = Sequence.Keypoints		local Previous = Keypoints[1]		
+		for Index = 2, #Keypoints do 
+			local CurrentKey = Keypoints[Index]
+			if Time <= CurrentKey.Time then
+				local TimeSegment = (Time - Previous.Time) / (CurrentKey.Time - Previous.Time)
+				
+				return Previous.Value:Lerp(CurrentKey.Value, TimeSegment)			end
+
+			Previous = CurrentKey
+		end
+
+		return Keypoints[#Keypoints].Value	end
+	
+	function Color.Paint(Text, InputColor)
+		assert(PaintAssert(Text, InputColor))		
+		if typeof(InputColor) == 'Color3' then
+			return FormatRichText(Text, InputColor)		elseif typeof(InputColor) == 'ColorSequence' then
+			local Result, Length = {}, #Text			
+			for Index = 1, Length do 
+				local Time = (Length == 1) and 0 or ((Index - 1) / (Length - 1))				
+				Result[Index] = Color.Paint(Text:sub(Index, Index), Color.EvaluateColorSequence(InputColor, Time))
+			end
+
+			return table.concat(Result)
+		end
+	end
+	
+	function Color.Merge(...)
+		local Arguments = {...} 		assert(MergeAssert(Arguments))		
+		local Keypoints, Size = {}, #Arguments		
+		for Index, InputColor in Arguments do 
+			table.insert(Keypoints, ColorSequenceKeypoint.new((Index - 1) / (Size - 1), InputColor))
+		end
+		
+		return ColorSequence.new(Keypoints)	end
+	
+	return Color
+end
+end)() end,function()ImportGlobals(7)return (function(...)return function(Root)
+	local t = {}
+
+	function t.type(typeName)
+		return function(value)
+			local valueType = type(value)
+			if valueType == typeName then
+				return true
+			else
+				return false, string.format("%s expected, got %s", typeName, valueType)
+			end
+		end
+	end
+
+	function t.typeof(typeName)
+		return function(value)
+			local valueType = typeof(value)
+			if valueType == typeName then
+				return true
+			else
+				return false, string.format("%s expected, got %s", typeName, valueType)
+			end
+		end
+	end
+
+	function t.any(value)
+		if value ~= nil then
+			return true
+		else
+			return false, "any expected, got nil"
+		end
+	end
+
+	t.boolean = t.typeof("boolean")
+	t.buffer = t.typeof("buffer")
+	t.thread = t.typeof("thread")
+	t.callback = t.typeof("function")
+	t["function"] = t.callback
+	t.none = t.typeof("nil")
+	t["nil"] = t.none
+	t.string = t.typeof("string")
+	t.table = t.typeof("table")
+	t.userdata = t.type("userdata")
+	t.vector = t.type("vector")
+
+	function t.number(value)
+		local valueType = typeof(value)
+		if valueType == "number" then
+			if value == value then
+				return true
+			else
+				return false, "unexpected NaN value"
+			end
+		else
+			return false, string.format("number expected, got %s", valueType)
+		end
+	end
+
+	function t.nan(value)
+		local valueType = typeof(value)
+		if valueType == "number" then
+			if value ~= value then
+				return true
+			else
+				return false, "unexpected non-NaN value"
+			end
+		else
+			return false, string.format("number expected, got %s", valueType)
+		end
+	end
+
+	t.Axes = t.typeof("Axes")
+	t.BrickColor = t.typeof("BrickColor")
+	t.CatalogSearchParams = t.typeof("CatalogSearchParams")
+	t.CFrame = t.typeof("CFrame")
+	t.Content = t.typeof("Content")
+	t.Color3 = t.typeof("Color3")
+	t.ColorSequence = t.typeof("ColorSequence")
+	t.ColorSequenceKeypoint = t.typeof("ColorSequenceKeypoint")
+	t.DateTime = t.typeof("DateTime")
+	t.DockWidgetPluginGuiInfo = t.typeof("DockWidgetPluginGuiInfo")
+	t.Enum = t.typeof("Enum")
+	t.EnumItem = t.typeof("EnumItem")
+	t.Enums = t.typeof("Enums")
+	t.Faces = t.typeof("Faces")
+	t.FloatCurveKey = t.typeof("FloatCurveKey")
+	t.Font = t.typeof("Font")
+	t.Instance = t.typeof("Instance")
+	t.NumberRange = t.typeof("NumberRange")
+	t.NumberSequence = t.typeof("NumberSequence")
+	t.NumberSequenceKeypoint = t.typeof("NumberSequenceKeypoint")
+	t.OverlapParams = t.typeof("OverlapParams")
+	t.PathWaypoint = t.typeof("PathWaypoint")
+	t.PhysicalProperties = t.typeof("PhysicalProperties")
+	t.Random = t.typeof("Random")
+	t.Ray = t.typeof("Ray")
+	t.RaycastParams = t.typeof("RaycastParams")
+	t.RaycastResult = t.typeof("RaycastResult")
+	t.RBXScriptConnection = t.typeof("RBXScriptConnection")
+	t.RBXScriptSignal = t.typeof("RBXScriptSignal")
+	t.Rect = t.typeof("Rect")
+	t.Region3 = t.typeof("Region3")
+	t.Region3int16 = t.typeof("Region3int16")
+	t.TweenInfo = t.typeof("TweenInfo")
+	t.UDim = t.typeof("UDim")
+	t.UDim2 = t.typeof("UDim2")
+	t.Vector2 = t.typeof("Vector2")
+	t.Vector2int16 = t.typeof("Vector2int16")
+	t.Vector3 = t.typeof("Vector3")
+	t.Vector3int16 = t.typeof("Vector3int16")
+
+	-- PERF: builds a hash set at checker-creation time for O(1) lookups at runtime.
+	-- The original also had a redundant ipairs fallback loop that could never catch
+	-- anything the set missed — removed here.
+	function t.literalList(literals)
+		local set = {}
+		for _, literal in ipairs(literals) do
+			set[literal] = true
+		end
+		return function(value)
+			if set[value] then
+				return true
+			end
+			return false, "bad type for literal list"
+		end
+	end
+
+	function t.literal(...)
+		local size = select("#", ...)
+		if size == 1 then
+			local literal = ...
+			return function(value)
+				if value ~= literal then
+					return false, string.format("expected %s, got %s", tostring(literal), tostring(value))
+				end
+				return true
+			end
+		else
+			local literals = {}
+			for i = 1, size do
+				local value = select(i, ...)
+				literals[i] = t.literal(value)
+			end
+			return t.unionList(literals)
+		end
+	end
+
+	t.exactly = t.literal
+
+	function t.keyOf(keyTable)
+		local keys ,length = {}
+,0
+		for key in pairs(keyTable) do
+			length = length + 1
+			keys[length] = key
+		end
+		return t.literal(table.unpack(keys, 1, length))
+	end
+
+	function t.valueOf(valueTable)
+		local values ,length = {}
+,0
+		for _, value in pairs(valueTable) do
+			length = length + 1
+			values[length] = value
+		end
+		return t.literal(table.unpack(values, 1, length))
+	end
+
+	function t.integer(value)
+		local success, errMsg = t.number(value)
+		if not success then
+			return false, errMsg or ""
+		end
+		if value % 1 == 0 then
+			return true
+		else
+			return false, string.format("integer expected, got %s", value)
+		end
+	end
+
+	function t.numberMin(min)
+		return function(value)
+			local success, errMsg = t.number(value)
+			if not success then
+				return false, errMsg or ""
+			end
+			if value >= min then
+				return true
+			else
+				return false, string.format("number >= %s expected, got %s", min, value)
+			end
+		end
+	end
+
+	function t.numberMax(max)
+		return function(value)
+			local success, errMsg = t.number(value)
+			if not success then
+				return false, errMsg
+			end
+			if value <= max then
+				return true
+			else
+				return false, string.format("number <= %s expected, got %s", max, value)
+			end
+		end
+	end
+
+	function t.numberMinExclusive(min)
+		return function(value)
+			local success, errMsg = t.number(value)
+			if not success then
+				return false, errMsg or ""
+			end
+			if min < value then
+				return true
+			else
+				return false, string.format("number > %s expected, got %s", min, value)
+			end
+		end
+	end
+
+	function t.numberMaxExclusive(max)
+		return function(value)
+			local success, errMsg = t.number(value)
+			if not success then
+				return false, errMsg or ""
+			end
+			if value < max then
+				return true
+			else
+				return false, string.format("number < %s expected, got %s", max, value)
+			end
+		end
+	end
+
+	t.numberPositive = t.numberMinExclusive(0)
+	t.numberNegative = t.numberMaxExclusive(0)
+
+	function t.numberConstrained(min, max)
+		assert(t.number(min))
+		assert(t.number(max))
+		local minCheck ,maxCheck = t.numberMin(min)
+,t.numberMax(max)
+		return function(value)
+			local minSuccess, minErrMsg = minCheck(value)
+			if not minSuccess then
+				return false, minErrMsg or ""
+			end
+			local maxSuccess, maxErrMsg = maxCheck(value)
+			if not maxSuccess then
+				return false, maxErrMsg or ""
+			end
+			return true
+		end
+	end
+
+	function t.numberConstrainedExclusive(min, max)
+		assert(t.number(min))
+		assert(t.number(max))
+		local minCheck ,maxCheck = t.numberMinExclusive(min)
+,t.numberMaxExclusive(max)
+		return function(value)
+			local minSuccess, minErrMsg = minCheck(value)
+			if not minSuccess then
+				return false, minErrMsg or ""
+			end
+			local maxSuccess, maxErrMsg = maxCheck(value)
+			if not maxSuccess then
+				return false, maxErrMsg or ""
+			end
+			return true
+		end
+	end
+
+	function t.match(pattern)
+		assert(t.string(pattern))
+		return function(value)
+			local stringSuccess, stringErrMsg = t.string(value)
+			if not stringSuccess then
+				return false, stringErrMsg
+			end
+			if string.match(value, pattern) == nil then
+				return false, string.format("%q failed to match pattern %q", value, pattern)
+			end
+			return true
+		end
+	end
+
+	function t.optional(check)
+		assert(t.callback(check))
+		return function(value)
+			if value == nil then
+				return true
+			end
+			local success, errMsg = check(value)
+			if success then
+				return true
+			else
+				return false, string.format("(optional) %s", errMsg or "")
+			end
+		end
+	end
+
+	function t.tuple(...)
+		local checks = { ... }
+		return function(...)
+			local args = { ... }
+			for i, check in ipairs(checks) do
+				local success, errMsg = check(args[i])
+				if success == false then
+					return false, string.format("Bad tuple index #%s:\n\t%s", i, errMsg or "")
+				end
+			end
+			return true
+		end
+	end
+
+	function t.keys(check)
+		assert(t.callback(check))
+		return function(value)
+			local tableSuccess, tableErrMsg = t.table(value)
+			if tableSuccess == false then
+				return false, tableErrMsg or ""
+			end
+			for key in pairs(value) do
+				local success, errMsg = check(key)
+				if success == false then
+					return false, string.format("bad key %s:\n\t%s", tostring(key), errMsg or "")
+				end
+			end
+			return true
+		end
+	end
+
+	function t.values(check)
+		assert(t.callback(check))
+		return function(value)
+			local tableSuccess, tableErrMsg = t.table(value)
+			if tableSuccess == false then
+				return false, tableErrMsg or ""
+			end
+			for key, val in pairs(value) do
+				local success, errMsg = check(val)
+				if success == false then
+					return false, string.format("bad value for key %s:\n\t%s", tostring(key), errMsg or "")
+				end
+			end
+			return true
+		end
+	end
+
+	function t.map(keyCheck, valueCheck)
+		assert(t.callback(keyCheck))
+		assert(t.callback(valueCheck))
+		local keyChecker ,valueChecker = t.keys(keyCheck)
+,t.values(valueCheck)
+		return function(value)
+			local keySuccess, keyErr = keyChecker(value)
+			if not keySuccess then
+				return false, keyErr or ""
+			end
+			local valueSuccess, valueErr = valueChecker(value)
+			if not valueSuccess then
+				return false, valueErr or ""
+			end
+			return true
+		end
+	end
+
+	function t.set(valueCheck)
+		return t.map(valueCheck, t.literal(true))
+	end
+
+	do
+		local arrayKeysCheck = t.keys(t.integer)
+
+		function t.array(check)
+			assert(t.callback(check))
+			local valuesCheck = t.values(check)
+			return function(value)
+				local keySuccess, keyErrMsg = arrayKeysCheck(value)
+				if keySuccess == false then
+					return false, string.format("[array] %s", keyErrMsg or "")
+				end
+				local arraySize = 0
+				for _ in ipairs(value) do
+					arraySize = arraySize + 1
+				end
+				for key in pairs(value) do
+					if key < 1 or key > arraySize then
+						return false, string.format("[array] key %s must be sequential", tostring(key))
+					end
+				end
+				local valueSuccess, valueErrMsg = valuesCheck(value)
+				if not valueSuccess then
+					return false, string.format("[array] %s", valueErrMsg or "")
+				end
+				return true
+			end
+		end
+
+		function t.strictArray(...)
+			local valueTypes = { ... }
+			assert(t.array(t.callback)(valueTypes))
+			return function(value)
+				local keySuccess, keyErrMsg = arrayKeysCheck(value)
+				if keySuccess == false then
+					return false, string.format("[strictArray] %s", keyErrMsg or "")
+				end
+				if #valueTypes < #value then
+					return false, string.format("[strictArray] Array size exceeds limit of %d", #valueTypes)
+				end
+				for idx, typeFn in pairs(valueTypes) do
+					local typeSuccess, typeErrMsg = typeFn(value[idx])
+					if not typeSuccess then
+						return false, string.format("[strictArray] Array index #%d - %s", idx, typeErrMsg)
+					end
+				end
+				return true
+			end
+		end
+	end
+
+	do
+		local callbackArray = t.array(t.callback)
+
+		function t.unionList(checks)
+			assert(callbackArray(checks))
+			return function(value)
+				for _, check in ipairs(checks) do
+					if check(value) then
+						return true
+					end
+				end
+				return false, "bad type for union"
+			end
+		end
+
+		function t.union(...)
+			return t.unionList({ ... })
+		end
+
+		t.some = t.union
+
+		function t.intersectionList(checks)
+			assert(callbackArray(checks))
+			return function(value)
+				for _, check in ipairs(checks) do
+					local success, errMsg = check(value)
+					if not success then
+						return false, errMsg or ""
+					end
+				end
+				return true
+			end
+		end
+
+		function t.intersection(...)
+			return t.intersectionList({ ... })
+		end
+
+		t.every = t.intersection
+	end
+
+	do
+		local checkInterface = t.map(t.any, t.callback)
+
+		function t.interface(checkTable)
+			assert(checkInterface(checkTable))
+			return function(value)
+				local tableSuccess, tableErrMsg = t.table(value)
+				if tableSuccess == false then
+					return false, tableErrMsg or ""
+				end
+				for key, check in pairs(checkTable) do
+					local success, errMsg = check(value[key])
+					if success == false then
+						return false, string.format("[interface] bad value for %s:\n\t%s", tostring(key), errMsg or "")
+					end
+				end
+				return true
+			end
+		end
+
+		function t.strictInterface(checkTable)
+			assert(checkInterface(checkTable))
+			return function(value)
+				local tableSuccess, tableErrMsg = t.table(value)
+				if tableSuccess == false then
+					return false, tableErrMsg or ""
+				end
+				for key, check in pairs(checkTable) do
+					local success, errMsg = check(value[key])
+					if success == false then
+						return false, string.format("[interface] bad value for %s:\n\t%s", tostring(key), errMsg or "")
+					end
+				end
+				for key in pairs(value) do
+					if not checkTable[key] then
+						return false, string.format("[interface] unexpected field %q", tostring(key))
+					end
+				end
+				return true
+			end
+		end
+	end
+
+	function t.instanceOf(className, childTable)
+		assert(t.string(className))
+		local childrenCheck
+		if childTable ~= nil then
+			childrenCheck = t.children(childTable)
+		end
+		return function(value)
+			local instanceSuccess, instanceErrMsg = t.Instance(value)
+			if not instanceSuccess then
+				return false, instanceErrMsg or ""
+			end
+			if value.ClassName ~= className then
+				return false, string.format("%s expected, got %s", className, value.ClassName)
+			end
+			if childrenCheck then
+				local childrenSuccess, childrenErrMsg = childrenCheck(value)
+				if not childrenSuccess then
+					return false, childrenErrMsg
+				end
+			end
+			return true
+		end
+	end
+
+	t.instance = t.instanceOf
+
+	function t.instanceIsA(className, childTable)
+		assert(t.string(className))
+		local childrenCheck
+		if childTable ~= nil then
+			childrenCheck = t.children(childTable)
+		end
+		return function(value)
+			local instanceSuccess, instanceErrMsg = t.Instance(value)
+			if not instanceSuccess then
+				return false, instanceErrMsg or ""
+			end
+			if not value:IsA(className) then
+				return false, string.format("%s expected, got %s", className, value.ClassName)
+			end
+			if childrenCheck then
+				local childrenSuccess, childrenErrMsg = childrenCheck(value)
+				if not childrenSuccess then
+					return false, childrenErrMsg
+				end
+			end
+			return true
+		end
+	end
+
+	function t.enum(enum)
+		assert(t.Enum(enum))
+		return function(value)
+			local enumItemSuccess, enumItemErrMsg = t.EnumItem(value)
+			if not enumItemSuccess then
+				return false, enumItemErrMsg
+			end
+			if value.EnumType == enum then
+				return true
+			else
+				return false, string.format("enum of %s expected, got enum of %s", tostring(enum), tostring(value.EnumType))
+			end
+		end
+	end
+
+	do
+		local checkWrap = t.tuple(t.callback, t.callback)
+
+		function t.wrap(callback, checkArgs)
+			assert(checkWrap(callback, checkArgs))
+			return function(...)
+				assert(checkArgs(...))
+				return callback(...)
+			end
+		end
+	end
+
+	function t.strict(check)
+		return function(...)
+			assert(check(...))
+		end
+	end
+
+	do
+		local checkChildren = t.map(t.string, t.callback)
+
+		function t.children(checkTable)
+			assert(checkChildren(checkTable))
+			return function(value)
+				local instanceSuccess, instanceErrMsg = t.Instance(value)
+				if not instanceSuccess then
+					return false, instanceErrMsg or ""
+				end
+				local childrenByName = {}
+				for _, child in ipairs(value:GetChildren()) do
+					local name = child.Name
+					if checkTable[name] then
+						if childrenByName[name] then
+							return false, string.format("Cannot process multiple children with the same name %q", name)
+						end
+						childrenByName[name] = child
+					end
+				end
+				for name, check in pairs(checkTable) do
+					local success, errMsg = check(childrenByName[name])
+					if not success then
+						return false, string.format("[%s.%s] %s", value:GetFullName(), name, errMsg or "")
+					end
+				end
+				return true
+			end
+		end
+	end
+
+	return t
+end
+end)() end,function()local wax, script, require=ImportGlobals(8)return (function(...)return function(Root)
+	-- // Interface
+	local Interface = {
+		Loaded = {};	
+	}	
+	function Interface.GetInterface(Name)
+		assert(typeof(Name) == 'string', 'Must provide Inteface Name')		
+		if Interface.Loaded[Name] then
+			return Interface.Loaded[Name]
+		end 
+		
+		local Target = script.List:FindFirstChild(Name)		assert(Target, `Failed to find Interface Components for: '{Name}'`)		
+		local LoadedComponents = {}		
+		for _, Component in Target:GetChildren() do 
+            assert(Component.ClassName == 'ModuleScript', `Failed to load Interface Component '{Component.Name}' of '{Name}': Instance is not a ModuleScript.`)			
+			LoadedComponents[Component.Name] = require(Component)(Root)		end
+		
+		Interface.Loaded[Name] = LoadedComponents
+		
+		return LoadedComponents
+	end
+	
+	
+	
+	
+	return Interface
+end
+end)() end,[11]=function()ImportGlobals(11)return (function(...)return function(Shared)
+    local cloneref = (cloneref or clonereference or function(instance)
+        return instance
+    end)
+    local CoreGui,Players,RunService,SoundService,UserInputService,TextService,Teams,TweenService,getgenv ,setclipboard ,protectgui = cloneref(game:GetService("CoreGui"))
+,cloneref(game:GetService("Players"))
+,cloneref(game:GetService("RunService"))
+,cloneref(game:GetService("SoundService"))
+,cloneref(game:GetService("UserInputService"))
+,cloneref(game:GetService("TextService"))
+,cloneref(game:GetService("Teams"))
+,cloneref(game:GetService("TweenService"))
+,getgenv or function()
+        return shared
+    end
+,setclipboard or nil
+,protectgui or (syn and syn.protect_gui) or function() end
+    local gethui ,LocalPlayer = gethui or function()
+        return CoreGui
+    end
+,Players.LocalPlayer or Players.PlayerAdded:Wait()
+    local Mouse ,Labels ,Buttons ,Toggles ,Options ,Tooltips ,BaseURL ,CustomImageManager = cloneref(LocalPlayer:GetMouse())
+,{}
+,{}
+,{}
+,{}
+,{}
+,"https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/"
+,{}
+    local CustomImageManagerAssets = {
+        TransparencyTexture = {
+            RobloxId = 139785960036434,
+            Path = "Obsidian/assets/TransparencyTexture.png",
+            URL = BaseURL .. "assets/TransparencyTexture.png",
+
+            Id = nil,
+        },
+
+        SaturationMap = {
+            RobloxId = 4155801252,
+            Path = "Obsidian/assets/SaturationMap.png",
+            URL = BaseURL .. "assets/SaturationMap.png",
+
+            Id = nil,
+        },
+
+        LoadingIcon = {
+            RobloxId = 97544096941083,
+            Path = "Obsidian/assets/LoadingIcon.png",
+            URL = BaseURL .. "assets/LoadingIcon.png",
+
+            Id = nil,
+        },
+
+        CheckIcon = {
+            RobloxId = 97682394690683,
+            Path = "Obsidian/assets/CheckIcon.png",
+            URL = BaseURL .. "assets/CheckIcon.png",
+
+            Id = nil,
+        },
+    }
+    do
+        local function RecursiveCreatePath(Path, IsFile)
+            if not isfolder or not makefolder then
+                return
+            end
+
+            local Segments ,TraversedPath = Path:split("/")
+,""
+
+            if IsFile then
+                table.remove(Segments, #Segments)
+            end
+
+            for _, Segment in ipairs(Segments) do
+                if not isfolder(TraversedPath .. Segment) then
+                    makefolder(TraversedPath .. Segment)
+                end
+
+                TraversedPath = TraversedPath .. Segment .. "/"
+            end
+
+            return TraversedPath
+        end
+
+        function CustomImageManager.AddAsset(
+            AssetName,
+            RobloxAssetId,
+            URL,
+            ForceRedownload        )
+            if CustomImageManagerAssets[AssetName] ~= nil then
+                error(string.format("Asset %q already exists", AssetName))
+            end
+
+            assert(typeof(RobloxAssetId) == "number", "RobloxAssetId must be a number")
+
+            CustomImageManagerAssets[AssetName] = {
+                RobloxId = RobloxAssetId,
+                Path = string.format("Obsidian/custom_assets/%s", AssetName),
+                URL = URL,
+
+                Id = nil,
+            }
+
+            CustomImageManager.DownloadAsset(AssetName, ForceRedownload)
+        end
+
+        function CustomImageManager.GetAsset(AssetName)
+            if not CustomImageManagerAssets[AssetName] then
+                return nil
+            end
+
+            local AssetData = CustomImageManagerAssets[AssetName]
+            if AssetData.Id then
+                return AssetData.Id
+            end
+
+            local AssetID = string.format("rbxassetid://%s", AssetData.RobloxId)
+
+            if getcustomasset then
+                local Success, NewID = pcall(getcustomasset, AssetData.Path)
+
+                if Success and NewID then
+                    AssetID = NewID
+                end
+            end
+
+            AssetData.Id = AssetID
+            return AssetID
+        end
+
+        function CustomImageManager.DownloadAsset(AssetName, ForceRedownload)
+            if not getcustomasset or not writefile or not isfile then
+                return false, "missing functions"
+            end
+
+            local AssetData = CustomImageManagerAssets[AssetName]
+
+            RecursiveCreatePath(AssetData.Path, true)
+
+            if ForceRedownload ~= true and isfile(AssetData.Path) then
+                return true, nil
+            end
+
+            local success, errorMessage = pcall(function()
+                writefile(AssetData.Path, game:HttpGet(AssetData.URL))
+            end)
+
+            return success, errorMessage
+        end
+
+        for AssetName, _ in CustomImageManagerAssets do
+            CustomImageManager.DownloadAsset(AssetName)
+        end
+    end
+
+    local Library = {
+        LocalPlayer = LocalPlayer,
+        DevicePlatform = nil,
+        IsMobile = false,
+        IsRobloxFocused = true,
+
+        ScreenGui = nil,
+
+        SearchText = "",
+        Searching = false,
+        GlobalSearch = false,
+        LastSearchTab = nil,
+
+        ActiveTab = nil,
+        Tabs = {},
+        TabButtons = {},
+        DependencyBoxes = {},
+
+        KeybindFrame = nil,
+        KeybindContainer = nil,
+        KeybindToggles = {},
+
+        Notifications = {},
+        Dialogues = {},
+        ActiveLoading = nil,
+        ActiveDialog = nil,
+
+        Corners = {},
+
+        ToggleKeybind = Enum.KeyCode.RightControl,
+        TweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        NotifyTweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+
+        Toggled = false,
+        Unloaded = false,
+
+        Labels = Labels,
+        Buttons = Buttons,
+        Toggles = Toggles,
+        Options = Options,
+
+        NotifySide = "Right",
+        ShowCustomCursor = true,
+        ForceCheckbox = false,
+        ShowToggleFrameInKeybinds = true,
+        NotifyOnError = false,
+
+        CantDragForced = false,
+
+        Signals = {},
+        UnloadSignals = {},
+
+        OriginalMinSize = Vector2.new(480, 360),
+        MinSize = Vector2.new(480, 360),
+        DPIScale = 1,
+        CornerRadius = 4,
+        CornerRadiusDropdown = false, -- Temporary
+
+        IsLightTheme = false,
+        Scheme = {
+            BackgroundColor = Color3.fromRGB(15, 15, 15),
+            MainColor = Color3.fromRGB(25, 25, 25),
+            AccentColor = Color3.fromRGB(125, 85, 255),
+            OutlineColor = Color3.fromRGB(40, 40, 40),
+            FontColor = Color3.new(1, 1, 1),
+            Font = Font.fromEnum(Enum.Font.Code),
+
+            RedColor = Color3.fromRGB(255, 50, 50),
+            DestructiveColor = Color3.fromRGB(220, 38, 38),
+            DarkColor = Color3.new(0, 0, 0),
+            WhiteColor = Color3.new(1, 1, 1),
+        },
+
+        Registry = {},
+        Scales = {},
+        ScalesOffset = {},
+
+        ImageManager = CustomImageManager,
+        ShowCursorBinding = string.sub(tostring({}), 10),
+    }
+
+    if RunService:IsStudio() then
+        if UserInputService.TouchEnabled and not UserInputService.MouseEnabled then
+            Library.IsMobile = true
+            Library.OriginalMinSize = Vector2.new(480, 240)
+        else
+            Library.IsMobile = false
+            Library.OriginalMinSize = Vector2.new(480, 360)
+        end
+    else
+        pcall(function()
+            Library.DevicePlatform = UserInputService:GetPlatform()
+        end)
+        Library.IsMobile = (Library.DevicePlatform == Enum.Platform.Android or Library.DevicePlatform == Enum.Platform.IOS)
+        Library.OriginalMinSize = Library.IsMobile and Vector2.new(480, 240) or Vector2.new(480, 360)
+    end
+
+    local Templates ,Places ,Sizes ,SchemeReplaceAlias ,SchemeAlias = {
+        --// UI \\-
+        Frame = {
+            BorderSizePixel = 0,
+        },
+        ImageLabel = {
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+        },
+        ImageButton = {
+            AutoButtonColor = false,
+            BorderSizePixel = 0,
+        },
+        ScrollingFrame = {
+            BorderSizePixel = 0,
+        },
+        TextLabel = {
+            BorderSizePixel = 0,
+            FontFace = "Font",
+            RichText = true,
+            TextColor3 = "FontColor",
+        },
+        TextButton = {
+            AutoButtonColor = false,
+            BorderSizePixel = 0,
+            FontFace = "Font",
+            RichText = true,
+            TextColor3 = "FontColor",
+        },
+        TextBox = {
+            BorderSizePixel = 0,
+            FontFace = "Font",
+            PlaceholderColor3 = function()
+                local H, S, V = Library.Scheme.FontColor:ToHSV()
+                return Color3.fromHSV(H, S, V / 2)
+            end,
+            Text = "",
+            TextColor3 = "FontColor",
+        },
+        UIListLayout = {
+            SortOrder = Enum.SortOrder.LayoutOrder,
+        },
+        UIStroke = {
+            ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+        },
+
+        --// Library \\--
+        Window = {
+            Title = "No Title",
+            Footer = "No Footer",
+            Position = UDim2.fromOffset(6, 6),
+            Size = UDim2.fromOffset(720, 600),
+            IconSize = UDim2.fromOffset(30, 30),
+            AutoShow = true,
+            Center = true,
+            Resizable = true,
+            SearchbarSize = UDim2.fromScale(1, 1),
+            GlobalSearch = false,
+            CornerRadius = 4,
+            NotifySide = "Right",
+            ShowCustomCursor = true,
+            Font = Enum.Font.Code,
+            ToggleKeybind = Enum.KeyCode.RightControl,
+
+            ShowMobileButtons = true,
+            MobileButtonsSide = "Left",
+
+            UnlockMouseWhileOpen = true,
+
+            EnableSidebarResize = false,
+            EnableCompacting = true,
+            DisableCompactingSnap = false,
+            SidebarCompacted = false,
+            MinContainerWidth = 256,
+
+            --// Snapping \\--
+            MinSidebarWidth = 128,
+            SidebarCompactWidth = 48,
+            SidebarCollapseThreshold = 0.5,
+
+            --// Dragging \\--
+            CompactWidthActivation = 128,
+        },
+        Dialog = {
+            Title = "Dialog",
+            Description = "Description",
+            AutoDismiss = true,
+            OutsideClickDismiss = true,
+            FooterButtons = {}
+        },
+        Loading = {
+            Title = "mspaint",
+            Icon = 95816097006870,
+            IconSize = UDim2.fromOffset(30, 30),
+
+            LoadingIcon = CustomImageManager.GetAsset("LoadingIcon"),
+            LoadingIconColor = nil,
+            LoadingIconTweenTime = 1,
+
+            CurrentStep = 0,
+            TotalSteps = 10,
+
+            ShowSidebar = false,
+            AutoResizeHeight = false,
+
+            WindowWidth = 450,
+            WindowHeight = 275,
+
+            ContentWidth = 450,
+            SidebarWidth = 250,
+        },
+        Toggle = {
+            Text = "Toggle",
+            Default = false,
+
+            Callback = function() end,
+            Changed = function() end,
+
+            Risky = false,
+            Disabled = false,
+            Visible = true,
+        },
+        Input = {
+            Text = "Input",
+            Default = "",
+            Finished = false,
+            Numeric = false,
+            ClearTextOnFocus = true,
+            ClearTextOnBlur = false,
+            Placeholder = "",
+            AllowEmpty = true,
+            EmptyReset = "---",
+
+            Callback = function() end,
+            Changed = function() end,
+            VerifyValue = nil,
+
+            Disabled = false,
+            Visible = true,
+        },
+        Slider = {
+            Text = "Slider",
+            Default = 0,
+            Min = 0,
+            Max = 100,
+            Rounding = 0,
+
+            Prefix = "",
+            Suffix = "",
+
+            Callback = function() end,
+            Changed = function() end,
+
+            Disabled = false,
+            Visible = true,
+        },
+        Dropdown = {
+            Values = {},
+            DisabledValues = {},
+            ValueImages = {},
+            
+            RichText = false, -- vma added this
+
+            Multi = false,
+            MaxVisibleDropdownItems = 8,
+
+            Callback = function() end,
+            Changed = function() end,
+
+            Disabled = false,
+            Visible = true,
+        },
+        Viewport = {
+            Object = nil,
+            Camera = nil,
+            Clone = true,
+            AutoFocus = true,
+            Interactive = false,
+            Height = 200,
+            Visible = true,
+        },
+        Image = {
+            Image = "",
+            Transparency = 0,
+            BackgroundTransparency = 0,
+            Color = Color3.new(1, 1, 1),
+            RectOffset = Vector2.zero,
+            RectSize = Vector2.zero,
+            ScaleType = Enum.ScaleType.Fit,
+            Height = 200,
+            Outline = false, -- vma added this
+            Visible = true,
+        },
+        Video = {
+            Video = "",
+            Looped = false,
+            Playing = false,
+            Volume = 1,
+            Height = 200,
+            Visible = true,
+        },
+        UIPassthrough = {
+            Instance = nil,
+            Height = 24,
+            Visible = true,
+        },
+
+        --// Addons \\-
+        KeyPicker = {
+            Text = "KeyPicker",
+
+            Default = "None",
+            DefaultModifiers = {},
+
+            Blacklisted = {},
+            BlacklistedModifiers = {},
+            Whitelisted = {},
+            WhitelistedModifiers = {},
+
+            Mode = "Toggle",
+            Modes = { "Always", "Toggle", "Hold" },
+            SyncToggleState = false,
+
+            Callback = function() end,
+            ChangedCallback = function() end,
+            Changed = function() end,
+            Clicked = function() end,
+        },
+        ColorPicker = {
+            Default = Color3.new(1, 1, 1),
+
+            Callback = function() end,
+            Changed = function() end,
+        },
+    }
+,{
+        Bottom = { 0, 1 },
+        Right = { 1, 0 },
+    }
+,{
+        Left = { 0.5, 1 },
+        Right = { 0.5, 1 },
+    }
+,{
+        RedColor = "Red",
+        WhiteColor = "White",
+        DarkColor = "Dark"
+    }
+,{
+        Red = "RedColor",
+        White = "WhiteColor",
+        Dark = "DarkColor"
+    }
+
+    local function GetSchemeValue(Index)
+        if not Index then
+            return nil
+        end
+
+        local ReplaceAliasIndex = SchemeReplaceAlias[Index]
+        if ReplaceAliasIndex and Library.Scheme[ReplaceAliasIndex] ~= nil then
+            Library.Scheme[Index] = Library.Scheme[ReplaceAliasIndex]
+            Library.Scheme[ReplaceAliasIndex] = nil
+
+            return Library.Scheme[Index]
+        end
+
+        local AliasIndex = SchemeAlias[Index]
+        if AliasIndex and Library.Scheme[AliasIndex] ~= nil then
+            warn(string.format("Scheme Value %q is deprecated, please use %q instead.", Index, AliasIndex))
+            return Library.Scheme[AliasIndex]
+        end
+
+        return Library.Scheme[Index]
+    end
+
+    --// Basic Functions \\--
+    local function WaitForEvent(Event, Timeout, Condition)
+        local Bindable = Instance.new("BindableEvent")
+        local Connection = Event:Once(function(...)
+            if not Condition or typeof(Condition) == "function" and Condition(...) then
+                Bindable:Fire(true)
+            else
+                Bindable:Fire(false)
+            end
+        end)
+        task.delay(Timeout, function()
+            Connection:Disconnect()
+            Bindable:Fire(false)
+        end)
+
+        local Result = Bindable.Event:Wait()
+        Bindable:Destroy()
+
+        return Result
+    end
+
+    local function IsMouseInput(Input, IncludeM2)
+        return Input.UserInputType == Enum.UserInputType.MouseButton1
+            or (IncludeM2 == true and Input.UserInputType == Enum.UserInputType.MouseButton2)
+            or Input.UserInputType == Enum.UserInputType.Touch
+    end
+    local function IsClickInput(Input, IncludeM2)
+        return IsMouseInput(Input, IncludeM2)
+            and Input.UserInputState == Enum.UserInputState.Begin
+            and Library.IsRobloxFocused
+    end
+    local function IsHoverInput(Input)
+        return (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch)
+            and Input.UserInputState == Enum.UserInputState.Change
+    end
+    local function IsDragInput(Input, IncludeM2)
+        return IsMouseInput(Input, IncludeM2)
+            and (Input.UserInputState == Enum.UserInputState.Begin or Input.UserInputState == Enum.UserInputState.Change)
+            and Library.IsRobloxFocused
+    end
+
+    local function GetTableSize(Table)
+        local Size = 0
+
+        for _, _ in Table do
+            Size += 1
+        end
+
+        return Size
+    end
+    local function StopTween(Tween)
+        if not (Tween and Tween.PlaybackState == Enum.PlaybackState.Playing) then
+            return
+        end
+
+        Tween:Cancel()
+    end
+    
+    local function Trim(Text)
+        return Text:match("^%s*(.-)%s*$")
+    end
+    local function Round(Value, Rounding)
+        assert(Rounding >= 0, "Invalid rounding number.")
+
+        if Rounding == 0 then
+            return math.floor(Value)
+        end
+
+        return tonumber(string.format("%." .. Rounding .. "f", Value))
+    end
+    
+    local function StripRichTextTags(String) -- // vma added
+        String = String:gsub("<br%s*/>", "\n")
+        return (String:gsub("<[^<>]->", ""))
+    end
+
+    local function GetPlayers(ExcludeLocalPlayer)
+        local PlayerList = Players:GetPlayers()
+
+        if ExcludeLocalPlayer then
+            local Idx = table.find(PlayerList, LocalPlayer)
+            if Idx then
+                table.remove(PlayerList, Idx)
+            end
+        end
+
+        table.sort(PlayerList, function(Player1, Player2)
+            return Player1.Name:lower() < Player2.Name:lower()
+        end)
+
+        return PlayerList
+    end
+    local function GetTeams()
+        local TeamList = Teams:GetTeams()
+
+        table.sort(TeamList, function(Team1, Team2)
+            return Team1.Name:lower() < Team2.Name:lower()
+        end)
+
+        return TeamList
+    end
+
+    function Library:UpdateDependencyBoxes()
+        for _, Depbox in Library.DependencyBoxes do
+            Depbox:Update(true)
+        end
+
+        if Library.Searching then
+            Library:UpdateSearch(Library.SearchText)
+        end
+    end
+
+    local function CheckDepbox(Box, Search)
+        local VisibleElements = 0
+
+        for _, ElementInfo in Box.Elements do
+            if ElementInfo.Type == "Divider" then
+                ElementInfo.Holder.Visible = false
+                continue
+            elseif ElementInfo.SubButton then
+                --// Check if any of the Buttons Name matches with Search
+                local Visible = false
+
+                --// Check if Search matches Element's Name and if Element is Visible
+                if ElementInfo.Text:lower():match(Search) and ElementInfo.Visible then
+                    Visible = true
+                else
+                    ElementInfo.Base.Visible = false
+                end
+                if ElementInfo.SubButton.Text:lower():match(Search) and ElementInfo.SubButton.Visible then
+                    Visible = true
+                else
+                    ElementInfo.SubButton.Base.Visible = false
+                end
+                ElementInfo.Holder.Visible = Visible
+                if Visible then
+                    VisibleElements += 1
+                end
+
+                continue
+            end
+
+            --// Check if Search matches Element's Name and if Element is Visible
+            if ElementInfo.Text and ElementInfo.Text:lower():match(Search) and ElementInfo.Visible then
+                ElementInfo.Holder.Visible = true
+                VisibleElements += 1
+            else
+                ElementInfo.Holder.Visible = false
+            end
+        end
+
+        for _, Depbox in Box.DependencyBoxes do
+            if not Depbox.Visible then
+                continue
+            end
+
+            VisibleElements += CheckDepbox(Depbox, Search)
+        end
+
+        Box.Holder.Visible = VisibleElements > 0
+        return VisibleElements
+    end
+    local function RestoreDepbox(Box)
+        for _, ElementInfo in Box.Elements do
+            ElementInfo.Holder.Visible = typeof(ElementInfo.Visible) == "boolean" and ElementInfo.Visible or true
+
+            if ElementInfo.SubButton then
+                ElementInfo.Base.Visible = ElementInfo.Visible
+                ElementInfo.SubButton.Base.Visible = ElementInfo.SubButton.Visible
+            end
+        end
+
+        Box:Resize()
+        Box.Holder.Visible = true
+
+        for _, Depbox in Box.DependencyBoxes do
+            if not Depbox.Visible then
+                continue
+            end
+
+            RestoreDepbox(Depbox)
+        end
+    end
+
+    local function ApplySearchToTab(Tab, Search)
+        if not Tab then
+            return
+        end
+
+        local HasVisible = false
+
+        --// Loop through Groupboxes to get Elements Info
+        for _, Groupbox in Tab.Groupboxes do
+            local VisibleElements = 0
+
+            for _, ElementInfo in Groupbox.Elements do
+                if ElementInfo.Type == "Divider" then
+                    ElementInfo.Holder.Visible = false
+                    continue
+                elseif ElementInfo.SubButton then
+                    --// Check if any of the Buttons Name matches with Search
+                    local Visible = false
+
+                    --// Check if Search matches Element's Name and if Element is Visible
+                    if ElementInfo.Text:lower():match(Search) and ElementInfo.Visible then
+                        Visible = true
+                    else
+                        ElementInfo.Base.Visible = false
+                    end
+                    if ElementInfo.SubButton.Text:lower():match(Search) and ElementInfo.SubButton.Visible then
+                        Visible = true
+                    else
+                        ElementInfo.SubButton.Base.Visible = false
+                    end
+                    ElementInfo.Holder.Visible = Visible
+                    if Visible then
+                        VisibleElements += 1
+                    end
+
+                    continue
+                end
+
+                --// Check if Search matches Element's Name and if Element is Visible
+                if ElementInfo.Text and ElementInfo.Text:lower():match(Search) and ElementInfo.Visible then
+                    ElementInfo.Holder.Visible = true
+                    VisibleElements += 1
+                else
+                    ElementInfo.Holder.Visible = false
+                end
+            end
+
+            for _, Depbox in Groupbox.DependencyBoxes do
+                if not Depbox.Visible then
+                    continue
+                end
+
+                VisibleElements += CheckDepbox(Depbox, Search)
+            end
+
+            --// Update Groupbox Size and Visibility if found any element
+            if VisibleElements > 0 then
+                Groupbox:Resize()
+                HasVisible = true
+            end
+            Groupbox.BoxHolder.Visible = VisibleElements > 0
+        end
+
+        for _, Tabbox in Tab.Tabboxes do
+            local VisibleTabs ,VisibleElements = 0
+,{}
+
+            for _, SubTab in Tabbox.Tabs do
+                VisibleElements[SubTab] = 0
+
+                for _, ElementInfo in SubTab.Elements do
+                    if ElementInfo.Type == "Divider" then
+                        ElementInfo.Holder.Visible = false
+                        continue
+                    elseif ElementInfo.SubButton then
+                        --// Check if any of the Buttons Name matches with Search
+                        local Visible = false
+
+                        --// Check if Search matches Element's Name and if Element is Visible
+                        if ElementInfo.Text:lower():match(Search) and ElementInfo.Visible then
+                            Visible = true
+                        else
+                            ElementInfo.Base.Visible = false
+                        end
+                        if ElementInfo.SubButton.Text:lower():match(Search) and ElementInfo.SubButton.Visible then
+                            Visible = true
+                        else
+                            ElementInfo.SubButton.Base.Visible = false
+                        end
+                        ElementInfo.Holder.Visible = Visible
+                        if Visible then
+                            VisibleElements[SubTab] += 1
+                        end
+
+                        continue
+                    end
+
+                    --// Check if Search matches Element's Name and if Element is Visible
+                    if ElementInfo.Text and ElementInfo.Text:lower():match(Search) and ElementInfo.Visible then
+                        ElementInfo.Holder.Visible = true
+                        VisibleElements[SubTab] += 1
+                    else
+                        ElementInfo.Holder.Visible = false
+                    end
+                end
+
+                for _, Depbox in SubTab.DependencyBoxes do
+                    if not Depbox.Visible then
+                        continue
+                    end
+
+                    VisibleElements[SubTab] += CheckDepbox(Depbox, Search)
+                end
+            end
+
+            for SubTab, Visible in VisibleElements do
+                SubTab.ButtonHolder.Visible = Visible > 0
+                if Visible > 0 then
+                    VisibleTabs += 1
+                    HasVisible = true
+
+                    if Tabbox.ActiveTab == SubTab then
+                        SubTab:Resize()
+                    elseif Tabbox.ActiveTab and VisibleElements[Tabbox.ActiveTab] == 0 then
+                        SubTab:Show()
+                    end
+                end
+            end
+
+            --// Update Tabbox Visibility if any visible
+            Tabbox.BoxHolder.Visible = VisibleTabs > 0
+        end
+
+        return HasVisible
+    end
+    local function ResetTab(Tab)
+        if not Tab then
+            return
+        end
+
+        for _, Groupbox in Tab.Groupboxes do
+            for _, ElementInfo in Groupbox.Elements do
+                ElementInfo.Holder.Visible = typeof(ElementInfo.Visible) == "boolean" and ElementInfo.Visible or true
+
+                if ElementInfo.SubButton then
+                    ElementInfo.Base.Visible = ElementInfo.Visible
+                    ElementInfo.SubButton.Base.Visible = ElementInfo.SubButton.Visible
+                end
+            end
+
+            for _, Depbox in Groupbox.DependencyBoxes do
+                if not Depbox.Visible then
+                    continue
+                end
+
+                RestoreDepbox(Depbox)
+            end
+
+            Groupbox:Resize()
+            Groupbox.BoxHolder.Visible = true
+        end
+
+        for _, Tabbox in Tab.Tabboxes do
+            for _, SubTab in Tabbox.Tabs do
+                for _, ElementInfo in SubTab.Elements do
+                    ElementInfo.Holder.Visible = typeof(ElementInfo.Visible) == "boolean" and ElementInfo.Visible or true
+
+                    if ElementInfo.SubButton then
+                        ElementInfo.Base.Visible = ElementInfo.Visible
+                        ElementInfo.SubButton.Base.Visible = ElementInfo.SubButton.Visible
+                    end
+                end
+
+                for _, Depbox in SubTab.DependencyBoxes do
+                    if not Depbox.Visible then
+                        continue
+                    end
+
+                    RestoreDepbox(Depbox)
+                end
+
+                SubTab.ButtonHolder.Visible = true
+            end
+
+            if Tabbox.ActiveTab then
+                Tabbox.ActiveTab:Resize()
+            end
+            Tabbox.BoxHolder.Visible = true
+        end
+    end
+
+    function Library:UpdateSearch(SearchText)
+        Library.SearchText = SearchText
+
+        local TabsToReset = {}
+
+        if Library.GlobalSearch then
+            for _, Tab in Library.Tabs do
+                if typeof(Tab) == "table" and not Tab.IsKeyTab then
+                    table.insert(TabsToReset, Tab)
+                end
+            end
+        elseif Library.LastSearchTab and typeof(Library.LastSearchTab) == "table" then
+            table.insert(TabsToReset, Library.LastSearchTab)
+        end
+
+        for _, Tab in ipairs(TabsToReset) do
+            ResetTab(Tab)
+        end
+
+        local Search = SearchText:lower()
+        if Trim(Search) == "" then
+            Library.Searching = false
+            Library.LastSearchTab = nil
+            return
+        end
+        if not Library.GlobalSearch and Library.ActiveTab and Library.ActiveTab.IsKeyTab then
+            Library.Searching = false
+            Library.LastSearchTab = nil
+            return
+        end
+
+        Library.Searching = true
+
+        local TabsToSearch = {}
+
+        if Library.GlobalSearch then
+            TabsToSearch = TabsToReset
+            if #TabsToSearch == 0 then
+                for _, Tab in Library.Tabs do
+                    if typeof(Tab) == "table" and not Tab.IsKeyTab then
+                        table.insert(TabsToSearch, Tab)
+                    end
+                end
+            end
+        elseif Library.ActiveTab then
+            table.insert(TabsToSearch, Library.ActiveTab)
+        end
+
+        local ActiveHasVisible ,FirstVisibleTab = false
+
+        for _, Tab in ipairs(TabsToSearch) do
+            local HasVisible = ApplySearchToTab(Tab, Search)
+            if HasVisible then
+                if not FirstVisibleTab then
+                    FirstVisibleTab = Tab
+                end
+                if Tab == Library.ActiveTab then
+                    ActiveHasVisible = true
+                end
+            end
+        end
+
+        if Library.GlobalSearch then
+            if ActiveHasVisible and Library.ActiveTab then
+                Library.ActiveTab:RefreshSides()
+            elseif FirstVisibleTab then
+                local SearchMarker = SearchText
+                task.defer(function()
+                    if Library.SearchText ~= SearchMarker then
+                        return
+                    end
+
+                    if Library.ActiveTab ~= FirstVisibleTab then
+                        FirstVisibleTab:Show()
+                    end
+                end)
+            end
+            Library.LastSearchTab = nil
+        else
+            Library.LastSearchTab = Library.ActiveTab
+        end
+    end
+
+    function Library:AddToRegistry(Instance, Properties)
+        Library.Registry[Instance] = Properties
+    end
+
+    function Library:RemoveFromRegistry(Instance)
+        Library.Registry[Instance] = nil
+    end
+
+    function Library:UpdateColorsUsingRegistry()
+        for Instance, Properties in Library.Registry do
+            for Property, Index in Properties do
+                local SchemeValue = GetSchemeValue(Index)
+
+                if SchemeValue or typeof(Index) == "function" then
+                    Instance[Property] = SchemeValue or Index()
+                end
+            end
+        end
+    end
+
+    function Library:SetDPIScale(DPIScale)
+        Library.DPIScale = DPIScale / 100
+        Library.MinSize = Library.OriginalMinSize * Library.DPIScale
+
+        for _, UIScale in Library.Scales do
+            UIScale.Scale = Library.DPIScale - (tonumber(Library.ScalesOffset[UIScale]) or 0)
+        end
+
+        for _, Option in Options do
+            if Option.Type == "Dropdown" then
+                Option:RecalculateListSize()
+            end
+        end
+
+        for _, Notification in Library.Notifications do
+            Notification:Resize()
+        end
+    end
+
+    function Library:GiveSignal(Connection)
+        local ConnectionType = typeof(Connection)
+        if Connection and (ConnectionType == "RBXScriptConnection" or ConnectionType == "RBXScriptSignal") then
+            table.insert(Library.Signals, Connection)
+        end
+
+        return Connection
+    end
+
+    function IsValidCustomIcon(Icon)
+        return typeof(Icon) == "string" and (Icon:match("rbxasset") or Icon:match("roblox%.com/asset/%?id=") or Icon:match("rbxthumb://type="))
+    end
+
+    local FetchIcons, Icons = pcall(function()
+        return ((loadstring(
+            game:HttpGet("https://raw.githubusercontent.com/deividcomsono/lucide-roblox-direct/refs/heads/main/source.lua")
+            ) ))()
+    end)
+
+    function Library:GetIcon(IconName)
+        if not FetchIcons then
+            return
+        end
+
+        local Success, Icon = pcall(Icons.GetAsset, IconName)
+        if not Success then
+            return
+        end
+        return Icon
+    end
+
+    function Library:GetCustomIcon(IconName)        if not IconName then
+            return nil
+        end
+
+        if tonumber(IconName) then
+            IconName = string.format("rbxassetid://%s", tostring(IconName))
+        end
+
+        local CustomIcon = IsValidCustomIcon(IconName)
+        if CustomIcon then
+            return {
+                Url = IconName,
+                ImageRectOffset = Vector2.zero,
+                ImageRectSize = Vector2.zero,
+                Custom = true,
+            }
+        end
+
+        local LucideIcon = Library:GetIcon(IconName)
+        if LucideIcon then
+            return LucideIcon
+        end
+
+        return nil
+    end
+
+    function Library:Validate(Table, Template)        if typeof(Table) ~= "table" then
+            return Template
+        end
+
+        for k, v in Template do
+            if typeof(k) == "number" then
+                continue
+            end
+
+            if typeof(v) == "table" then
+                Table[k] = Library:Validate(Table[k], v)
+            elseif Table[k] == nil then
+                Table[k] = v
+            end
+        end
+
+        return Table
+    end
+
+    --// Creator Functions \\--
+    local function FillInstance(Table, Instance)
+        local ThemeProperties = Library.Registry[Instance] or {}
+
+        for key, value in Table do
+            if key ~= "Text" then
+                local SchemeValue = GetSchemeValue(value)
+
+                if SchemeValue or typeof(value) == "function" then
+                    ThemeProperties[key] = value
+                    value = SchemeValue or value()
+                else
+                    ThemeProperties[key] = nil
+                end
+            end
+
+            Instance[key] = value
+        end
+
+        if GetTableSize(ThemeProperties) > 0 then
+            Library.Registry[Instance] = ThemeProperties
+        end
+    end
+
+    local function New(ClassName, Properties)        local Instance = Instance.new(ClassName)
+
+        if Templates[ClassName] then
+            FillInstance(Templates[ClassName], Instance)
+        end
+        FillInstance(Properties, Instance)
+
+        if Properties.Parent and not Properties.ZIndex then
+            pcall(function()
+                Instance.ZIndex = Properties.Parent.ZIndex
+            end)
+        end
+
+        return Instance
+    end
+
+    --// Main Instances \\-
+    local function SafeParentUI(Instance, Parent)
+local success=pcall(function()
+            if not Parent then
+                Parent = CoreGui
+            end
+
+            local DestinationParent
+            if typeof(Parent) == "function" then
+                DestinationParent = Parent()
+            else
+                DestinationParent = Parent
+            end
+
+            Instance.Parent = DestinationParent
+        end)
+
+        if not (success and Instance.Parent) then
+            Instance.Parent = Library.LocalPlayer:WaitForChild("PlayerGui", math.huge)
+        end
+    end
+
+    local function ParentUI(UI, SkipHiddenUI)
+        if SkipHiddenUI then
+            SafeParentUI(UI, CoreGui)
+            return
+        end
+
+        pcall(protectgui, UI)
+        SafeParentUI(UI, gethui)
+    end
+
+    local ScreenGui = New("ScreenGui", {
+        Name = "Obsidian",
+        DisplayOrder = 998,
+        ResetOnSpawn = false,
+    })
+    ParentUI(ScreenGui)
+    Library.ScreenGui = ScreenGui
+
+    ScreenGui.DescendantRemoving:Connect(function(Instance)
+        Library:RemoveFromRegistry(Instance)
+    end)
+
+    local ModalElement ,Cursor,CursorCustomImage
+=(New("TextButton", {
+        BackgroundTransparency = 1,
+        Modal = false,
+        Size = UDim2.fromScale(0, 0),
+        AnchorPoint = Vector2.zero,
+        Text = "",
+        ZIndex = -999,
+        Parent = ScreenGui,
+    })
+)    do
+        Cursor = New("Frame", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            BackgroundColor3 = "WhiteColor",
+            Size = UDim2.fromOffset(9, 1),
+            Visible = false,
+            ZIndex = 11000,
+            Parent = ScreenGui,
+        })
+        New("Frame", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            BackgroundColor3 = "DarkColor",
+            Position = UDim2.fromScale(0.5, 0.5),
+            Size = UDim2.new(1, 2, 1, 2),
+            ZIndex = 10999,
+            Parent = Cursor,
+        })
+
+        local CursorV = New("Frame", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            BackgroundColor3 = "WhiteColor",
+            Position = UDim2.fromScale(0.5, 0.5),
+            Size = UDim2.fromOffset(1, 9),
+            ZIndex = 11000,
+            Parent = Cursor,
+        })
+        New("Frame", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            BackgroundColor3 = "DarkColor",
+            Position = UDim2.fromScale(0.5, 0.5),
+            Size = UDim2.new(1, 2, 1, 2),
+            ZIndex = 10999,
+            Parent = CursorV,
+        })
+
+        CursorCustomImage = New("ImageLabel", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            BackgroundTransparency = 1,
+            Position = UDim2.fromScale(0.5, 0.5),
+            Size = UDim2.fromOffset(20, 20),
+            ZIndex = 11000,
+            Visible = false,
+            Parent = Cursor
+        })
+    end
+
+    --// Notification
+    local NotificationArea
+,NotificationList
+    do
+        NotificationArea = New("Frame", {
+            AnchorPoint = Vector2.new(1, 0),
+            BackgroundTransparency = 1,
+            Position = UDim2.new(1, -6, 0, 6),
+            Size = UDim2.new(0, 300, 1, -6),
+            Parent = ScreenGui,
+        })
+        table.insert(
+            Library.Scales,
+            New("UIScale", {
+                Parent = NotificationArea,
+            })
+        )
+
+        NotificationList = New("UIListLayout", {
+            HorizontalAlignment = Enum.HorizontalAlignment.Right,
+            Padding = UDim.new(0, 8),
+            Parent = NotificationArea,
+        })
+    end
+
+    --// Lib Functions \\--
+    function Library:ResetCursorIcon()
+        CursorCustomImage.Visible = false
+        CursorCustomImage.Size = UDim2.fromOffset(20, 20)
+    end
+
+    function Library:ChangeCursorIcon(ImageId)
+        if not ImageId or ImageId == "" then
+            Library:ResetCursorIcon()
+            return
+        end
+
+        local Icon = Library:GetCustomIcon(ImageId)
+        assert(Icon, "Image must be a valid Roblox asset or a valid URL or a valid lucide icon.")
+
+        CursorCustomImage.Visible = true
+        CursorCustomImage.Image = Icon.Url
+        CursorCustomImage.ImageRectOffset = Icon.ImageRectOffset
+        CursorCustomImage.ImageRectSize = Icon.ImageRectSize
+    end
+
+    function Library:ChangeCursorIconSize(Size)
+        assert(typeof(Size) == "UDim2", "UDim2 expected.")
+        CursorCustomImage.Size = Size
+    end
+
+    function Library:GetBetterColor(Color, Add)        Add = Add * (Library.IsLightTheme and -4 or 2)
+        return Color3.fromRGB(
+            math.clamp(Color.R * 255 + Add, 0, 255),
+            math.clamp(Color.G * 255 + Add, 0, 255),
+            math.clamp(Color.B * 255 + Add, 0, 255)
+        )
+    end
+
+    function Library:GetLighterColor(Color)        local H, S, V = Color:ToHSV()
+        return Color3.fromHSV(H, math.max(0, S - 0.1), math.min(1, V + 0.1))
+    end
+
+    function Library:GetDarkerColor(Color)        local H, S, V = Color:ToHSV()
+        return Color3.fromHSV(H, S, V / 2)
+    end
+
+    function Library:GetKeyString(KeyCode)
+        if KeyCode.EnumType == Enum.KeyCode and KeyCode.Value > 33 and KeyCode.Value < 127 then
+            return string.char(KeyCode.Value)
+        end
+
+        return KeyCode.Name
+    end
+
+    function Library:GetTextBounds(Text, Font, Size, Width)        local Params = Instance.new("GetTextBoundsParams")
+        Params.Text = Text
+        Params.RichText = true
+        Params.Font = Font
+        Params.Size = Size
+        Params.Width = Width or workspace.CurrentCamera.ViewportSize.X - 32
+
+        local Bounds = TextService:GetTextBoundsAsync(Params)
+        return Bounds.X, Bounds.Y
+    end
+
+    function Library:MouseIsOverFrame(Frame, Mouse)        local AbsPos, AbsSize = Frame.AbsolutePosition, Frame.AbsoluteSize
+        return Mouse.X >= AbsPos.X
+            and Mouse.X <= AbsPos.X + AbsSize.X
+            and Mouse.Y >= AbsPos.Y
+            and Mouse.Y <= AbsPos.Y + AbsSize.Y
+    end
+
+    function Library:SafeCallback(Func, ...)
+        if not (Func and typeof(Func) == "function") then
+            return
+        end
+
+        local Result = table.pack(xpcall(Func, function(Error)
+            task.defer(error, debug.traceback(Error, 2))
+            if Library.NotifyOnError then
+                Library:Notify(Error)
+            end
+
+            return Error
+        end, ...))
+
+        if not Result[1] then
+            return nil
+        end
+
+        return table.unpack(Result, 2, Result.n)
+    end
+
+    function Library:MakeDraggable(UI, DragFrame, IgnoreToggled, IsMainWindow)
+        local Dragging ,StartPos
+,FramePos
+,Changed
+=false
+        DragFrame.InputBegan:Connect(function(Input)
+            if not IsClickInput(Input) or IsMainWindow and Library.CantDragForced then
+                return
+            end
+
+            StartPos = Input.Position
+            FramePos = UI.Position
+            Dragging = true
+
+            Changed = Input.Changed:Connect(function()
+                if Input.UserInputState ~= Enum.UserInputState.End then
+                    return
+                end
+
+                Dragging = false
+                if Changed and Changed.Connected then
+                    Changed:Disconnect()
+                    Changed = nil
+                end
+            end)
+        end)
+        Library:GiveSignal(UserInputService.InputChanged:Connect(function(Input)
+            if
+                (not IgnoreToggled and not Library.Toggled)
+                or (IsMainWindow and Library.CantDragForced)
+                or not (ScreenGui and ScreenGui.Parent)
+            then
+                Dragging = false
+                if Changed and Changed.Connected then
+                    Changed:Disconnect()
+                    Changed = nil
+                end
+
+                return
+            end
+
+            if Dragging and IsHoverInput(Input) then
+                local Delta = Input.Position - StartPos
+                UI.Position =
+                    UDim2.new(FramePos.X.Scale, FramePos.X.Offset + Delta.X, FramePos.Y.Scale, FramePos.Y.Offset + Delta.Y)
+            end
+        end))
+    end
+
+    function Library:MakeResizable(UI, DragFrame, Callback)
+        local Dragging ,StartPos
+,FrameSize
+,Changed
+=false
+
+        DragFrame.InputBegan:Connect(function(Input)
+            if not IsClickInput(Input) then
+                return
+            end
+
+            StartPos = Input.Position
+            FrameSize = UI.Size
+            Dragging = true
+
+            Changed = Input.Changed:Connect(function()
+                if Input.UserInputState ~= Enum.UserInputState.End then
+                    return
+                end
+
+                Dragging = false
+                if Changed and Changed.Connected then
+                    Changed:Disconnect()
+                    Changed = nil
+                end
+            end)
+        end)
+
+        Library:GiveSignal(UserInputService.InputChanged:Connect(function(Input)
+            if not UI.Visible or not (ScreenGui and ScreenGui.Parent) then
+                Dragging = false
+                if Changed and Changed.Connected then
+                    Changed:Disconnect()
+                    Changed = nil
+                end
+
+                return
+            end
+
+            if Dragging and IsHoverInput(Input) then
+                local Delta = Input.Position - StartPos
+                UI.Size = UDim2.new(
+                    FrameSize.X.Scale,
+                    math.clamp(FrameSize.X.Offset + Delta.X, Library.MinSize.X, math.huge),
+                    FrameSize.Y.Scale,
+                    math.clamp(FrameSize.Y.Offset + Delta.Y, Library.MinSize.Y, math.huge)
+                )
+                if Callback then
+                    Library:SafeCallback(Callback)
+                end
+            end
+        end))
+    end
+
+    function Library:MakeCover(Holder, Place)
+        local Pos ,Size = Places[Place] or { 0, 0 }
+,Sizes[Place] or { 1, 0.5 }
+
+        local Cover = New("Frame", {
+            AnchorPoint = Vector2.new(Pos[1], Pos[2]),
+            BackgroundColor3 = Holder.BackgroundColor3,
+            Position = UDim2.fromScale(Pos[1], Pos[2]),
+            Size = UDim2.fromScale(Size[1], Size[2]),
+            Parent = Holder,
+        })
+
+        return Cover
+    end
+
+    function Library:MakeLine(Frame, Info)
+        local Line = New("Frame", {
+            AnchorPoint = Info.AnchorPoint or Vector2.zero,
+            BackgroundColor3 = "OutlineColor",
+            Position = Info.Position,
+            Size = Info.Size,
+            ZIndex = Info.ZIndex or Frame.ZIndex,
+            Parent = Frame,
+        })
+
+        return Line
+    end
+
+    function Library:AddOutline(Frame)
+        local OutlineStroke ,ShadowStroke = New("UIStroke", {
+            Color = "OutlineColor",
+            Thickness = 1,
+            ZIndex = 2,
+            Parent = Frame,
+        })
+,New("UIStroke", {
+            Color = "DarkColor",
+            Thickness = 1.5,
+            ZIndex = 1,
+            Parent = Frame,
+        })
+        return OutlineStroke, ShadowStroke
+    end
+
+    function Library:AddBlank(Frame, Size)
+        return New("Frame", {
+            BackgroundTransparency = 1,
+            Size = Size or UDim2.fromScale(0, 0),
+            Parent = Frame,
+        })
+    end
+
+    --// Deprecated \\--
+    function Library:MakeOutline(Frame, Corner, ZIndex)
+        warn("Obsidian:MakeOutline is deprecated, please use Obsidian:AddOutline instead.")
+        local Holder = New("Frame", {
+            BackgroundColor3 = "DarkColor",
+            Position = UDim2.fromOffset(-2, -2),
+            Size = UDim2.new(1, 4, 1, 4),
+            ZIndex = ZIndex,
+            Parent = Frame,
+        })
+
+        local Outline = New("Frame", {
+            BackgroundColor3 = "OutlineColor",
+            Position = UDim2.fromOffset(1, 1),
+            Size = UDim2.new(1, -2, 1, -2),
+            ZIndex = ZIndex,
+            Parent = Holder,
+        })
+
+        if Corner and Corner > 0 then
+            New("UICorner", {
+                CornerRadius = UDim.new(0, Corner + 1),
+                Parent = Holder,
+            })
+            New("UICorner", {
+                CornerRadius = UDim.new(0, Corner),
+                Parent = Outline,
+            })
+        end
+
+        return Holder, Outline
+    end
+
+    function Library:AddDraggableLabel(Text)
+        local Table ,Label = {}
+,New("TextLabel", {
+            AutomaticSize = Enum.AutomaticSize.XY,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            BackgroundColor3 = "BackgroundColor",
+            Size = UDim2.fromOffset(0, 0),
+            Position = UDim2.fromOffset(6, 6),
+            Text = Text,
+            TextSize = 15,
+            ZIndex = 10,
+            Parent = ScreenGui,
+        })
+        table.insert(
+            Library.Corners, 
+            New("UICorner", {
+                CornerRadius = UDim.new(0, Library.CornerRadius),
+                Parent = Label,
+            })
+        )
+        New("UIPadding", {
+            PaddingBottom = UDim.new(0, 6),
+            PaddingLeft = UDim.new(0, 12),
+            PaddingRight = UDim.new(0, 12),
+            PaddingTop = UDim.new(0, 6),
+            Parent = Label,
+        })
+        table.insert(
+            Library.Scales,
+            New("UIScale", {
+                Parent = Label,
+            })
+        )
+        Library:AddOutline(Label)
+
+        Library:MakeDraggable(Label, Label, true)
+
+        Table.Label = Label
+
+        function Table:SetText(Text)
+            Label.Text = Text
+        end
+
+        function Table:SetVisible(Visible)
+            Label.Visible = Visible
+        end
+
+        return Table
+    end
+
+    function Library:AddDraggableButton(Text, Func, ExcludeScaling)
+        local Table ,Button = {}
+,New("TextButton", {
+            BackgroundColor3 = "BackgroundColor",
+            Position = UDim2.fromOffset(6, 6),
+            TextSize = 16,
+            ZIndex = 10,
+            Parent = ScreenGui,
+        })
+        table.insert(
+            Library.Corners, 
+            New("UICorner", {
+                CornerRadius = UDim.new(0, Library.CornerRadius),
+                Parent = Button,
+            })
+        )
+        if not ExcludeScaling then
+            table.insert(
+                Library.Scales,
+                New("UIScale", {
+                    Parent = Button,
+                })
+            )
+        end
+        Library:AddOutline(Button)
+
+        Button.MouseButton1Click:Connect(function()
+            Library:SafeCallback(Func, Table)
+        end)
+        Library:MakeDraggable(Button, Button, true)
+
+        Table.Button = Button
+
+        function Table:SetText(Text)
+            local X, Y = Library:GetTextBounds(Text, Library.Scheme.Font, 16)
+
+            Button.Text = Text
+            Button.Size = UDim2.fromOffset(X * 2, Y * 2)
+        end
+        Table:SetText(Text)
+
+        return Table
+    end
+
+    function Library:AddDraggableMenu(Name)
+        local Holder = New("Frame", {
+            AutomaticSize = Enum.AutomaticSize.XY,
+            BackgroundColor3 = "BackgroundColor",
+            Position = UDim2.fromOffset(6, 6),
+            Size = UDim2.fromOffset(0, 0),
+            ZIndex = 10,
+            Parent = ScreenGui,
+        })
+        table.insert(
+            Library.Corners,
+            New("UICorner", {
+                CornerRadius = UDim.new(0, Library.CornerRadius),
+                Parent = Holder,
+            })
+        )
+        table.insert(
+            Library.Scales,
+            New("UIScale", {
+                Parent = Holder,
+            })
+        )
+        Library:AddOutline(Holder)
+
+        Library:MakeLine(Holder, {
+            Position = UDim2.fromOffset(0, 34),
+            Size = UDim2.new(1, 0, 0, 1),
+        })
+
+        local Label = New("TextLabel", {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 34),
+            Text = Name,
+            TextSize = 15,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = Holder,
+        })
+        New("UIPadding", {
+            PaddingLeft = UDim.new(0, 12),
+            PaddingRight = UDim.new(0, 12),
+            Parent = Label,
+        })
+
+        local Container = New("Frame", {
+            BackgroundTransparency = 1,
+            Position = UDim2.fromOffset(0, 35),
+            Size = UDim2.new(1, 0, 1, -35),
+            Parent = Holder,
+        })
+        New("UIListLayout", {
+            Padding = UDim.new(0, 7),
+            Parent = Container,
+        })
+        New("UIPadding", {
+            PaddingBottom = UDim.new(0, 7),
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+            PaddingTop = UDim.new(0, 7),
+            Parent = Container,
+        })
+
+        Library:MakeDraggable(Holder, Label, true)
+        return Holder, Container
+    end
+
+    --// Watermark - Deprecated \\--
+    do
+        local WatermarkLabel = Library:AddDraggableLabel("")
+        WatermarkLabel:SetVisible(false)
+
+        function Library:SetWatermark(Text)
+            warn("Watermark is deprecated, please use Library:AddDraggableLabel instead.")
+            WatermarkLabel:SetText(Text)
+        end
+
+        function Library:SetWatermarkVisibility(Visible)
+            warn("Watermark is deprecated, please use Library:AddDraggableLabel instead.")
+            WatermarkLabel:SetVisible(Visible)
+        end
+    end
+
+    --// Context Menu \\--
+    local CurrentMenu
+    function Library:AddContextMenu(
+        Holder,
+        Size,
+        Offset,
+        List,
+        ActiveCallback,
+        IgnoreCornerRadius    )
+        local ParentGui ,Menu
+=(Holder:FindFirstAncestorOfClass("ScreenGui")
+)        if ParentGui ~= ScreenGui and (Library.ActiveLoading and ParentGui ~= Library.ActiveLoading.ScreenGui) then
+            ParentGui = ScreenGui
+        end
+
+        if List then
+            Menu = New("ScrollingFrame", {
+                AutomaticCanvasSize = List == 2 and Enum.AutomaticSize.Y or Enum.AutomaticSize.None,
+                AutomaticSize = List == 1 and Enum.AutomaticSize.Y or Enum.AutomaticSize.None,
+                BackgroundColor3 = "BackgroundColor",
+                BottomImage = "rbxasset://textures/ui/Scroll/scroll-middle.png",
+                CanvasSize = UDim2.fromOffset(0, 0),
+                ScrollBarImageColor3 = "OutlineColor",
+                ScrollBarThickness = List == 2 and 2 or 0,
+                Size = typeof(Size) == "function" and Size() or Size,
+                TopImage = "rbxasset://textures/ui/Scroll/scroll-middle.png",
+                Visible = false,
+                ZIndex = 10,
+                Parent = ParentGui,
+            })
+        else
+            Menu = New("Frame", {
+                BackgroundColor3 = "BackgroundColor",
+                Size = typeof(Size) == "function" and Size() or Size,
+                Visible = false,
+                ZIndex = 10,
+                Parent = ParentGui,
+            })
+        end
+        table.insert(
+            Library.Scales,
+            New("UIScale", {
+                Parent = Menu,
+            })
+        )
+
+        New("UIStroke", {
+            Color = "OutlineColor",
+            Parent = Menu,
+        })
+
+        if IgnoreCornerRadius ~= true then
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                    Parent = Menu,
+                })
+            )
+        end
+
+        local Table = {
+            Active = false,
+            Holder = Holder,
+            Menu = Menu,
+            List = nil,
+            Signal = nil,
+
+            Size = Size,
+        }
+
+        if List then
+            Table.List = New("UIListLayout", {
+                Parent = Menu,
+            })
+        end
+
+        function Table:Open()
+            if CurrentMenu == Table then
+                return
+            elseif CurrentMenu then
+                CurrentMenu:Close()
+            end
+
+            CurrentMenu = Table
+            Table.Active = true
+
+            if typeof(Offset) == "function" then
+                Menu.Position = UDim2.fromOffset(
+                    math.floor(Holder.AbsolutePosition.X + Offset()[1]),
+                    math.floor(Holder.AbsolutePosition.Y + Offset()[2])
+                )
+            else
+                Menu.Position = UDim2.fromOffset(
+                    math.floor(Holder.AbsolutePosition.X + Offset[1]),
+                    math.floor(Holder.AbsolutePosition.Y + Offset[2])
+                )
+            end
+            Menu.Size = typeof(Table.Size) == "function" and Table.Size() or Table.Size
+            if typeof(ActiveCallback) == "function" then
+                Library:SafeCallback(ActiveCallback, true)
+            end
+
+            Menu.Visible = true
+
+            Table.Signal = Holder:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+                if typeof(Offset) == "function" then
+                    Menu.Position = UDim2.fromOffset(
+                        math.floor(Holder.AbsolutePosition.X + Offset()[1]),
+                        math.floor(Holder.AbsolutePosition.Y + Offset()[2])
+                    )
+                else
+                    Menu.Position = UDim2.fromOffset(
+                        math.floor(Holder.AbsolutePosition.X + Offset[1]),
+                        math.floor(Holder.AbsolutePosition.Y + Offset[2])
+                    )
+                end
+            end)
+        end
+
+        function Table:Close()
+            if CurrentMenu ~= Table then
+                return
+            end
+            Menu.Visible = false
+
+            if Table.Signal then
+                Table.Signal:Disconnect()
+                Table.Signal = nil
+            end
+            Table.Active = false
+            CurrentMenu = nil
+            if typeof(ActiveCallback) == "function" then
+                Library:SafeCallback(ActiveCallback, false)
+            end
+        end
+
+        function Table:Toggle()
+            if Table.Active then
+                Table:Close()
+            else
+                Table:Open()
+            end
+        end
+
+        function Table:SetSize(Size)
+            Table.Size = Size
+            Menu.Size = typeof(Size) == "function" and Size() or Size
+        end
+
+        return Table
+    end
+
+    Library:GiveSignal(UserInputService.InputBegan:Connect(function(Input)
+        if Library.Unloaded then
+            return
+        end
+
+        if IsClickInput(Input, true) then
+            local Location = Input.Position
+
+            if
+                CurrentMenu
+                and not (
+                    Library:MouseIsOverFrame(CurrentMenu.Menu, Location)
+                        or Library:MouseIsOverFrame(CurrentMenu.Holder, Location)
+                )
+            then
+                CurrentMenu:Close()
+            end
+        end
+    end))
+
+    --// Tooltip \\--
+    local TooltipLabel = New("TextLabel", {
+        AutomaticSize = Enum.AutomaticSize.Y,
+        BackgroundColor3 = "BackgroundColor",
+        TextSize = 14,
+        TextWrapped = true,
+        Visible = false,
+        ZIndex = 20,
+        Parent = ScreenGui,
+    })
+    New("UIPadding", {
+        PaddingBottom = UDim.new(0, 2),
+        PaddingLeft = UDim.new(0, 4),
+        PaddingRight = UDim.new(0, 4),
+        PaddingTop = UDim.new(0, 2),
+        Parent = TooltipLabel,
+    })
+    table.insert(
+        Library.Scales,
+        New("UIScale", {
+            Parent = TooltipLabel,
+        })
+    )
+    New("UIStroke", {
+        Color = "OutlineColor",
+        Parent = TooltipLabel,
+    })
+    table.insert(
+        Library.Corners,
+        New("UICorner", {
+            CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+            Parent = TooltipLabel,
+        })
+    )
+    TooltipLabel:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+        if Library.Unloaded then
+            return
+        end
+local X=Library:GetTextBounds(
+            TooltipLabel.Text,
+            TooltipLabel.FontFace,
+            TooltipLabel.TextSize,
+            (workspace.CurrentCamera.ViewportSize.X - TooltipLabel.AbsolutePosition.X - 8) / Library.DPIScale
+        )
+
+        TooltipLabel.Size = UDim2.fromOffset(X + 8)
+    end)
+
+    local CurrentHoverInstance
+    function Library:AddTooltip(InfoStr, DisabledInfoStr, HoverInstance)
+        local TooltipTable = {
+            Disabled = false,
+            Hovering = false,
+            Signals = {},
+        }
+
+        local function DoHover()
+            if
+                CurrentHoverInstance == HoverInstance
+                or Library.ActiveDialog
+                or (CurrentMenu and Library:MouseIsOverFrame(CurrentMenu.Menu, Mouse))
+                or (TooltipTable.Disabled and typeof(DisabledInfoStr) ~= "string")
+                or (not TooltipTable.Disabled and typeof(InfoStr) ~= "string")
+            then
+                return
+            end
+            CurrentHoverInstance = HoverInstance
+
+            local ParentGui = HoverInstance:FindFirstAncestorOfClass("ScreenGui")
+            if ParentGui ~= ScreenGui and (Library.ActiveLoading and ParentGui ~= Library.ActiveLoading.ScreenGui) then
+                ParentGui = ScreenGui
+            end
+            TooltipLabel.Parent = ParentGui
+
+            TooltipLabel.Text = TooltipTable.Disabled and DisabledInfoStr or InfoStr
+            TooltipLabel.Visible = true
+
+            while
+                (Library.Toggled or Library.ActiveLoading)
+                and not Library.ActiveDialog
+                and Library:MouseIsOverFrame(HoverInstance, Mouse)
+                and not (CurrentMenu and Library:MouseIsOverFrame(CurrentMenu.Menu, Mouse))
+            do
+                TooltipLabel.Position = UDim2.fromOffset(
+                    Mouse.X + (Library.ShowCustomCursor and 8 or 14),
+                    Mouse.Y + (Library.ShowCustomCursor and 8 or 12)
+                )
+
+                RunService.RenderStepped:Wait()
+            end
+
+            TooltipLabel.Visible = false
+            CurrentHoverInstance = nil
+        end
+
+        local function GiveSignal(Connection)
+            local ConnectionType = typeof(Connection)
+            if Connection and (ConnectionType == "RBXScriptConnection" or ConnectionType == "RBXScriptSignal") then
+                table.insert(TooltipTable.Signals, Connection)
+            end
+
+            return Connection
+        end
+
+        GiveSignal(HoverInstance.MouseEnter:Connect(DoHover))
+        GiveSignal(HoverInstance.MouseMoved:Connect(DoHover))
+        GiveSignal(HoverInstance.MouseLeave:Connect(function()
+            if CurrentHoverInstance ~= HoverInstance then
+                return
+            end
+
+            TooltipLabel.Visible = false
+            CurrentHoverInstance = nil
+        end))
+
+        function TooltipTable:Destroy()
+            for Index = #TooltipTable.Signals, 1, -1 do
+                local Connection = table.remove(TooltipTable.Signals, Index)
+                if Connection and Connection.Connected then
+                    Connection:Disconnect()
+                end
+            end
+
+            if CurrentHoverInstance == HoverInstance then
+                if TooltipLabel then
+                    TooltipLabel.Visible = false
+                end
+
+                CurrentHoverInstance = nil
+            end
+        end
+
+        table.insert(Tooltips, TooltipLabel)
+        return TooltipTable
+    end
+
+    function Library:OnUnload(Callback)
+        table.insert(Library.UnloadSignals, Callback)
+    end
+
+    function Library:Unload()
+        for Index = #Library.Signals, 1, -1 do
+            local Connection = table.remove(Library.Signals, Index)
+            if Connection and Connection.Connected then
+                Connection:Disconnect()
+            end
+        end
+
+        for _, Callback in Library.UnloadSignals do
+            Library:SafeCallback(Callback)
+        end
+
+        for _, Tooltip in Tooltips do
+            Library:SafeCallback(Tooltip.Destroy, Tooltip)
+        end
+
+        Library.Unloaded = true
+
+        if Library.ActiveLoading then
+            Library.ActiveLoading:Destroy()
+        end
+
+        if ScreenGui then
+            ScreenGui:Destroy()
+        end
+
+        getgenv().Library = nil
+    end
+
+    local CheckIcon ,ArrowIcon ,ResizeIcon ,KeyIcon ,MoveIcon = Library:GetIcon("check")
+,Library:GetIcon("chevron-up")
+,Library:GetIcon("move-diagonal-2")
+,Library:GetIcon("key")
+,Library:GetIcon("move")
+
+    function Library:SetIconModule(module)
+        FetchIcons = true
+        Icons = module
+
+        -- Top ten fixes 🚀
+        CheckIcon = Library:GetIcon("check")
+        ArrowIcon = Library:GetIcon("chevron-up")
+        ResizeIcon = Library:GetIcon("move-diagonal-2")
+        KeyIcon = Library:GetIcon("key")
+        MoveIcon = Library:GetIcon("move")
+    end
+
+    local BaseAddons = {}
+    do
+        local Funcs = {}
+
+        function Funcs:AddKeyPicker(Idx, Info)
+            Info = Library:Validate(Info, Templates.KeyPicker)
+
+            local ParentObj = self
+            local ToggleLabel ,KeyPicker = ParentObj.TextLabel
+,{
+                Text = Info.Text,
+                Value = Info.Default, -- Key
+                Modifiers = Info.DefaultModifiers, -- Modifiers
+                DisplayValue = Info.Default, -- Picker Text
+
+                Blacklisted = Info.Blacklisted,
+                BlacklistedModifiers = Info.BlacklistedModifiers,
+                Whitelisted = Info.Whitelisted,
+                WhitelistedModifiers = Info.WhitelistedModifiers,
+
+                Toggled = false,
+                Mode = Info.Mode,
+                SyncToggleState = Info.SyncToggleState,
+
+                Callback = Info.Callback,
+                ChangedCallback = Info.ChangedCallback,
+                Changed = Info.Changed,
+                Clicked = Info.Clicked,
+
+                Type = "KeyPicker",
+            }
+
+            if KeyPicker.Mode == "Press" then
+                assert(ParentObj.Type == "Label", "KeyPicker with the mode 'Press' can be only applied on Labels.")
+
+                KeyPicker.SyncToggleState = false
+                Info.Modes = { "Press" }
+                Info.Mode = "Press"
+            end
+
+            if KeyPicker.SyncToggleState then
+                Info.Modes = { "Toggle", "Hold" }
+
+                if not table.find(Info.Modes, Info.Mode) then
+                    Info.Mode = "Toggle"
+                end
+            end
+
+            local Picking ,SpecialKeys ,SpecialKeysInput ,Modifiers ,ModifiersInput = false
+,{
+MB1=Enum.UserInputType.MouseButton1,
+MB2=Enum.UserInputType.MouseButton2,
+MB3=Enum.UserInputType.MouseButton3,
+            }
+,{
+                [Enum.UserInputType.MouseButton1] = "MB1",
+                [Enum.UserInputType.MouseButton2] = "MB2",
+                [Enum.UserInputType.MouseButton3] = "MB3",
+            }
+,{
+LAlt=Enum.KeyCode.LeftAlt,
+RAlt=Enum.KeyCode.RightAlt,
+LCtrl=Enum.KeyCode.LeftControl,
+RCtrl=Enum.KeyCode.RightControl,
+LShift=Enum.KeyCode.LeftShift,
+RShift=Enum.KeyCode.RightShift,
+Tab=Enum.KeyCode.Tab,
+CapsLock=Enum.KeyCode.CapsLock,
+            }
+,{
+                [Enum.KeyCode.LeftAlt] = "LAlt",
+                [Enum.KeyCode.RightAlt] = "RAlt",
+
+                [Enum.KeyCode.LeftControl] = "LCtrl",
+                [Enum.KeyCode.RightControl] = "RCtrl",
+
+                [Enum.KeyCode.LeftShift] = "LShift",
+                [Enum.KeyCode.RightShift] = "RShift",
+
+                [Enum.KeyCode.Tab] = "Tab",
+                [Enum.KeyCode.CapsLock] = "CapsLock",
+            }
+
+            local IsModifierInput ,GetActiveModifiers = function(Input)
+                return Input.UserInputType == Enum.UserInputType.Keyboard and ModifiersInput[Input.KeyCode] ~= nil
+            end
+,function()
+                local ActiveModifiers = {}
+
+                for Name, Input in Modifiers do
+                    if table.find(ActiveModifiers, Name) then
+                        continue
+                    end
+                    if not UserInputService:IsKeyDown(Input) then
+                        continue
+                    end
+
+                    table.insert(ActiveModifiers, Name)
+                end
+
+                return ActiveModifiers
+            end
+
+            local AreModifiersHeld ,IsInputDown ,ConvertToInputModifiers ,VerifyModifiers = function(Required)
+                if not (typeof(Required) == "table" and GetTableSize(Required) > 0) then
+                    return true
+                end
+
+                local ActiveModifiers ,Holding = GetActiveModifiers()
+,true
+
+                for _, Name in Required do
+                    if table.find(ActiveModifiers, Name) then
+                        continue
+                    end
+
+                    Holding = false
+                    break
+                end
+
+                return Holding
+            end
+,function(Input)
+                if not Input then
+                    return false
+                end
+
+                if SpecialKeysInput[Input.UserInputType] ~= nil then
+                    return UserInputService:IsMouseButtonPressed(Input.UserInputType)
+                        and not UserInputService:GetFocusedTextBox()
+                elseif Input.UserInputType == Enum.UserInputType.Keyboard then
+                    return UserInputService:IsKeyDown(Input.KeyCode) and not UserInputService:GetFocusedTextBox()
+                else
+                    return false
+                end
+            end
+,function(CurrentModifiers)
+                local InputModifiers = {}
+
+                for _, name in CurrentModifiers do
+                    table.insert(InputModifiers, Modifiers[name])
+                end
+
+                return InputModifiers
+            end
+,function(CurrentModifiers)
+                if typeof(CurrentModifiers) ~= "table" then
+                    return {}
+                end
+
+                local ValidModifiers = {}
+
+                for _, name in CurrentModifiers do
+                    if not Modifiers[name] then
+                        continue
+                    end
+
+                    table.insert(ValidModifiers, name)
+                end
+
+                return ValidModifiers
+            end
+
+            KeyPicker.Modifiers = VerifyModifiers(KeyPicker.Modifiers)
+
+            local Picker = New("TextButton", {
+                BackgroundColor3 = "MainColor",
+                Size = UDim2.fromOffset(18, 18),
+                Text = KeyPicker.Value,
+                TextSize = 14,
+                Parent = ToggleLabel,
+            })
+
+            New("UIStroke", {
+                Color = "OutlineColor",
+                Parent = Picker,
+            })
+
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                    Parent = Picker,
+                })
+            )
+
+            local KeybindsToggle = { Normal = KeyPicker.Mode ~= "Toggle" }
+            do
+                local Holder = New("TextButton", {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1, 0, 0, 16),
+                    Text = "",
+                    Visible = not Info.NoUI,
+                    Parent = Library.KeybindContainer,
+                })
+
+                local Label ,Checkbox = New("TextLabel", {
+                    AutomaticSize = Enum.AutomaticSize.X,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromScale(0, 1),
+                    Text = "",
+                    TextSize = 14,
+                    TextTransparency = 0.5,
+                    Parent = Holder,
+                })
+,New("Frame", {
+                    AnchorPoint = Vector2.new(0, 0.5),
+                    BackgroundColor3 = "MainColor",
+                    Position = UDim2.fromScale(0, 0.5),
+                    Size = UDim2.fromOffset(14, 14),
+                    SizeConstraint = Enum.SizeConstraint.RelativeYY,
+                    Parent = Holder,
+                })
+                table.insert(
+                    Library.Corners,
+                    New("UICorner", {
+                        CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                        Parent = Checkbox,
+                    })
+                )
+                New("UIStroke", {
+                    Color = "OutlineColor",
+                    Parent = Checkbox,
+                })
+
+                local CheckImage = New("ImageLabel", {
+                    Image = CheckIcon and CheckIcon.Url or "",
+                    ImageColor3 = "FontColor",
+                    ImageRectOffset = CheckIcon and CheckIcon.ImageRectOffset or Vector2.zero,
+                    ImageRectSize = CheckIcon and CheckIcon.ImageRectSize or Vector2.zero,
+                    ImageTransparency = 1,
+                    Position = UDim2.fromOffset(2, 2),
+                    Size = UDim2.new(1, -4, 1, -4),
+                    Parent = Checkbox,
+                })
+
+                function KeybindsToggle:Display(State)
+                    Label.TextTransparency = State and 0 or 0.5
+                    CheckImage.ImageTransparency = State and 0 or 1
+                end
+
+                function KeybindsToggle:SetText(Text)
+                    Label.Text = Text
+                end
+
+                function KeybindsToggle:SetVisibility(Visibility)
+                    Holder.Visible = Visibility
+                end
+
+                function KeybindsToggle:SetNormal(Normal)
+                    KeybindsToggle.Normal = Normal
+
+                    Holder.Active = not Normal
+                    Label.Position = Normal and UDim2.fromOffset(0, 0) or UDim2.fromOffset(22, 0)
+                    Checkbox.Visible = not Normal
+                end
+
+                KeyPicker.DoClick = function(...) end --// make luau lsp shut up
+                Holder.MouseButton1Click:Connect(function()
+                    if KeybindsToggle.Normal then
+                        return
+                    end
+
+                    KeyPicker.Toggled = not KeyPicker.Toggled
+                    KeyPicker:DoClick()
+                end)
+
+                KeybindsToggle.Holder = Holder
+                KeybindsToggle.Label = Label
+                KeybindsToggle.Checkbox = Checkbox
+                KeybindsToggle.Loaded = true
+                table.insert(Library.KeybindToggles, KeybindsToggle)
+            end
+
+            local MenuTable = Library:AddContextMenu(Picker, UDim2.fromOffset(62, 0), function()
+                return { Picker.AbsoluteSize.X + 1.5, 0.5 }
+            end, 1, nil, true)
+            KeyPicker.Menu = MenuTable
+
+            local ModeButtons = {}
+            for _, Mode in Info.Modes do
+                local ModeButton ,Button = {}
+,New("TextButton", {
+                    BackgroundColor3 = "MainColor",
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1, 0, 0, 21),
+                    Text = Mode,
+                    TextSize = 14,
+                    TextTransparency = 0.5,
+                    Parent = MenuTable.Menu,
+                })
+
+                function ModeButton:Select()
+                    for _, Button in ModeButtons do
+                        Button:Deselect()
+                    end
+
+                    KeyPicker.Mode = Mode
+
+                    Button.BackgroundTransparency = 0
+                    Button.TextTransparency = 0
+
+                    MenuTable:Close()
+                end
+
+                function ModeButton:Deselect()
+                    KeyPicker.Mode = nil
+
+                    Button.BackgroundTransparency = 1
+                    Button.TextTransparency = 0.5
+                end
+
+                Button.MouseButton1Click:Connect(function()
+                    ModeButton:Select()
+                end)
+
+                if KeyPicker.Mode == Mode then
+                    ModeButton:Select()
+                end
+
+                ModeButtons[Mode] = ModeButton
+            end
+
+            function KeyPicker:Display(PickerText)
+                if Library.Unloaded then
+                    return
+                end
+
+                local X, Y = Library:GetTextBounds(
+                    PickerText or KeyPicker.DisplayValue,
+                    Picker.FontFace,
+                    Picker.TextSize,
+                    ToggleLabel.AbsoluteSize.X
+                )
+                Picker.Text = PickerText or KeyPicker.DisplayValue
+                Picker.Size = UDim2.fromOffset((X + 9), (Y + 4))
+            end
+
+            function KeyPicker:Update()
+                KeyPicker:Display()
+
+                if Info.NoUI then
+                    return
+                end
+
+                if KeyPicker.Mode == "Toggle" and ParentObj.Type == "Toggle" and ParentObj.Disabled then
+                    KeybindsToggle:SetVisibility(false)
+                    return
+                end
+
+                local State ,ShowToggle = KeyPicker:GetState()
+,Library.ShowToggleFrameInKeybinds and KeyPicker.Mode == "Toggle"
+
+                if KeyPicker.SyncToggleState and ParentObj.Value ~= State then
+                    ParentObj:SetValue(State)
+                end
+
+                if KeybindsToggle.Loaded then
+                    if ShowToggle then
+                        KeybindsToggle:SetNormal(false)
+                    else
+                        KeybindsToggle:SetNormal(true)
+                    end
+
+                    KeybindsToggle:SetText(("[%s] %s (%s)"):format(KeyPicker.DisplayValue, KeyPicker.Text, KeyPicker.Mode))
+                    KeybindsToggle:SetVisibility(true)
+                    KeybindsToggle:Display(State)
+                end
+            end
+
+            function KeyPicker:GetState()
+                if KeyPicker.Mode == "Always" then
+                    return true
+                elseif KeyPicker.Mode == "Hold" then
+                    local Key = KeyPicker.Value
+                    if Key == "None" then
+                        return false
+                    end
+
+                    if not AreModifiersHeld(KeyPicker.Modifiers) then
+                        return false
+                    end
+
+                    if SpecialKeys[Key] ~= nil then
+                        return UserInputService:IsMouseButtonPressed(SpecialKeys[Key])
+                            and not UserInputService:GetFocusedTextBox()
+                    else
+                        return UserInputService:IsKeyDown(Enum.KeyCode[Key]) and not UserInputService:GetFocusedTextBox()
+                    end
+                else
+                    return KeyPicker.Toggled
+                end
+            end
+
+            function KeyPicker:OnChanged(Func)
+                KeyPicker.Changed = Func
+            end
+
+            function KeyPicker:OnClick(Func)
+                KeyPicker.Clicked = Func
+            end
+
+            function KeyPicker:DoClick()
+                if KeyPicker.Mode == "Press" then
+                    if KeyPicker.Toggled and Info.WaitForCallback == true then
+                        return
+                    end
+
+                    KeyPicker.Toggled = true
+                end
+
+                Library:SafeCallback(KeyPicker.Callback, KeyPicker.Toggled)
+                Library:SafeCallback(KeyPicker.Clicked, KeyPicker.Toggled)
+
+                if KeyPicker.Mode == "Press" then
+                    KeyPicker.Toggled = false
+                end
+            end
+
+            function KeyPicker:SetValue(Data)
+                local Key, Mode, Modifiers = Data[1], Data[2], Data[3]
+
+                local IsKeyValid, KeyCode = pcall(function()
+                    if Key == "None" then
+                        Key = nil
+                        return nil
+                    end
+
+                    if SpecialKeys[Key] == nil then
+                        return Enum.KeyCode[Key]
+                    end
+
+                    return SpecialKeys[Key]
+                end)
+
+                if Key == nil then
+                    KeyPicker.Value = "None"
+                elseif IsKeyValid then
+                    KeyPicker.Value = Key
+                else
+                    KeyPicker.Value = "Unknown"
+                end
+
+                KeyPicker.Modifiers =
+                    VerifyModifiers(if typeof(Modifiers) == "table" then Modifiers else KeyPicker.Modifiers)
+                KeyPicker.DisplayValue = if GetTableSize(KeyPicker.Modifiers) > 0
+                    then (table.concat(KeyPicker.Modifiers, " + ") .. " + " .. KeyPicker.Value)
+                    else KeyPicker.Value
+
+                if ModeButtons[Mode] then
+                    ModeButtons[Mode]:Select()
+                end
+
+                local NewModifiers = ConvertToInputModifiers(KeyPicker.Modifiers)
+                Library:SafeCallback(KeyPicker.ChangedCallback, KeyCode, NewModifiers)
+                Library:SafeCallback(KeyPicker.Changed, KeyCode, NewModifiers)
+
+                KeyPicker:Update()
+            end
+
+            function KeyPicker:SetText(Text)
+                KeybindsToggle:SetText(Text)
+                KeyPicker:Update()
+            end
+
+            Picker.MouseButton1Click:Connect(function()
+                if Picking then
+                    return
+                end
+
+                Picking = true
+
+                Picker.Text = "..."
+                Picker.Size = UDim2.fromOffset(29, 18)
+
+                -- Wait for an non modifier key --
+                local ActiveModifiers ,Input
+,GetInput ={}
+GetInput = function()
+                    Input = UserInputService.InputBegan:Wait()
+                    if UserInputService:GetFocusedTextBox() ~= nil then
+                        return true
+                    end
+
+                    if Input.KeyCode == Enum.KeyCode.Escape then
+                        return false
+                    end
+
+                    local IsMod ,KeyName
+=(IsModifierInput(Input)
+)                    if SpecialKeysInput[Input.UserInputType] ~= nil then
+                        KeyName = SpecialKeysInput[Input.UserInputType]
+                    elseif Input.UserInputType == Enum.UserInputType.Keyboard then
+                        if IsMod then
+                            KeyName = ModifiersInput[Input.KeyCode]
+                        else
+                            KeyName = Input.KeyCode.Name
+                        end
+                    end
+
+                    if KeyName then
+                        if IsMod then
+                            if KeyPicker.WhitelistedModifiers and #KeyPicker.WhitelistedModifiers > 0 and not table.find(KeyPicker.WhitelistedModifiers, KeyName) then
+                                return GetInput()
+                            end
+
+                            if KeyPicker.BlacklistedModifiers and table.find(KeyPicker.BlacklistedModifiers, KeyName) then
+                                return GetInput()
+                            end
+                        else
+                            if KeyPicker.Whitelisted and #KeyPicker.Whitelisted > 0 and not table.find(KeyPicker.Whitelisted, KeyName) then
+                                return GetInput()
+                            end
+
+                            if KeyPicker.Blacklisted and table.find(KeyPicker.Blacklisted, KeyName) then
+                                return GetInput()
+                            end
+                        end
+                    end
+
+                    return false
+                end
+
+                repeat
+                    task.wait()
+
+                    -- Wait for any input --
+                    Picker.Text = "..."
+                    Picker.Size = UDim2.fromOffset(29, 18)
+
+                    if GetInput() then
+                        Picking = false
+                        KeyPicker:Update()
+                        return
+                    end
+
+                    -- Escape --
+                    if Input.KeyCode == Enum.KeyCode.Escape then
+                        break
+                    end
+
+                    -- Handle modifier keys --
+                    if IsModifierInput(Input) then
+                        local StopLoop = false
+
+                        repeat
+                            task.wait()
+                            if UserInputService:IsKeyDown(Input.KeyCode) then
+                                task.wait(0.075)
+
+                                if UserInputService:IsKeyDown(Input.KeyCode) then
+                                    -- Add modifier to the key list --
+                                    if not table.find(ActiveModifiers, ModifiersInput[Input.KeyCode]) then
+                                        ActiveModifiers[#ActiveModifiers + 1] = ModifiersInput[Input.KeyCode]
+                                        KeyPicker:Display(table.concat(ActiveModifiers, " + ") .. " + ...")
+                                    end
+
+                                    -- Wait for another input --
+                                    if GetInput() then
+                                        StopLoop = true
+                                        break -- Invalid Input
+                                    end
+
+                                    -- Escape --
+                                    if Input.KeyCode == Enum.KeyCode.Escape then
+                                        break
+                                    end
+
+                                    -- Stop loop if its a normal key --
+                                    if not IsModifierInput(Input) then
+                                        break
+                                    end
+                                else
+                                    if not table.find(ActiveModifiers, ModifiersInput[Input.KeyCode]) then
+                                        break -- Modifier is meant to be used as a normal key --
+                                    end
+                                end
+                            end
+                        until false
+
+                        if StopLoop then
+                            Picking = false
+                            KeyPicker:Update()
+                            return
+                        end
+                    end
+
+                    break -- Input found, end loop
+                until false
+
+                local Key = "Unknown"
+                if SpecialKeysInput[Input.UserInputType] ~= nil then
+                    Key = SpecialKeysInput[Input.UserInputType]
+                elseif Input.UserInputType == Enum.UserInputType.Keyboard then
+                    Key = Input.KeyCode == Enum.KeyCode.Escape and "None" or Input.KeyCode.Name
+                end
+
+                ActiveModifiers = if Input.KeyCode == Enum.KeyCode.Escape or Key == "Unknown" then {} else ActiveModifiers
+
+                KeyPicker.Toggled = false
+                KeyPicker:SetValue({ Key, KeyPicker.Mode, ActiveModifiers })
+
+                -- RunService.RenderStepped:Wait()
+                repeat
+                    task.wait()
+                until not IsInputDown(Input) or UserInputService:GetFocusedTextBox()
+                Picking = false
+            end)
+            Picker.MouseButton2Click:Connect(MenuTable.Toggle)
+
+            Library:GiveSignal(UserInputService.InputBegan:Connect(function(Input)
+                if Library.Unloaded then
+                    return
+                end
+
+                if
+                    KeyPicker.Mode == "Always"
+                    or KeyPicker.Value == "Unknown"
+                    or KeyPicker.Value == "None"
+                    or Picking
+                    or UserInputService:GetFocusedTextBox()
+                then
+                    return
+                end
+
+                local Key ,HoldingModifiers ,HoldingKey = KeyPicker.Value
+,AreModifiersHeld(KeyPicker.Modifiers)
+,false
+
+                if
+                    Key
+                    and HoldingModifiers == true
+                    and (
+                        SpecialKeysInput[Input.UserInputType] == Key
+                            or (Input.UserInputType == Enum.UserInputType.Keyboard and Input.KeyCode.Name == Key)
+                    )
+                then
+                    HoldingKey = true
+                end
+
+                if KeyPicker.Mode == "Toggle" then
+                    if HoldingKey then
+                        KeyPicker.Toggled = not KeyPicker.Toggled
+                        KeyPicker:DoClick()
+                    end
+                elseif KeyPicker.Mode == "Press" then
+                    if HoldingKey then
+                        KeyPicker:DoClick()
+                    end
+                end
+
+                KeyPicker:Update()
+            end))
+
+            Library:GiveSignal(UserInputService.InputEnded:Connect(function()
+                if Library.Unloaded then
+                    return
+                end
+
+                if
+                    KeyPicker.Value == "Unknown"
+                    or KeyPicker.Value == "None"
+                    or Picking
+                    or UserInputService:GetFocusedTextBox()
+                then
+                    return
+                end
+
+                KeyPicker:Update()
+            end))
+
+            KeyPicker:Update()
+
+            if ParentObj.Addons then
+                table.insert(ParentObj.Addons, KeyPicker)
+            end
+
+            KeyPicker.Default = KeyPicker.Value
+            KeyPicker.DefaultModifiers = table.clone(KeyPicker.Modifiers or {})
+
+            Options[Idx] = KeyPicker
+
+            return self
+        end
+
+        local HueSequenceTable = {}
+        for Hue = 0, 1, 0.1 do
+            table.insert(HueSequenceTable, ColorSequenceKeypoint.new(Hue, Color3.fromHSV(Hue, 1, 1)))
+        end
+        function Funcs:AddColorPicker(Idx, Info)
+            Info = Library:Validate(Info, Templates.ColorPicker)
+
+            local ParentObj = self
+            local ToggleLabel ,ColorPicker = ParentObj.TextLabel
+,{
+                Value = Info.Default,
+
+                Transparency = Info.Transparency or 0,
+                Title = Info.Title,
+
+                Callback = Info.Callback,
+                Changed = Info.Changed,
+
+                Type = "ColorPicker",
+            }
+            ColorPicker.Hue, ColorPicker.Sat, ColorPicker.Vib = ColorPicker.Value:ToHSV()
+
+            local Holder = New("TextButton", {
+                BackgroundColor3 = ColorPicker.Value,
+                Size = UDim2.fromOffset(18, 18),
+                Text = "",
+                Parent = ToggleLabel,
+            })
+
+            local HolderStroke = New("UIStroke", {
+                Color = Library:GetDarkerColor(ColorPicker.Value),
+                Parent = Holder,
+            })
+
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                    Parent = Holder,
+                })
+            )
+
+            local HolderTransparency = New("ImageLabel", {
+                Image = CustomImageManager.GetAsset("TransparencyTexture"),
+                ImageTransparency = (1 - ColorPicker.Transparency),
+                ScaleType = Enum.ScaleType.Tile,
+                Position = UDim2.new(0, -1, 0, -1),
+                Size = UDim2.new(1, 2, 1, 2),
+                TileSize = UDim2.fromOffset(9, 9),
+                Parent = Holder,
+            })
+
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                    Parent = HolderTransparency,
+                })
+            )
+
+            --// Color Menu \\--
+            local ColorMenu = Library:AddContextMenu(
+                Holder,
+                UDim2.fromOffset(Info.Transparency and 256 or 234, 0),
+                function()
+                    return { 0.5, Holder.AbsoluteSize.Y + 1.5 }
+                end,
+                1
+            )
+            ColorMenu.List.Padding = UDim.new(0, 8)
+            ColorPicker.ColorMenu = ColorMenu
+
+            New("UIPadding", {
+                PaddingBottom = UDim.new(0, 6),
+                PaddingLeft = UDim.new(0, 6),
+                PaddingRight = UDim.new(0, 6),
+                PaddingTop = UDim.new(0, 6),
+                Parent = ColorMenu.Menu,
+            })
+
+            if typeof(ColorPicker.Title) == "string" then
+                New("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1, 0, 0, 8),
+                    Text = ColorPicker.Title,
+                    TextSize = 14,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = ColorMenu.Menu,
+                })
+            end
+
+            local ColorHolder = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 200),
+                Parent = ColorMenu.Menu,
+            })
+            New("UIListLayout", {
+                FillDirection = Enum.FillDirection.Horizontal,
+                Padding = UDim.new(0, 6),
+                Parent = ColorHolder,
+            })
+
+            --// Sat Map
+            local SatVipMap = New("ImageButton", {
+                BackgroundColor3 = ColorPicker.Value,
+                Image = CustomImageManager.GetAsset("SaturationMap"),
+                Size = UDim2.fromOffset(200, 200),
+                Parent = ColorHolder,
+            })
+
+            local SatVibCursor = New("Frame", {
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                BackgroundColor3 = "WhiteColor",
+                Size = UDim2.fromOffset(6, 6),
+                Parent = SatVipMap,
+            })
+            New("UICorner", {
+                CornerRadius = UDim.new(1, 0),
+                Parent = SatVibCursor,
+            })
+            New("UIStroke", {
+                Color = "DarkColor",
+                Parent = SatVibCursor,
+            })
+
+            --// Hue
+            local HueSelector = New("TextButton", {
+                Size = UDim2.fromOffset(16, 200),
+                Text = "",
+                Parent = ColorHolder,
+            })
+            New("UIGradient", {
+                Color = ColorSequence.new(HueSequenceTable),
+                Rotation = 90,
+                Parent = HueSelector,
+            })
+
+            local HueCursor ,TransparencySelector,TransparencyColor,TransparencyCursor
+=(New("Frame", {
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                BackgroundColor3 = "WhiteColor",
+                BorderColor3 = "DarkColor",
+                BorderSizePixel = 1,
+                Position = UDim2.fromScale(0.5, ColorPicker.Hue),
+                Size = UDim2.new(1, 2, 0, 1),
+                Parent = HueSelector,
+            })
+)            if Info.Transparency then
+                TransparencySelector = New("ImageButton", {
+                    Image = CustomImageManager.GetAsset("TransparencyTexture"),
+                    ScaleType = Enum.ScaleType.Tile,
+                    Size = UDim2.fromOffset(16, 200),
+                    TileSize = UDim2.fromOffset(8, 8),
+                    Parent = ColorHolder,
+                })
+
+                TransparencyColor = New("Frame", {
+                    BackgroundColor3 = ColorPicker.Value,
+                    Size = UDim2.fromScale(1, 1),
+                    Parent = TransparencySelector,
+                })
+                New("UIGradient", {
+                    Rotation = 90,
+                    Transparency = NumberSequence.new({
+                        NumberSequenceKeypoint.new(0, 0),
+                        NumberSequenceKeypoint.new(1, 1),
+                    }),
+                    Parent = TransparencyColor,
+                })
+
+                TransparencyCursor = New("Frame", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    BackgroundColor3 = "WhiteColor",
+                    BorderColor3 = "DarkColor",
+                    BorderSizePixel = 1,
+                    Position = UDim2.fromScale(0.5, ColorPicker.Transparency),
+                    Size = UDim2.new(1, 2, 0, 1),
+                    Parent = TransparencySelector,
+                })
+            end
+
+            local InfoHolder = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 20),
+                Parent = ColorMenu.Menu,
+            })
+            New("UIListLayout", {
+                FillDirection = Enum.FillDirection.Horizontal,
+                HorizontalFlex = Enum.UIFlexAlignment.Fill,
+                Padding = UDim.new(0, 8),
+                Parent = InfoHolder,
+            })
+
+            local HueBox = New("TextBox", {
+                BackgroundColor3 = "MainColor",
+                ClearTextOnFocus = false,
+                Size = UDim2.fromScale(1, 1),
+                Text = "#??????",
+                TextSize = 14,
+                Parent = InfoHolder,
+            })
+
+            New("UIStroke", {
+                Color = "OutlineColor",
+                Parent = HueBox,
+            })
+
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                    Parent = HueBox,
+                })
+            )
+
+            local RgbBox = New("TextBox", {
+                BackgroundColor3 = "MainColor",
+                ClearTextOnFocus = false,
+                Size = UDim2.fromScale(1, 1),
+                Text = "?, ?, ?",
+                TextSize = 14,
+                Parent = InfoHolder,
+            })
+
+            New("UIStroke", {
+                Color = "OutlineColor",
+                Parent = RgbBox,
+            })
+
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                    Parent = RgbBox,
+                })
+            )
+
+            --// Context Menu \\--
+            local ContextMenu = Library:AddContextMenu(Holder, UDim2.fromOffset(93, 0), function()
+                return { Holder.AbsoluteSize.X + 1.5, 0.5 }
+            end, 1)
+            ColorPicker.ContextMenu = ContextMenu
+            ContextMenu.List.Padding = UDim.new(0, 6)
+            do
+                local function CreateButton(Text, Func)
+                    local Button = New("TextButton", {
+                        BackgroundTransparency = 1,
+                        Size = UDim2.new(1, 0, 0, 21),
+                        Text = Text,
+                        TextSize = 14,
+                        Parent = ContextMenu.Menu,
+                    })
+
+                    Button.MouseButton1Click:Connect(function()
+                        Library:SafeCallback(Func)
+                        ContextMenu:Close()
+                    end)
+                end
+
+                CreateButton("Copy color", function()
+                    Library.CopiedColor = { ColorPicker.Value, ColorPicker.Transparency }
+                end)
+
+                ColorPicker.SetValueRGB = function(...) end --// make luau lsp shut up
+                CreateButton("Paste color", function()
+                    ColorPicker:SetValueRGB(Library.CopiedColor[1], Library.CopiedColor[2])
+                end)
+
+                if setclipboard then
+                    CreateButton("Copy Hex", function()
+                        setclipboard(tostring(ColorPicker.Value:ToHex()))
+                    end)
+
+                    CreateButton("Copy RGB", function()
+                        setclipboard(table.concat({
+                            math.floor(ColorPicker.Value.R * 255),
+                            math.floor(ColorPicker.Value.G * 255),
+                            math.floor(ColorPicker.Value.B * 255),
+                        }, ", "))
+                    end)
+                end
+            end
+
+            --// End \\--
+            function ColorPicker:SetHSVFromRGB(Color)
+                ColorPicker.Hue, ColorPicker.Sat, ColorPicker.Vib = Color:ToHSV()
+            end
+
+            function ColorPicker:Display()
+                if Library.Unloaded then
+                    return
+                end
+
+                ColorPicker.Value = Color3.fromHSV(ColorPicker.Hue, ColorPicker.Sat, ColorPicker.Vib)
+
+                Holder.BackgroundColor3 = ColorPicker.Value
+                HolderStroke.Color = Library:GetDarkerColor(ColorPicker.Value)
+                HolderTransparency.ImageTransparency = (1 - ColorPicker.Transparency)
+
+                SatVipMap.BackgroundColor3 = Color3.fromHSV(ColorPicker.Hue, 1, 1)
+                if TransparencyColor then
+                    TransparencyColor.BackgroundColor3 = ColorPicker.Value
+                end
+
+                SatVibCursor.Position = UDim2.fromScale(ColorPicker.Sat, 1 - ColorPicker.Vib)
+                HueCursor.Position = UDim2.fromScale(0.5, ColorPicker.Hue)
+                if TransparencyCursor then
+                    TransparencyCursor.Position = UDim2.fromScale(0.5, ColorPicker.Transparency)
+                end
+
+                HueBox.Text = "#" .. ColorPicker.Value:ToHex()
+                RgbBox.Text = table.concat({
+                    math.floor(ColorPicker.Value.R * 255),
+                    math.floor(ColorPicker.Value.G * 255),
+                    math.floor(ColorPicker.Value.B * 255),
+                }, ", ")
+            end
+
+            function ColorPicker:Update()
+                ColorPicker:Display()
+
+                Library:SafeCallback(ColorPicker.Callback, ColorPicker.Value)
+                Library:SafeCallback(ColorPicker.Changed, ColorPicker.Value)
+            end
+
+            function ColorPicker:OnChanged(Func)
+                ColorPicker.Changed = Func
+            end
+
+            function ColorPicker:SetValue(HSV, Transparency)
+                if typeof(HSV) == "Color3" then
+                    ColorPicker:SetValueRGB(HSV, Transparency)
+                    return
+                end
+
+                local Color = Color3.fromHSV(HSV[1], HSV[2], HSV[3])
+                ColorPicker.Transparency = Info.Transparency and Transparency or 0
+                ColorPicker:SetHSVFromRGB(Color)
+                ColorPicker:Update()
+            end
+
+            function ColorPicker:SetValueRGB(Color, Transparency)
+                ColorPicker.Transparency = Info.Transparency and Transparency or 0
+                ColorPicker:SetHSVFromRGB(Color)
+                ColorPicker:Update()
+            end
+
+            Holder.MouseButton1Click:Connect(ColorMenu.Toggle)
+            Holder.MouseButton2Click:Connect(ContextMenu.Toggle)
+
+            SatVipMap.InputBegan:Connect(function(Input)
+                while IsDragInput(Input) do
+                    local MinX = SatVipMap.AbsolutePosition.X
+                    local MaxX = MinX + SatVipMap.AbsoluteSize.X
+                    local LocationX ,MinY = math.clamp(Mouse.X, MinX, MaxX)
+,SatVipMap.AbsolutePosition.Y
+                    local MaxY = MinY + SatVipMap.AbsoluteSize.Y
+                    local LocationY ,OldSat ,OldVib = math.clamp(Mouse.Y, MinY, MaxY)
+,ColorPicker.Sat
+,ColorPicker.Vib
+                    ColorPicker.Sat = (LocationX - MinX) / (MaxX - MinX)
+                    ColorPicker.Vib = 1 - ((LocationY - MinY) / (MaxY - MinY))
+
+                    if ColorPicker.Sat ~= OldSat or ColorPicker.Vib ~= OldVib then
+                        ColorPicker:Update()
+                    end
+
+                    RunService.RenderStepped:Wait()
+                end
+            end)
+            HueSelector.InputBegan:Connect(function(Input)
+                while IsDragInput(Input) do
+                    local Min = HueSelector.AbsolutePosition.Y
+                    local Max = Min + HueSelector.AbsoluteSize.Y
+                    local Location ,OldHue = math.clamp(Mouse.Y, Min, Max)
+,ColorPicker.Hue
+                    ColorPicker.Hue = (Location - Min) / (Max - Min)
+
+                    if ColorPicker.Hue ~= OldHue then
+                        ColorPicker:Update()
+                    end
+
+                    RunService.RenderStepped:Wait()
+                end
+            end)
+            if TransparencySelector then
+                TransparencySelector.InputBegan:Connect(function(Input)
+                    while IsDragInput(Input) do
+                        local Min ,Max = TransparencySelector.AbsolutePosition.Y
+,TransparencySelector.AbsolutePosition.Y + TransparencySelector.AbsoluteSize.Y
+                        local Location ,OldTransparency = math.clamp(Mouse.Y, Min, Max)
+,ColorPicker.Transparency
+                        ColorPicker.Transparency = (Location - Min) / (Max - Min)
+
+                        if ColorPicker.Transparency ~= OldTransparency then
+                            ColorPicker:Update()
+                        end
+
+                        RunService.RenderStepped:Wait()
+                    end
+                end)
+            end
+
+            HueBox.FocusLost:Connect(function(Enter)
+                if not Enter then
+                    return
+                end
+
+                local Success, Color = pcall(Color3.fromHex, HueBox.Text)
+                if Success and typeof(Color) == "Color3" then
+                    ColorPicker.Hue, ColorPicker.Sat, ColorPicker.Vib = Color:ToHSV()
+                end
+
+                ColorPicker:Update()
+            end)
+            RgbBox.FocusLost:Connect(function(Enter)
+                if not Enter then
+                    return
+                end
+
+                local R, G, B = RgbBox.Text:match("(%d+),%s*(%d+),%s*(%d+)")
+                if R and G and B then
+                    ColorPicker:SetHSVFromRGB(Color3.fromRGB(R, G, B))
+                end
+
+                ColorPicker:Update()
+            end)
+
+            ColorPicker:Display()
+
+            if ParentObj.Addons then
+                table.insert(ParentObj.Addons, ColorPicker)
+            end
+
+            ColorPicker.Default = ColorPicker.Value
+
+            Options[Idx] = ColorPicker
+
+            return self
+        end
+
+        BaseAddons.__index = Funcs
+        BaseAddons.__namecall = function(_, Key, ...)
+            return Funcs[Key](...)
+        end
+    end
+
+    local BaseGroupbox = {}
+    do
+        local Funcs = {}
+
+        function Funcs:AddDivider(...)
+            local Params ,MarginTop ,MarginBottom ,Text
+= select(1, ...)
+,0
+,0
+
+            if typeof(Params) == "table" then
+                Text = Params.Text
+                MarginTop = Params.MarginTop or Params.Margin or 0
+                MarginBottom = Params.MarginBottom or Params.Margin or 0
+            elseif typeof(Params) == "string" then
+                Text = Params
+            end
+
+            local Groupbox = self
+            local Container = Groupbox.Container
+
+            local Holder = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 6 + MarginTop + MarginBottom),
+                Parent = Container,
+            })
+
+            local InnerHolder = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 1, 0),
+                Parent = Holder,
+            })
+
+            New("UIPadding", {
+                PaddingTop = UDim.new(0, MarginTop),
+                PaddingBottom = UDim.new(0, MarginBottom),
+                Parent = Holder,
+            })
+
+            if Text then
+                local TextLabel = New("TextLabel", {
+                    AutomaticSize = Enum.AutomaticSize.X,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromScale(1, 0),
+                    Text = Text,
+                    TextSize = 14,
+                    TextTransparency = 0.5,
+                    TextXAlignment = Enum.TextXAlignment.Center,
+                    Parent = InnerHolder,
+                })
+local X=Library:GetTextBounds(Text, TextLabel.FontFace, TextLabel.TextSize, TextLabel.AbsoluteSize.X)
+                local SizeX = X // 2 + 10
+
+                New("Frame", {
+                    AnchorPoint = Vector2.new(0, 0.5),
+                    BackgroundColor3 = "MainColor",
+                    BorderColor3 = "OutlineColor",
+                    BorderSizePixel = 1,
+                    Position = UDim2.fromScale(0, 0.5),
+                    Size = UDim2.new(0.5, -SizeX, 0, 2),
+                    Parent = InnerHolder,
+                })
+                New("Frame", {
+                    AnchorPoint = Vector2.new(1, 0.5),
+                    BackgroundColor3 = "MainColor",
+                    BorderColor3 = "OutlineColor",
+                    BorderSizePixel = 1,
+                    Position = UDim2.fromScale(1, 0.5),
+                    Size = UDim2.new(0.5, -SizeX, 0, 2),
+                    Parent = InnerHolder,
+                })
+            else
+                New("Frame", {
+                    AnchorPoint = Vector2.new(0, 0.5),
+                    BackgroundColor3 = "MainColor",
+                    BorderColor3 = "OutlineColor",
+                    BorderSizePixel = 1,
+                    Position = UDim2.fromScale(0, 0.5),
+                    Size = UDim2.new(1, 0, 0, 2),
+                    Parent = InnerHolder,
+                })
+            end
+
+            Groupbox:Resize()
+
+            local Divider = {
+                Holder = Holder,
+                Text = Text,
+                MarginTop = MarginTop,
+                MarginBottom = MarginBottom,
+                Type = "Divider",
+            }
+
+            table.insert(Groupbox.Elements, Divider)
+            return Divider
+        end
+
+        function Funcs:AddLabel(...)
+            local Data ,Addons ,First ,Second = {}
+,{}
+,select(1, ...)
+,select(2, ...)
+
+            if typeof(First) == "table" or typeof(Second) == "table" then
+                local Params = typeof(First) == "table" and First or Second
+
+                Data.Text = Params.Text or ""
+                Data.DoesWrap = Params.DoesWrap or false
+                Data.Size = Params.Size or 14
+                Data.Visible = Params.Visible or true
+                Data.Idx = typeof(Second) == "table" and First or nil
+                Data.Alignment = Params.Alignment or Enum.TextXAlignment.Left
+            else
+                Data.Text = First or ""
+                Data.DoesWrap = Second or false
+                Data.Size = 14
+                Data.Visible = true
+                Data.Idx = select(3, ...) or nil
+            end
+
+            local Groupbox = self
+            local Container ,Label = Groupbox.Container
+,{
+                Text = Data.Text,
+                DoesWrap = Data.DoesWrap,
+                Alignment = Data.Alignment or Enum.TextXAlignment.Left, -- vma added this
+
+                Addons = Addons,
+
+                Visible = Data.Visible,
+                Type = "Label",
+            }
+
+            local TextLabel = New("TextLabel", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 18),
+                Text = Label.Text,
+                TextSize = Data.Size,
+                TextWrapped = Label.DoesWrap,
+                TextXAlignment = Groupbox.IsKeyTab and Enum.TextXAlignment.Center or Label.Alignment,
+                Parent = Container,
+            })
+
+            function Label:SetVisible(Visible)
+                Label.Visible = Visible
+
+                TextLabel.Visible = Label.Visible
+                Groupbox:Resize()
+            end
+
+            function Label:SetText(Text)
+                Label.Text = Text
+                TextLabel.Text = Text
+
+                if Label.DoesWrap then
+local _, Y =                        Library:GetTextBounds(Label.Text, TextLabel.FontFace, TextLabel.TextSize, TextLabel.AbsoluteSize.X)
+                    TextLabel.Size = UDim2.new(1, 0, 0, Y + 4)
+                end
+
+                Groupbox:Resize()
+            end
+
+            if Label.DoesWrap then
+local _, Y =                    Library:GetTextBounds(Label.Text, TextLabel.FontFace, TextLabel.TextSize, TextLabel.AbsoluteSize.X)
+                TextLabel.Size = UDim2.new(1, 0, 0, Y + 4)
+
+                local Last = TextLabel.AbsoluteSize
+                TextLabel:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+                    if TextLabel.AbsoluteSize == Last then
+                        return
+                    end
+local _, Y =                        Library:GetTextBounds(Label.Text, TextLabel.FontFace, TextLabel.TextSize, TextLabel.AbsoluteSize.X)
+                    TextLabel.Size = UDim2.new(1, 0, 0, Y + 4)
+
+                    Last = TextLabel.AbsoluteSize
+                    Groupbox:Resize()
+                end)
+            else
+                New("UIListLayout", {
+                    FillDirection = Enum.FillDirection.Horizontal,
+                    HorizontalAlignment = Enum.HorizontalAlignment.Right,
+                    Padding = UDim.new(0, 6),
+                    Parent = TextLabel,
+                })
+            end
+
+            Groupbox:Resize()
+
+            Label.TextLabel = TextLabel
+            Label.Container = Container
+            if not Data.DoesWrap then
+                setmetatable(Label, BaseAddons)
+            end
+
+            Label.Holder = TextLabel
+            table.insert(Groupbox.Elements, Label)
+
+            if Data.Idx then
+                Labels[Data.Idx] = Label
+            else
+                table.insert(Labels, Label)
+            end
+
+            return Label
+        end
+
+        function Funcs:AddButton(...)
+            local function GetInfo(...)
+                local Info ,First ,Second = {}
+,select(1, ...)
+,select(2, ...)
+
+                if typeof(First) == "table" or typeof(Second) == "table" then
+                    local Params = typeof(First) == "table" and First or Second
+
+                    Info.Text = Params.Text or ""
+                    Info.Func = Params.Func or Params.Callback or function() end
+                    Info.DoubleClick = Params.DoubleClick
+
+                    Info.Tooltip = Params.Tooltip
+                    Info.DisabledTooltip = Params.DisabledTooltip
+
+                    Info.Risky = Params.Risky or false
+                    Info.Disabled = Params.Disabled or false
+                    Info.Visible = Params.Visible or true
+                    Info.Idx = typeof(Second) == "table" and First or nil
+                else
+                    Info.Text = First or ""
+                    Info.Func = Second or function() end
+                    Info.DoubleClick = false
+
+                    Info.Tooltip = nil
+                    Info.DisabledTooltip = nil
+
+                    Info.Risky = false
+                    Info.Disabled = false
+                    Info.Visible = true
+                    Info.Idx = select(3, ...) or nil
+                end
+
+                return Info
+            end
+            local Info ,Groupbox = GetInfo(...)
+,self
+            local Container ,Button = Groupbox.Container
+,{
+                Text = Info.Text,
+                Func = Info.Func,
+                DoubleClick = Info.DoubleClick,
+
+                Tooltip = Info.Tooltip,
+                DisabledTooltip = Info.DisabledTooltip,
+                TooltipTable = nil,
+
+                Risky = Info.Risky,
+                Disabled = Info.Disabled,
+                Visible = Info.Visible,
+
+                Tween = nil,
+                Type = "Button",
+            }
+
+            local Holder = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 21),
+                Parent = Container,
+            })
+
+            New("UIListLayout", {
+                FillDirection = Enum.FillDirection.Horizontal,
+                HorizontalFlex = Enum.UIFlexAlignment.Fill,
+                Padding = UDim.new(0, 9),
+                Parent = Holder,
+            })
+
+            local function CreateButton(Button)
+                local Base = New("TextButton", {
+                    Active = not Button.Disabled,
+                    BackgroundColor3 = Button.Disabled and "BackgroundColor" or "MainColor",
+                    Size = UDim2.fromScale(1, 1),
+                    Text = Button.Text,
+                    TextSize = 14,
+                    TextTransparency = 0.4,
+                    Visible = Button.Visible,
+                    Parent = Holder,
+                })
+
+                local Stroke = New("UIStroke", {
+                    Color = "OutlineColor",
+                    Transparency = Button.Disabled and 0.5 or 0,
+                    Parent = Base,
+                })
+
+                table.insert(
+                    Library.Corners,
+                    New("UICorner", {
+                        CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                        Parent = Base,
+                    })
+                )
+
+                return Base, Stroke
+            end
+
+            local function InitEvents(Button)
+                Button.Base.MouseEnter:Connect(function()
+                    if Button.Disabled then
+                        return
+                    end
+
+                    Button.Tween = TweenService:Create(Button.Base, Library.TweenInfo, {
+                        TextTransparency = 0,
+                    })
+                    Button.Tween:Play()
+                end)
+                Button.Base.MouseLeave:Connect(function()
+                    if Button.Disabled then
+                        return
+                    end
+
+                    Button.Tween = TweenService:Create(Button.Base, Library.TweenInfo, {
+                        TextTransparency = 0.4,
+                    })
+                    Button.Tween:Play()
+                end)
+
+                Button.Base.MouseButton1Click:Connect(function()
+                    if Button.Disabled or Button.Locked then
+                        return
+                    end
+
+                    if Button.DoubleClick then
+                        Button.Locked = true
+
+                        Button.Base.Text = "Are you sure?"
+                        Button.Base.TextColor3 = Library.Scheme.AccentColor
+                        Library.Registry[Button.Base].TextColor3 = "AccentColor"
+
+                        local Clicked = WaitForEvent(Button.Base.MouseButton1Click, 0.5)
+
+                        Button.Base.Text = Button.Text
+                        Button.Base.TextColor3 = Button.Risky and Library.Scheme.RedColor or Library.Scheme.FontColor
+                        Library.Registry[Button.Base].TextColor3 = Button.Risky and "RedColor" or "FontColor"
+
+                        if Clicked then
+                            Library:SafeCallback(Button.Func)
+                        end
+
+                        RunService.RenderStepped:Wait() --// Mouse Button fires without waiting (i hate roblox)
+                        Button.Locked = false
+                        return
+                    end
+
+                    Library:SafeCallback(Button.Func)
+                end)
+            end
+
+            Button.Base, Button.Stroke = CreateButton(Button)
+            InitEvents(Button)
+
+            function Button:AddButton(...)
+                local Info = GetInfo(...)
+
+                local SubButton = {
+                    Text = Info.Text,
+                    Func = Info.Func,
+                    DoubleClick = Info.DoubleClick,
+
+                    Tooltip = Info.Tooltip,
+                    DisabledTooltip = Info.DisabledTooltip,
+                    TooltipTable = nil,
+
+                    Risky = Info.Risky,
+                    Disabled = Info.Disabled,
+                    Visible = Info.Visible,
+
+                    Tween = nil,
+                    Type = "SubButton",
+                }
+
+                Button.SubButton = SubButton
+                SubButton.Base, SubButton.Stroke = CreateButton(SubButton)
+                InitEvents(SubButton)
+
+                function SubButton:UpdateColors()
+                    if Library.Unloaded then
+                        return
+                    end
+
+                    StopTween(SubButton.Tween)
+
+                    SubButton.Base.BackgroundColor3 = SubButton.Disabled and Library.Scheme.BackgroundColor
+                        or Library.Scheme.MainColor
+                    SubButton.Base.TextTransparency = SubButton.Disabled and 0.8 or 0.4
+                    SubButton.Stroke.Transparency = SubButton.Disabled and 0.5 or 0
+
+                    Library.Registry[SubButton.Base].BackgroundColor3 = SubButton.Disabled and "BackgroundColor"
+                        or "MainColor"
+                end
+
+                function SubButton:SetDisabled(Disabled)
+                    SubButton.Disabled = Disabled
+
+                    if SubButton.TooltipTable then
+                        SubButton.TooltipTable.Disabled = SubButton.Disabled
+                    end
+
+                    SubButton.Base.Active = not SubButton.Disabled
+                    SubButton:UpdateColors()
+                end
+
+                function SubButton:SetVisible(Visible)
+                    SubButton.Visible = Visible
+
+                    SubButton.Base.Visible = SubButton.Visible
+                    Groupbox:Resize()
+                end
+
+                function SubButton:SetText(Text)
+                    SubButton.Text = Text
+                    SubButton.Base.Text = Text
+                end
+
+                if typeof(SubButton.Tooltip) == "string" or typeof(SubButton.DisabledTooltip) == "string" then
+                    SubButton.TooltipTable =
+                        Library:AddTooltip(SubButton.Tooltip, SubButton.DisabledTooltip, SubButton.Base)
+                    SubButton.TooltipTable.Disabled = SubButton.Disabled
+                end
+
+                if SubButton.Risky then
+                    SubButton.Base.TextColor3 = Library.Scheme.RedColor
+                    Library.Registry[SubButton.Base].TextColor3 = "RedColor"
+                end
+
+                SubButton:UpdateColors()
+
+                if Info.Idx then
+                    Buttons[Info.Idx] = SubButton
+                else
+                    table.insert(Buttons, SubButton)
+                end
+
+                return SubButton
+            end
+
+            function Button:UpdateColors()
+                if Library.Unloaded then
+                    return
+                end
+
+                StopTween(Button.Tween)
+
+                Button.Base.BackgroundColor3 = Button.Disabled and Library.Scheme.BackgroundColor
+                    or Library.Scheme.MainColor
+                Button.Base.TextTransparency = Button.Disabled and 0.8 or 0.4
+                Button.Stroke.Transparency = Button.Disabled and 0.5 or 0
+
+                Library.Registry[Button.Base].BackgroundColor3 = Button.Disabled and "BackgroundColor" or "MainColor"
+            end
+
+            function Button:SetDisabled(Disabled)
+                Button.Disabled = Disabled
+
+                if Button.TooltipTable then
+                    Button.TooltipTable.Disabled = Button.Disabled
+                end
+
+                Button.Base.Active = not Button.Disabled
+                Button:UpdateColors()
+            end
+
+            function Button:SetVisible(Visible)
+                Button.Visible = Visible
+
+                Holder.Visible = Button.Visible
+                Groupbox:Resize()
+            end
+
+            function Button:SetText(Text)
+                Button.Text = Text
+                Button.Base.Text = Text
+            end
+
+            if typeof(Button.Tooltip) == "string" or typeof(Button.DisabledTooltip) == "string" then
+                Button.TooltipTable = Library:AddTooltip(Button.Tooltip, Button.DisabledTooltip, Button.Base)
+                Button.TooltipTable.Disabled = Button.Disabled
+            end
+
+            if Button.Risky then
+                Button.Base.TextColor3 = Library.Scheme.RedColor
+                Library.Registry[Button.Base].TextColor3 = "RedColor"
+            end
+
+            Button:UpdateColors()
+            Groupbox:Resize()
+
+            Button.Holder = Holder
+            table.insert(Groupbox.Elements, Button)
+
+            if Info.Idx then
+                Buttons[Info.Idx] = Button
+            else
+                table.insert(Buttons, Button)
+            end
+
+            return Button
+        end
+
+        function Funcs:AddCheckbox(Idx, Info)
+            Info = Library:Validate(Info, Templates.Toggle)
+
+            local Groupbox = self
+            local Container ,Toggle = Groupbox.Container
+,{
+                Text = Info.Text,
+                Value = Info.Default,
+
+                Tooltip = Info.Tooltip,
+                DisabledTooltip = Info.DisabledTooltip,
+                TooltipTable = nil,
+
+                Callback = Info.Callback,
+                Changed = Info.Changed,
+
+                Risky = Info.Risky,
+                Disabled = Info.Disabled,
+                Visible = Info.Visible,
+                Addons = {},
+
+                Variant = "Checkbox",
+                Type = "Toggle",
+            }
+
+            local Button = New("TextButton", {
+                Active = not Toggle.Disabled,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 18),
+                Text = "",
+                Visible = Toggle.Visible,
+                Parent = Container,
+            })
+
+            local Label = New("TextLabel", {
+                BackgroundTransparency = 1,
+                Position = UDim2.fromOffset(26, 0),
+                Size = UDim2.new(1, -26, 1, 0),
+                Text = Toggle.Text,
+                TextSize = 14,
+                TextTransparency = 0.4,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                Parent = Button,
+            })
+
+            New("UIListLayout", {
+                FillDirection = Enum.FillDirection.Horizontal,
+                HorizontalAlignment = Enum.HorizontalAlignment.Right,
+                Padding = UDim.new(0, 6),
+                Parent = Label,
+            })
+
+            local Checkbox = New("Frame", {
+                BackgroundColor3 = "MainColor",
+                Size = UDim2.fromScale(1, 1),
+                SizeConstraint = Enum.SizeConstraint.RelativeYY,
+                Parent = Button,
+            })
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                    Parent = Checkbox,
+                })
+            )
+
+            local CheckboxStroke ,CheckImage = New("UIStroke", {
+                Color = "OutlineColor",
+                Parent = Checkbox,
+            })
+,New("ImageLabel", {
+                Image = CheckIcon and CheckIcon.Url or "",
+                ImageColor3 = "FontColor",
+                ImageRectOffset = CheckIcon and CheckIcon.ImageRectOffset or Vector2.zero,
+                ImageRectSize = CheckIcon and CheckIcon.ImageRectSize or Vector2.zero,
+                ImageTransparency = 1,
+                Position = UDim2.fromOffset(2, 2),
+                Size = UDim2.new(1, -4, 1, -4),
+                Parent = Checkbox,
+            })
+
+            function Toggle:UpdateColors()
+                Toggle:Display()
+            end
+
+            function Toggle:Display()
+                if Library.Unloaded then
+                    return
+                end
+
+                CheckboxStroke.Transparency = Toggle.Disabled and 0.5 or 0
+
+                if Toggle.Disabled then
+                    Label.TextTransparency = 0.8
+                    CheckImage.ImageTransparency = Toggle.Value and 0.8 or 1
+
+                    Checkbox.BackgroundColor3 = Library.Scheme.BackgroundColor
+                    Library.Registry[Checkbox].BackgroundColor3 = "BackgroundColor"
+
+                    return
+                end
+
+                TweenService:Create(Label, Library.TweenInfo, {
+                    TextTransparency = Toggle.Value and 0 or 0.4,
+                }):Play()
+                TweenService:Create(CheckImage, Library.TweenInfo, {
+                    ImageTransparency = Toggle.Value and 0 or 1,
+                }):Play()
+
+                Checkbox.BackgroundColor3 = Library.Scheme.MainColor
+                Library.Registry[Checkbox].BackgroundColor3 = "MainColor"
+            end
+
+            function Toggle:OnChanged(Func)
+                Toggle.Changed = Func
+            end
+
+            function Toggle:SetValue(Value)
+                if Toggle.Disabled then
+                    return
+                end
+
+                Toggle.Value = Value
+                Toggle:Display()
+
+                for _, Addon in Toggle.Addons do
+                    if Addon.Type == "KeyPicker" and Addon.SyncToggleState then
+                        Addon.Toggled = Toggle.Value
+                        Addon:Update()
+                    end
+                end
+
+                Library:UpdateDependencyBoxes()
+                Library:SafeCallback(Toggle.Callback, Toggle.Value)
+                Library:SafeCallback(Toggle.Changed, Toggle.Value)
+            end
+
+            function Toggle:SetDisabled(Disabled)
+                Toggle.Disabled = Disabled
+
+                if Toggle.TooltipTable then
+                    Toggle.TooltipTable.Disabled = Toggle.Disabled
+                end
+
+                for _, Addon in Toggle.Addons do
+                    if Addon.Type == "KeyPicker" and Addon.SyncToggleState then
+                        Addon:Update()
+                    end
+                end
+
+                Button.Active = not Toggle.Disabled
+                Toggle:Display()
+            end
+
+            function Toggle:SetVisible(Visible)
+                Toggle.Visible = Visible
+
+                Button.Visible = Toggle.Visible
+                Groupbox:Resize()
+            end
+
+            function Toggle:SetText(Text)
+                Toggle.Text = Text
+                Label.Text = Text
+            end
+
+            Button.MouseButton1Click:Connect(function()
+                if Toggle.Disabled then
+                    return
+                end
+
+                Toggle:SetValue(not Toggle.Value)
+            end)
+
+            if typeof(Toggle.Tooltip) == "string" or typeof(Toggle.DisabledTooltip) == "string" then
+                Toggle.TooltipTable = Library:AddTooltip(Toggle.Tooltip, Toggle.DisabledTooltip, Button)
+                Toggle.TooltipTable.Disabled = Toggle.Disabled
+            end
+
+            if Toggle.Risky then
+                Label.TextColor3 = Library.Scheme.RedColor
+                Library.Registry[Label].TextColor3 = "RedColor"
+            end
+
+            Toggle:Display()
+            Groupbox:Resize()
+
+            Toggle.TextLabel = Label
+            Toggle.Container = Container
+            setmetatable(Toggle, BaseAddons)
+
+            Toggle.Holder = Button
+            table.insert(Groupbox.Elements, Toggle)
+
+            Toggle.Default = Toggle.Value
+
+            Toggles[Idx] = Toggle
+
+            return Toggle
+        end
+
+        function Funcs:AddToggle(Idx, Info)
+            if Library.ForceCheckbox then
+                return Funcs.AddCheckbox(self, Idx, Info)
+            end
+
+            Info = Library:Validate(Info, Templates.Toggle)
+
+            local Groupbox = self
+            local Container ,Toggle = Groupbox.Container
+,{
+                Text = Info.Text,
+                Value = Info.Default,
+
+                Tooltip = Info.Tooltip,
+                DisabledTooltip = Info.DisabledTooltip,
+                TooltipTable = nil,
+
+                Callback = Info.Callback,
+                Changed = Info.Changed,
+
+                Risky = Info.Risky,
+                Disabled = Info.Disabled,
+                Visible = Info.Visible,
+                Addons = {},
+
+                Variant = "Switch",
+                Type = "Toggle",
+            }
+
+            local Button = New("TextButton", {
+                Active = not Toggle.Disabled,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 18),
+                Text = "",
+                Visible = Toggle.Visible,
+                Parent = Container,
+            })
+
+            local Label = New("TextLabel", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, -40, 1, 0),
+                Text = Toggle.Text,
+                TextSize = 14,
+                TextTransparency = 0.4,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                Parent = Button,
+            })
+
+            New("UIListLayout", {
+                FillDirection = Enum.FillDirection.Horizontal,
+                HorizontalAlignment = Enum.HorizontalAlignment.Right,
+                Padding = UDim.new(0, 6),
+                Parent = Label,
+            })
+
+            local Switch = New("Frame", {
+                AnchorPoint = Vector2.new(1, 0),
+                BackgroundColor3 = "MainColor",
+                Position = UDim2.fromScale(1, 0),
+                Size = UDim2.fromOffset(32, 18),
+                Parent = Button,
+            })
+            New("UICorner", {
+                CornerRadius = UDim.new(1, 0),
+                Parent = Switch,
+            })
+            New("UIPadding", {
+                PaddingBottom = UDim.new(0, 2),
+                PaddingLeft = UDim.new(0, 2),
+                PaddingRight = UDim.new(0, 2),
+                PaddingTop = UDim.new(0, 2),
+                Parent = Switch,
+            })
+            local SwitchStroke ,Ball = New("UIStroke", {
+                Color = "OutlineColor",
+                Parent = Switch,
+            })
+,New("Frame", {
+                BackgroundColor3 = "FontColor",
+                Size = UDim2.fromScale(1, 1),
+                SizeConstraint = Enum.SizeConstraint.RelativeYY,
+                Parent = Switch,
+            })
+            New("UICorner", {
+                CornerRadius = UDim.new(1, 0),
+                Parent = Ball,
+            })
+
+            function Toggle:UpdateColors()
+                Toggle:Display()
+            end
+
+            function Toggle:Display()
+                if Library.Unloaded then
+                    return
+                end
+
+                local Offset = Toggle.Value and 1 or 0
+
+                Switch.BackgroundTransparency = Toggle.Disabled and 0.75 or 0
+                SwitchStroke.Transparency = Toggle.Disabled and 0.75 or 0
+
+                Switch.BackgroundColor3 = Toggle.Value and Library.Scheme.AccentColor or Library.Scheme.MainColor
+                SwitchStroke.Color = Toggle.Value and Library.Scheme.AccentColor or Library.Scheme.OutlineColor
+
+                Library.Registry[Switch].BackgroundColor3 = Toggle.Value and "AccentColor" or "MainColor"
+                Library.Registry[SwitchStroke].Color = Toggle.Value and "AccentColor" or "OutlineColor"
+
+                if Toggle.Disabled then
+                    Label.TextTransparency = 0.8
+                    Ball.AnchorPoint = Vector2.new(Offset, 0)
+                    Ball.Position = UDim2.fromScale(Offset, 0)
+
+                    Ball.BackgroundColor3 = Library:GetDarkerColor(Library.Scheme.FontColor)
+                    Library.Registry[Ball].BackgroundColor3 = function()
+                        return Library:GetDarkerColor(Library.Scheme.FontColor)
+                    end
+
+                    return
+                end
+
+                TweenService:Create(Label, Library.TweenInfo, {
+                    TextTransparency = Toggle.Value and 0 or 0.4,
+                }):Play()
+                TweenService:Create(Ball, Library.TweenInfo, {
+                    AnchorPoint = Vector2.new(Offset, 0),
+                    Position = UDim2.fromScale(Offset, 0),
+                }):Play()
+
+                Ball.BackgroundColor3 = Library.Scheme.FontColor
+                Library.Registry[Ball].BackgroundColor3 = "FontColor"
+            end
+
+            function Toggle:OnChanged(Func)
+                Toggle.Changed = Func
+            end
+
+            function Toggle:SetValue(Value)
+                if Toggle.Disabled then
+                    return
+                end
+
+                Toggle.Value = Value
+                Toggle:Display()
+
+                for _, Addon in Toggle.Addons do
+                    if Addon.Type == "KeyPicker" and Addon.SyncToggleState then
+                        Addon.Toggled = Toggle.Value
+                        Addon:Update()
+                    end
+                end
+
+                Library:UpdateDependencyBoxes()
+                Library:SafeCallback(Toggle.Callback, Toggle.Value)
+                Library:SafeCallback(Toggle.Changed, Toggle.Value)
+            end
+
+            function Toggle:SetDisabled(Disabled)
+                Toggle.Disabled = Disabled
+
+                if Toggle.TooltipTable then
+                    Toggle.TooltipTable.Disabled = Toggle.Disabled
+                end
+
+                for _, Addon in Toggle.Addons do
+                    if Addon.Type == "KeyPicker" and Addon.SyncToggleState then
+                        Addon:Update()
+                    end
+                end
+
+                Button.Active = not Toggle.Disabled
+                Toggle:Display()
+            end
+
+            function Toggle:SetVisible(Visible)
+                Toggle.Visible = Visible
+
+                Button.Visible = Toggle.Visible
+                Groupbox:Resize()
+            end
+
+            function Toggle:SetText(Text)
+                Toggle.Text = Text
+                Label.Text = Text
+            end
+
+            Button.MouseButton1Click:Connect(function()
+                if Toggle.Disabled then
+                    return
+                end
+
+                Toggle:SetValue(not Toggle.Value)
+            end)
+
+            if typeof(Toggle.Tooltip) == "string" or typeof(Toggle.DisabledTooltip) == "string" then
+                Toggle.TooltipTable = Library:AddTooltip(Toggle.Tooltip, Toggle.DisabledTooltip, Button)
+                Toggle.TooltipTable.Disabled = Toggle.Disabled
+            end
+
+            if Toggle.Risky then
+                Label.TextColor3 = Library.Scheme.RedColor
+                Library.Registry[Label].TextColor3 = "RedColor"
+            end
+
+            Toggle:Display()
+            Groupbox:Resize()
+
+            Toggle.TextLabel = Label
+            Toggle.Container = Container
+            setmetatable(Toggle, BaseAddons)
+
+            Toggle.Holder = Button
+            table.insert(Groupbox.Elements, Toggle)
+
+            Toggle.Default = Toggle.Value
+
+            Toggles[Idx] = Toggle
+
+            return Toggle
+        end
+
+        function Funcs:AddInput(Idx, Info)
+            if typeof(Info) == "table" and (typeof(Info.VerifyValue) == "function" and Info.Finished ~= true) then
+                Info.Finished = true
+            end
+
+            Info = Library:Validate(Info, Templates.Input)
+
+            local Groupbox = self
+            local Container ,Input = Groupbox.Container
+,{
+                Text = Info.Text,
+                Value = Info.Default,
+
+                Finished = Info.Finished,
+                Numeric = Info.Numeric,
+                ClearTextOnFocus = Info.ClearTextOnFocus,
+                ClearTextOnBlur = Info.ClearTextOnBlur,
+                Placeholder = Info.Placeholder,
+                AllowEmpty = Info.AllowEmpty,
+                EmptyReset = Info.EmptyReset,
+
+                Tooltip = Info.Tooltip,
+                DisabledTooltip = Info.DisabledTooltip,
+                TooltipTable = nil,
+
+                Callback = Info.Callback,
+                Changed = Info.Changed,
+                VerifyValue = Info.VerifyValue,
+
+                Disabled = Info.Disabled,
+                Visible = Info.Visible,
+
+                Type = "Input",
+            }
+
+            local Holder = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 39),
+                Visible = Input.Visible,
+                Parent = Container,
+            })
+
+            local Label ,Box = New("TextLabel", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 14),
+                Text = Input.Text,
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                Parent = Holder,
+            })
+,New("TextBox", {
+                AnchorPoint = Vector2.new(0, 1),
+                BackgroundColor3 = "MainColor",
+                ClearTextOnFocus = not Input.Disabled and Input.ClearTextOnFocus,
+                PlaceholderText = Input.Placeholder,
+                Position = UDim2.fromScale(0, 1),
+                Size = UDim2.new(1, 0, 0, 21),
+                Text = Input.Value,
+                TextEditable = not Input.Disabled,
+                TextScaled = true,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                Parent = Holder,
+            })
+
+            New("UIPadding", {
+                PaddingBottom = UDim.new(0, 3),
+                PaddingLeft = UDim.new(0, 8),
+                PaddingRight = UDim.new(0, 8),
+                PaddingTop = UDim.new(0, 4),
+                Parent = Box,
+            })
+
+            New("UIStroke", {
+                Color = "OutlineColor",
+                Parent = Box,
+            })
+
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                    Parent = Box,
+                })
+            )
+
+            function Input:UpdateColors()
+                if Library.Unloaded then
+                    return
+                end
+
+                Label.TextTransparency = Input.Disabled and 0.8 or 0
+                Box.TextTransparency = Input.Disabled and 0.8 or 0
+            end
+
+            function Input:OnChanged(Func)
+                Input.Changed = Func
+            end
+
+            function Input:SetValue(Text)
+                if not Input.AllowEmpty and Trim(Text) == "" then
+                    Text = Input.EmptyReset
+                end
+
+                if Info.MaxLength and #Text > Info.MaxLength then
+                    Text = Text:sub(1, Info.MaxLength)
+                end
+
+                if Input.Numeric then
+                    if #tostring(Text) > 0 and not tonumber(Text) then
+                        Text = Input.Value
+                    end
+                end
+
+                if typeof(Info.VerifyValue) == "function" and (Text ~= Input.EmptyReset and Info.VerifyValue(Text) ~= true) then
+                    Text = Input.EmptyReset
+                end
+
+                Input.Value = Text
+                Box.Text = Text
+
+                if not Input.Disabled then
+                    Library:SafeCallback(Input.Callback, Input.Value)
+                    Library:SafeCallback(Input.Changed, Input.Value)
+                end
+            end
+
+            function Input:SetDisabled(Disabled)
+                Input.Disabled = Disabled
+
+                if Input.TooltipTable then
+                    Input.TooltipTable.Disabled = Input.Disabled
+                end
+
+                Box.ClearTextOnFocus = not Input.Disabled and Input.ClearTextOnFocus
+                Box.TextEditable = not Input.Disabled
+                Input:UpdateColors()
+            end
+
+            function Input:SetVisible(Visible)
+                Input.Visible = Visible
+
+                Holder.Visible = Input.Visible
+                Groupbox:Resize()
+            end
+
+            function Input:SetText(Text)
+                Input.Text = Text
+                Label.Text = Text
+            end
+
+            if Input.Finished then
+                Box.FocusLost:Connect(function(Enter)
+                    if not Enter then
+                        if Input.ClearTextOnBlur then
+                            Box.Text = Input.Value
+                        end
+
+                        return
+                    end
+
+                    Input:SetValue(Box.Text)
+                end)
+            else
+                Box:GetPropertyChangedSignal("Text"):Connect(function()
+                    if Box.Text == Input.Value then return end
+
+                    Input:SetValue(Box.Text)
+                end)
+            end
+
+            if typeof(Input.Tooltip) == "string" or typeof(Input.DisabledTooltip) == "string" then
+                Input.TooltipTable = Library:AddTooltip(Input.Tooltip, Input.DisabledTooltip, Box)
+                Input.TooltipTable.Disabled = Input.Disabled
+            end
+
+            Groupbox:Resize()
+
+            Input.Holder = Holder
+            table.insert(Groupbox.Elements, Input)
+
+            Input.Default = Input.Value
+            if typeof(Info.VerifyValue) == "function" and (Input.Default ~= Input.EmptyReset and Info.VerifyValue(Input.Default) ~= true) then
+                Input:SetValue(Input.EmptyReset)
+                Input.Default = Input.EmptyReset
+            end
+
+            Options[Idx] = Input
+
+            return Input
+        end
+
+        function Funcs:AddSlider(Idx, Info)
+            Info = Library:Validate(Info, Templates.Slider)
+
+            local Groupbox = self
+            local Container ,Slider = Groupbox.Container
+,{
+                Text = Info.Text,
+                Value = Info.Default,
+
+                Min = Info.Min,
+                Max = Info.Max,
+
+                Prefix = Info.Prefix,
+                Suffix = Info.Suffix,
+                Compact = Info.Compact,
+                Rounding = Info.Rounding,
+                HideMax = Info.HideMax,
+
+                Tooltip = Info.Tooltip,
+                DisabledTooltip = Info.DisabledTooltip,
+                TooltipTable = nil,
+
+                Callback = Info.Callback,
+                Changed = Info.Changed,
+
+                Disabled = Info.Disabled,
+                Visible = Info.Visible,
+
+                Type = "Slider",
+            }
+
+            local Holder ,SliderLabel
+=(New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, Info.Compact and 15 or 33),
+                Visible = Slider.Visible,
+                Parent = Container,
+            })
+)            if not Info.Compact then
+                SliderLabel = New("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1, 0, 0, 14),
+                    Text = Slider.Text,
+                    TextSize = 14,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = Holder,
+                })
+            end
+
+            local Bar = New("TextButton", {
+                Active = not Slider.Disabled,
+                AnchorPoint = Vector2.new(0, 1),
+                BackgroundColor3 = "MainColor",
+                Position = UDim2.fromScale(0, 1),
+                Size = UDim2.new(1, 0, 0, 15),
+                Text = "",
+                Parent = Holder,
+            })
+
+            New("UIStroke", {
+                Color = "OutlineColor",
+                Parent = Bar,
+            })
+
+            local DisplayLabel = New("TextLabel", {
+                BackgroundTransparency = 1,
+                Size = UDim2.fromScale(1, 1),
+                Text = "",
+                TextSize = 14,
+                ZIndex = 2,
+                Parent = Bar,
+            })
+            New("UIStroke", {
+                ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
+                Color = "DarkColor",
+                LineJoinMode = Enum.LineJoinMode.Miter,
+                Parent = DisplayLabel,
+            })
+
+            local Fill = New("Frame", {
+                BackgroundColor3 = "AccentColor",
+                Size = UDim2.fromScale(0.5, 1),
+                Parent = Bar,
+            })
+
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                    Parent = Bar,
+                })
+            )
+
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                    Parent = Fill,
+                })
+            )
+
+            function Slider:UpdateColors()
+                if Library.Unloaded then
+                    return
+                end
+
+                if SliderLabel then
+                    SliderLabel.TextTransparency = Slider.Disabled and 0.8 or 0
+                end
+                DisplayLabel.TextTransparency = Slider.Disabled and 0.8 or 0
+
+                Fill.BackgroundColor3 = Slider.Disabled and Library.Scheme.OutlineColor or Library.Scheme.AccentColor
+                Library.Registry[Fill].BackgroundColor3 = Slider.Disabled and "OutlineColor" or "AccentColor"
+            end
+
+            function Slider:Display()
+                if Library.Unloaded then
+                    return
+                end
+
+                local CustomDisplayText                 if Info.FormatDisplayValue then
+                    CustomDisplayText = Info.FormatDisplayValue(Slider, Slider.Value)
+                end
+
+                if CustomDisplayText then
+                    DisplayLabel.Text = tostring(CustomDisplayText)
+                else
+                    if Info.Compact then
+                        DisplayLabel.Text =
+                            string.format("%s: %s%s%s", Slider.Text, Slider.Prefix, Slider.Value, Slider.Suffix)
+                    elseif Info.HideMax then
+                        DisplayLabel.Text = string.format("%s%s%s", Slider.Prefix, Slider.Value, Slider.Suffix)
+                    else
+                        DisplayLabel.Text = string.format(
+                            "%s%s%s/%s%s%s",
+                            Slider.Prefix,
+                            Slider.Value,
+                            Slider.Suffix,
+                            Slider.Prefix,
+                            Slider.Max,
+                            Slider.Suffix
+                        )
+                    end
+                end
+
+                local X = (Slider.Value - Slider.Min) / (Slider.Max - Slider.Min)
+                Fill.Size = UDim2.fromScale(X, 1)
+            end
+
+            function Slider:OnChanged(Func)
+                Slider.Changed = Func
+            end
+
+            function Slider:SetMax(Value)
+                assert(Value > Slider.Min, "Max value cannot be less than the current min value.")
+
+                Slider:SetValue(math.clamp(Slider.Value, Slider.Min, Value))
+                Slider.Max = Value
+                Slider:Display()
+            end
+
+            function Slider:SetMin(Value)
+                assert(Value < Slider.Max, "Min value cannot be greater than the current max value.")
+
+                Slider:SetValue(math.clamp(Slider.Value, Value, Slider.Max))
+                Slider.Min = Value
+                Slider:Display()
+            end
+
+            function Slider:SetValue(Str)
+                if Slider.Disabled then
+                    return
+                end
+
+                local Num = tonumber(Str)
+                if not Num or Num == Slider.Value then
+                    return
+                end
+
+                Num = math.clamp(Num, Slider.Min, Slider.Max)
+
+                Slider.Value = Num
+                Slider:Display()
+
+                Library:SafeCallback(Slider.Callback, Slider.Value)
+                Library:SafeCallback(Slider.Changed, Slider.Value)
+            end
+
+            function Slider:SetDisabled(Disabled)
+                Slider.Disabled = Disabled
+
+                if Slider.TooltipTable then
+                    Slider.TooltipTable.Disabled = Slider.Disabled
+                end
+
+                Bar.Active = not Slider.Disabled
+                Slider:UpdateColors()
+            end
+
+            function Slider:SetVisible(Visible)
+                Slider.Visible = Visible
+
+                Holder.Visible = Slider.Visible
+                Groupbox:Resize()
+            end
+
+            function Slider:SetText(Text)
+                Slider.Text = Text
+                if SliderLabel then
+                    SliderLabel.Text = Text
+                    return
+                end
+                Slider:Display()
+            end
+
+            function Slider:SetPrefix(Prefix)
+                Slider.Prefix = Prefix
+                Slider:Display()
+            end
+
+            function Slider:SetSuffix(Suffix)
+                Slider.Suffix = Suffix
+                Slider:Display()
+            end
+
+            Bar.InputBegan:Connect(function(Input)
+                if not IsClickInput(Input) or Slider.Disabled then
+                    return
+                end
+
+                if Library.ActiveTab then
+                    for _, Side in Library.ActiveTab.Sides do
+                        Side.ScrollingEnabled = false
+                    end
+                end
+
+                if Library.ActiveLoading and Library.ActiveLoading.Sidebar then
+                    Library.ActiveLoading.Sidebar.Container.ScrollingEnabled = false
+                end
+
+                while IsDragInput(Input) do
+                    local Location = Mouse.X
+                    local Scale ,OldValue = math.clamp((Location - Bar.AbsolutePosition.X) / Bar.AbsoluteSize.X, 0, 1)
+,Slider.Value
+                    Slider.Value = Round(Slider.Min + ((Slider.Max - Slider.Min) * Scale), Slider.Rounding)
+
+                    Slider:Display()
+                    if Slider.Value ~= OldValue then
+                        Library:SafeCallback(Slider.Callback, Slider.Value)
+                        Library:SafeCallback(Slider.Changed, Slider.Value)
+                    end
+
+                    RunService.RenderStepped:Wait()
+                end
+
+                if Library.ActiveTab then
+                    for _, Side in Library.ActiveTab.Sides do
+                        Side.ScrollingEnabled = true
+                    end
+                end
+
+                if Library.ActiveLoading and Library.ActiveLoading.Sidebar then
+                    Library.ActiveLoading.Sidebar.Container.ScrollingEnabled = true
+                end
+            end)
+
+            if typeof(Slider.Tooltip) == "string" or typeof(Slider.DisabledTooltip) == "string" then
+                Slider.TooltipTable = Library:AddTooltip(Slider.Tooltip, Slider.DisabledTooltip, Bar)
+                Slider.TooltipTable.Disabled = Slider.Disabled
+            end
+
+            Slider:UpdateColors()
+            Slider:Display()
+            Groupbox:Resize()
+
+            Slider.Holder = Holder
+            table.insert(Groupbox.Elements, Slider)
+
+            Slider.Default = Slider.Value
+
+            Options[Idx] = Slider
+
+            return Slider
+        end
+
+        function Funcs:AddDropdown(Idx, Info)
+            Info = Library:Validate(Info, Templates.Dropdown)
+
+            local Groupbox = self
+            local Container = Groupbox.Container
+
+            if Info.SpecialType == "Player" then
+                Info.Values = GetPlayers(Info.ExcludeLocalPlayer)
+                Info.AllowNull = true
+            elseif Info.SpecialType == "Team" then
+                Info.Values = GetTeams()
+                Info.AllowNull = true
+            end
+
+            local Dropdown = {
+                Text = typeof(Info.Text) == "string" and Info.Text or nil,
+
+                Value = Info.Multi and {} or nil,
+                Values = Info.Values,
+                DisabledValues = Info.DisabledValues,
+                ValueImages = Info.ValueImages,
+
+                Multi = Info.Multi,
+
+                SpecialType = Info.SpecialType,
+                ExcludeLocalPlayer = Info.ExcludeLocalPlayer,
+                EnablePlayerImages = Info.EnablePlayerImages,
+
+                Tooltip = Info.Tooltip,
+                RichText = Info.RichText,
+                DisabledTooltip = Info.DisabledTooltip,
+                TooltipTable = nil,
+
+                Callback = Info.Callback,
+                Changed = Info.Changed,
+
+                Disabled = Info.Disabled,
+                Visible = Info.Visible,
+
+                Type = "Dropdown",
+            }
+
+            local Holder = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, Dropdown.Text and 39 or 21),
+                Visible = Dropdown.Visible,
+                Parent = Container,
+            })
+
+            local Label ,DisplayContainer = New("TextLabel", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 14),
+                Text = Dropdown.Text,
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                Visible = not not Info.Text,
+                ZIndex = 3,
+                Parent = Holder,
+            })
+,New("TextButton", {
+                AnchorPoint = Vector2.new(0, 1),
+                BackgroundColor3 = "MainColor",
+                Position = UDim2.fromScale(0, 1),
+                Size = UDim2.new(1, 0, 0, 21),
+                Text = "",
+                TextTransparency = 1,
+                ZIndex = 2,
+                Parent = Holder,
+            })
+
+            New("UIPadding", {
+                PaddingLeft = UDim.new(0, 8),
+                PaddingRight = UDim.new(0, 4),
+                Parent = DisplayContainer,
+            })
+
+            New("UIStroke", {
+                Color = "OutlineColor",
+                Parent = DisplayContainer,
+            })
+
+            if Library.CornerRadiusDropdown == true then
+                table.insert(
+                    Library.Corners,
+                    New("UICorner", {
+                        CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                        Parent = DisplayContainer,
+                    })
+                )
+            end
+
+            local DisplayImage ,DisplayButton ,ArrowImage ,SearchBox
+= New("ImageLabel", {
+                BackgroundTransparency = 1,
+                Position = UDim2.fromOffset(-4, 3),
+                Size = UDim2.fromOffset(16, 16),
+                Image = "",
+                ImageTransparency = 1,
+                ZIndex = 2,
+                Parent = DisplayContainer,
+            })
+,New("TextButton", {
+                Active = not Dropdown.Disabled,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 21),
+                Text = "---",
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextTruncate = Enum.TextTruncate.AtEnd, -- vma added this
+                RichText = Info.RichText,
+                ZIndex = 2,
+                Parent = DisplayContainer,
+            })
+,(New("ImageLabel", {
+                AnchorPoint = Vector2.new(1, 0.5),
+                Image = ArrowIcon and ArrowIcon.Url or "",
+                ImageColor3 = "FontColor",
+                ImageRectOffset = ArrowIcon and ArrowIcon.ImageRectOffset or Vector2.zero,
+                ImageRectSize = ArrowIcon and ArrowIcon.ImageRectSize or Vector2.zero,
+                ImageTransparency = 0.5,
+                Position = UDim2.fromScale(1, 0.5),
+                Size = UDim2.fromOffset(16, 16),
+                Parent = DisplayContainer,
+            })
+)            if Info.Searchable then
+                SearchBox = New("TextBox", {
+                    BackgroundTransparency = 1,
+                    PlaceholderText = "Search...",
+                    Position = UDim2.fromOffset(-8, 0),
+                    Size = UDim2.new(1, -12, 1, 0),
+                    TextSize = 14,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Visible = false,
+                    Parent = DisplayButton,
+                })
+                New("UIPadding", {
+                    PaddingLeft = UDim.new(0, 8),
+                    Parent = SearchBox,
+                })
+            end
+
+            local GetValueImage ,MenuTable = function(Value)
+                if not Value then
+                    return nil
+                end
+
+                local ValueImage                 if Dropdown.SpecialType == "Player" and Dropdown.EnablePlayerImages == true then
+                    if typeof(Value) == "Instance" and Value:IsA("Player") then
+                        ValueImage = { Url = string.format("rbxthumb://type=AvatarHeadShot&id=%s&w=48&h=48", tostring(Value.UserId)) }
+                    end
+                else
+                    if Info.ValueImages and Info.ValueImages[Value] then
+                        ValueImage = Library:GetCustomIcon(Info.ValueImages[Value])
+                    end
+                end
+
+                return ValueImage
+            end
+,Library:AddContextMenu(
+                DisplayContainer,
+                function()
+                    return UDim2.fromOffset((DisplayContainer.AbsoluteSize.X / Library.DPIScale) + 1, 0)
+                end,
+                function()
+                    return { 0.5, DisplayContainer.AbsoluteSize.Y + 1.5 }
+                end,
+                2,
+                function(Active)
+                    DisplayButton.TextTransparency = (Active and SearchBox) and 1 or 0
+                    ArrowImage.ImageTransparency = Active and 0 or 0.5
+                    ArrowImage.Rotation = Active and 180 or 0
+                    if SearchBox then
+                        SearchBox.Text = ""
+                        SearchBox.Visible = Active
+                    end
+                end,
+                true
+            )
+            Dropdown.Menu = MenuTable
+            
+            local Buttons = {} -- must move this from below (vma)
+
+            function Dropdown:RecalculateListSize(Count)
+                local Y ,X = math.clamp((Count or GetTableSize(Dropdown.Values)) * 21, 0, Info.MaxVisibleDropdownItems * 21)
+,(DisplayContainer.AbsoluteSize.X / Library.DPIScale) + 1                for Button in Buttons do 
+                    local RawText = Info.RichText and StripRichTextTags(Button.Text) or Button.Text                    local TextSizeX = Library:GetTextBounds(RawText, Button.FontFace, Button.TextSize, math.huge)                    
+                    if TextSizeX > X then
+                        X = TextSizeX
+                    end
+                end
+                
+                MenuTable:SetSize(function()
+                    return UDim2.fromOffset(X, Y)
+                end)
+            end
+
+            function Dropdown:UpdateColors()
+                if Library.Unloaded then
+                    return
+                end
+
+                Label.TextTransparency = Dropdown.Disabled and 0.8 or 0
+                DisplayButton.TextTransparency = Dropdown.Disabled and 0.8 or 0
+                DisplayImage.ImageTransparency = Dropdown.Disabled and 0.8 or 0
+                ArrowImage.ImageTransparency = Dropdown.Disabled and 0.8 or MenuTable.Active and 0 or 0.5
+            end
+
+            function Dropdown:Display()
+                if Library.Unloaded then
+                    return
+                end
+
+                local Str ,ValueImage = ""
+
+                if Info.Multi then
+                    for _, Value in Dropdown.Values do
+                        if Dropdown.Value[Value] then
+                            if not ValueImage then
+                                ValueImage = GetValueImage(Value)
+                            end
+
+                            Str = Str
+                                .. (Info.FormatDisplayValue and tostring(Info.FormatDisplayValue(Value)) or tostring(Value))
+                                .. ", "
+                        end
+                    end
+
+                    Str = Str:sub(1, #Str - 2)
+                else
+                    ValueImage = GetValueImage(Dropdown.Value)
+                    Str = Dropdown.Value and tostring(Dropdown.Value) or ""
+
+                    if Str ~= "" and Info.FormatDisplayValue then
+                        Str = tostring(Info.FormatDisplayValue(Str))
+                    end
+                end
+
+                DisplayButton.Text = (Str == "" and "---" or Str)
+
+                if ValueImage then
+                    DisplayImage.Image = ValueImage.Url
+                    DisplayImage.ImageRectOffset = ValueImage.ImageRectOffset or Vector2.zero
+                    DisplayImage.ImageRectSize = ValueImage.ImageRectSize or Vector2.zero
+                    DisplayImage.ImageTransparency = 0
+                else
+                    DisplayImage.Image = ""
+                    DisplayImage.ImageTransparency = 1
+                end
+
+                DisplayButton.Size = ValueImage and UDim2.new(1, -8, 0, 21) or UDim2.new(1, 0, 0, 21)
+                DisplayButton.Position = ValueImage and UDim2.fromOffset(14, 0) or UDim2.fromOffset(0, 0)
+            end
+
+            function Dropdown:OnChanged(Func)
+                Dropdown.Changed = Func
+            end
+
+            function Dropdown:GetActiveValues()
+                if Info.Multi then
+                    local Table = {}
+
+                    for Value, _ in Dropdown.Value do
+                        table.insert(Table, Value)
+                    end
+
+                    return Table
+                end
+
+                return Dropdown.Value and 1 or 0
+            end
+
+            function Dropdown:BuildDropdownList()
+                local Values ,DisabledValues = Dropdown.Values
+,Dropdown.DisabledValues
+
+                -- Destroy old utility buttons
+                if Dropdown.UtilityButtonsHolder then
+                    Dropdown.UtilityButtonsHolder:Destroy()
+                    Dropdown.UtilityButtonsHolder = nil
+                end
+
+                for Button, _ in Buttons do
+                    Button.Parent:Destroy()
+                end
+                table.clear(Buttons)
+
+                local Count = 0
+
+                -- vma added this
+                if Dropdown.Multi and next(Dropdown.Values) and (not SearchBox or SearchBox.Text:len() == 0) then
+                    Count = 1
+                    local UtilHolder = New("Frame", {
+                        BackgroundTransparency = 1,
+                        Size = UDim2.new(1, 0, 0, 21),
+                        Parent = MenuTable.Menu,
+                    })
+                    Dropdown.UtilityButtonsHolder = UtilHolder
+
+                    New("UIListLayout", {
+                        Parent = UtilHolder,
+                        Padding = UDim.new(0, 8),
+                        FillDirection = Enum.FillDirection.Horizontal,
+                        HorizontalAlignment = Enum.HorizontalAlignment.Center,
+                        VerticalAlignment = Enum.VerticalAlignment.Center,
+                    })
+
+                    local function MakeUtilButton(Text, Callback)
+                        local Btn = New("TextButton", {
+                            BackgroundColor3 = "MainColor",
+                            Size = UDim2.fromScale(0.45, 0.8),
+                            Text = Text,
+                            TextSize = 13,
+                            TextTransparency = 0.4,
+                            Parent = UtilHolder,
+                        })
+                        New("UIStroke", { Color = "OutlineColor", Parent = Btn })
+                        table.insert(Library.Corners, New("UICorner", {
+                            CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                            Parent = Btn,
+                        }))
+                        Btn.MouseButton1Click:Connect(Callback)
+                    end
+
+                    MakeUtilButton("Select All", function()
+                        local Dict = {}
+                        for _, Value in Dropdown.Values do
+                            Dict[Value] = true
+                        end
+                        Dropdown:SetValue(Dict)
+                    end)
+
+                    MakeUtilButton("Deselect All", function()
+                        Dropdown:SetValue({})
+                    end)
+                end
+
+                for _, Value in Values do
+                    local FormattedValue = tostring(Info.FormatListValue and Info.FormatListValue(Value) or (Info.FormatDisplayValue and Info.FormatDisplayValue(Value) or Value))
+                    local RawText = Info.RichText and StripRichTextTags(FormattedValue) or FormattedValue
+
+                    if SearchBox and not RawText:lower():match(SearchBox.Text:lower()) then
+                        continue
+                    end
+
+                    Count += 1
+                    local IsDisabled ,Table ,ValueImage = table.find(DisabledValues, Value)
+,{}
+,GetValueImage(Value)
+
+                    local Container = New("Frame", {
+                        BackgroundColor3 = "MainColor",
+                        BackgroundTransparency = 1,
+                        LayoutOrder = IsDisabled and 1 or 0,
+                        Size = UDim2.new(1, 0, 0, 21),
+                        Parent = MenuTable.Menu,
+                    })
+
+                    local Image ,Button = ValueImage and New("ImageLabel", {
+                        BackgroundTransparency = 1,
+                        Image = ValueImage.Url,
+                        ImageRectOffset = ValueImage.ImageRectOffset,
+                        ImageRectSize = ValueImage.ImageRectSize,
+                        ImageTransparency = 0.5,
+                        Size = UDim2.fromOffset(16, 16),
+                        Position = UDim2.fromOffset(4, 3),
+                        Parent = Container,
+                    })
+,New("TextButton", {
+                        BackgroundTransparency = 1,
+                        RichText = Info.RichText, -- ADD THIS
+                        Size = ValueImage and UDim2.new(1, -18, 0, 21) or UDim2.new(1, 0, 0, 21),
+                        Position = ValueImage and UDim2.fromOffset(18, 0) or UDim2.fromOffset(0, 0),
+                        Text = FormattedValue,
+                        TextSize = 14,
+                        TextTransparency = 0.5,
+                        TextXAlignment = Enum.TextXAlignment.Left,
+                        Parent = Container,
+                    })
+                    New("UIPadding", {
+                        PaddingLeft = UDim.new(0, 7),
+                        PaddingRight = UDim.new(0, 7),
+                        Parent = Button,
+                    })
+
+                    local Selected
+                    if Info.Multi then
+                        Selected = Dropdown.Value[Value]
+                    else
+                        Selected = Dropdown.Value == Value
+                    end
+
+                    function Table:UpdateButton()
+                        if Info.Multi then
+                            Selected = Dropdown.Value[Value]
+                        else
+                            Selected = Dropdown.Value == Value
+                        end
+
+                        Container.BackgroundTransparency = Selected and 0 or 1
+                        Button.TextTransparency = IsDisabled and 0.8 or Selected and 0 or 0.5
+
+                        if Image then
+                            Image.ImageTransparency = IsDisabled and 0.8 or Selected and 0 or 0.5
+                        end
+                    end
+
+                    if not IsDisabled then
+                        Button.MouseButton1Click:Connect(function()
+                            local Try = not Selected
+
+                            if not (Dropdown:GetActiveValues() == 1 and not Try and not Info.AllowNull) then
+                                Selected = Try
+                                if Info.Multi then
+                                    Dropdown.Value[Value] = Selected and true or nil
+                                else
+                                    Dropdown.Value = Selected and Value or nil
+                                end
+
+                                for _, OtherButton in Buttons do
+                                    OtherButton:UpdateButton()
+                                end
+                            end
+
+                            Table:UpdateButton()
+                            Dropdown:Display()
+
+                            Library:UpdateDependencyBoxes()
+                            Library:SafeCallback(Dropdown.Callback, Dropdown.Value)
+                            Library:SafeCallback(Dropdown.Changed, Dropdown.Value)
+                        end)
+                    end
+
+                    Table:UpdateButton()
+                    Dropdown:Display()
+
+                    Buttons[Button] = Table
+                end
+
+                Dropdown:RecalculateListSize(Count)
+            end
+
+            function Dropdown:SetValue(Value)
+                if Info.Multi then
+                    local Table = {}
+
+                    for Val, Active in Value or {} do
+                        if typeof(Active) ~= "boolean" then
+                            Table[Active] = true
+                        elseif Active and table.find(Dropdown.Values, Val) then
+                            Table[Val] = true
+                        end
+                    end
+
+                    Dropdown.Value = Table
+                else
+                    if table.find(Dropdown.Values, Value) then
+                        Dropdown.Value = Value
+                    elseif not Value then
+                        Dropdown.Value = nil
+                    end
+                end
+
+                Dropdown:Display()
+                for _, Button in Buttons do
+                    Button:UpdateButton()
+                end
+
+                if not Dropdown.Disabled then
+                    Library:UpdateDependencyBoxes()
+                    Library:SafeCallback(Dropdown.Callback, Dropdown.Value)
+                    Library:SafeCallback(Dropdown.Changed, Dropdown.Value)
+                end
+            end
+
+            function Dropdown:SetValues(Values)
+                Dropdown.Values = Values
+                Dropdown:BuildDropdownList()
+            end
+
+            function Dropdown:AddValues(Values)
+                if typeof(Values) == "table" then
+                    for _, val in Values do
+                        table.insert(Dropdown.Values, val)
+                    end
+                elseif typeof(Values) == "string" then
+                    table.insert(Dropdown.Values, Values)
+                else
+                    return
+                end
+
+                Dropdown:BuildDropdownList()
+            end
+
+            function Dropdown:SetDisabledValues(DisabledValues)
+                Dropdown.DisabledValues = DisabledValues
+                Dropdown:BuildDropdownList()
+            end
+
+            function Dropdown:AddDisabledValues(DisabledValues)
+                if typeof(DisabledValues) == "table" then
+                    for _, val in DisabledValues do
+                        table.insert(Dropdown.DisabledValues, val)
+                    end
+                elseif typeof(DisabledValues) == "string" then
+                    table.insert(Dropdown.DisabledValues, DisabledValues)
+                else
+                    return
+                end
+
+                Dropdown:BuildDropdownList()
+            end
+
+            function Dropdown:SetValueImages(ValueImages)
+                if typeof(ValueImages) ~= "table" then
+                    return
+                end
+
+                Dropdown.ValueImages = ValueImages
+                Dropdown:BuildDropdownList()
+            end
+
+            function Dropdown:AddValueImages(ValueImages)
+                if typeof(ValueImages) ~= "table" then
+                    return
+                end
+
+                for key, val in ValueImages do
+                    Dropdown.ValueImages[key] = val
+                end
+
+                Dropdown:BuildDropdownList()
+            end
+
+            function Dropdown:SetDisabled(Disabled)
+                Dropdown.Disabled = Disabled
+
+                if Dropdown.TooltipTable then
+                    Dropdown.TooltipTable.Disabled = Dropdown.Disabled
+                end
+
+                MenuTable:Close()
+                DisplayButton.Active = not Dropdown.Disabled
+                Dropdown:UpdateColors()
+            end
+
+            function Dropdown:SetVisible(Visible)
+                Dropdown.Visible = Visible
+
+                Holder.Visible = Dropdown.Visible
+                Groupbox:Resize()
+            end
+
+            function Dropdown:SetText(Text)
+                Dropdown.Text = Text
+                Holder.Size = UDim2.new(1, 0, 0, Text and 39 or 21)
+
+                Label.Text = Text and Text or ""
+                Label.Visible = not not Text
+            end
+
+            local ToggleDropdown = function()
+                if Dropdown.Disabled then
+                    return
+                end
+
+                MenuTable:Toggle()
+            end
+
+            DisplayContainer.MouseButton1Click:Connect(ToggleDropdown)
+            DisplayButton.MouseButton1Click:Connect(ToggleDropdown)
+
+            if SearchBox then
+                SearchBox:GetPropertyChangedSignal("Text"):Connect(Dropdown.BuildDropdownList)
+            end
+
+            local Defaults = {}
+            if typeof(Info.Default) == "string" then
+                local Index = table.find(Dropdown.Values, Info.Default)
+                if Index then
+                    table.insert(Defaults, Index)
+                end
+            elseif typeof(Info.Default) == "table" then
+                for _, Value in next, Info.Default do
+                    local Index = table.find(Dropdown.Values, Value)
+                    if Index then
+                        table.insert(Defaults, Index)
+                    end
+                end
+            elseif Dropdown.Values[Info.Default] ~= nil then
+                table.insert(Defaults, Info.Default)
+            end
+
+            if next(Defaults) then
+                for i = 1, #Defaults do
+                    local Index = Defaults[i]
+                    if Info.Multi then
+                        Dropdown.Value[Dropdown.Values[Index] ] = true
+                    else
+                        Dropdown.Value = Dropdown.Values[Index]
+                    end
+
+                    if not Info.Multi then
+                        break
+                    end
+                end
+            end
+
+            if typeof(Dropdown.Tooltip) == "string" or typeof(Dropdown.DisabledTooltip) == "string" then
+                Dropdown.TooltipTable = Library:AddTooltip(Dropdown.Tooltip, Dropdown.DisabledTooltip, DisplayContainer)
+                Dropdown.TooltipTable.Disabled = Dropdown.Disabled
+            end
+
+            Dropdown:UpdateColors()
+            Dropdown:Display()
+            Dropdown:BuildDropdownList()
+            Groupbox:Resize()
+
+            Dropdown.Holder = Holder
+            table.insert(Groupbox.Elements, Dropdown)
+
+            Dropdown.Default = Defaults
+            Dropdown.DefaultValues = Dropdown.Values
+
+            Options[Idx] = Dropdown
+
+            return Dropdown
+        end
+
+        function Funcs:AddViewport(Idx, Info)
+            Info = Library:Validate(Info, Templates.Viewport)
+
+            local Groupbox = self
+            local Container ,Dragging,Pinching ,LastPinchDist ,ViewportObject ,LastMousePos= Groupbox.Container
+,false,false
+,0
+,(Info.Object
+)            if Info.Clone and typeof(Info.Object) == "Instance" then
+                if Info.Object.Archivable then
+                    ViewportObject = ViewportObject:Clone()
+                else
+                    Info.Object.Archivable = true
+                    ViewportObject = ViewportObject:Clone()
+                    Info.Object.Archivable = false
+                end
+            end
+
+            local Viewport = {
+                Object = ViewportObject,
+                Camera = if not Info.Camera then Instance.new("Camera") else Info.Camera,
+                Interactive = Info.Interactive,
+                AutoFocus = Info.AutoFocus,
+                Visible = Info.Visible,
+                Type = "Viewport",
+            }
+
+            assert(
+                typeof(Viewport.Object) == "Instance" and (Viewport.Object:IsA("BasePart") or Viewport.Object:IsA("Model")),
+                "Instance must be a BasePart or Model."
+            )
+
+            assert(
+                typeof(Viewport.Camera) == "Instance" and Viewport.Camera:IsA("Camera"),
+                "Camera must be a valid Camera instance."
+            )
+
+            local function GetModelSize(model)
+                if model:IsA("BasePart") then
+                    return model.Size
+                end
+
+                return select(2, model:GetBoundingBox())
+            end
+
+            local function FocusCamera()
+                local ModelSize = GetModelSize(Viewport.Object)
+                local MaxExtent = math.max(ModelSize.X, ModelSize.Y, ModelSize.Z)
+                local CameraDistance ,ModelPosition = MaxExtent * 2
+,Viewport.Object:GetPivot().Position
+
+                Viewport.Camera.CFrame =
+                    CFrame.new(ModelPosition + Vector3.new(0, MaxExtent / 2, CameraDistance), ModelPosition)
+            end
+
+            local Holder = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, Info.Height),
+                Visible = Viewport.Visible,
+                Parent = Container,
+            })
+
+            local Box = New("Frame", {
+                AnchorPoint = Vector2.new(0, 1),
+                BackgroundColor3 = "MainColor",
+                BorderColor3 = "OutlineColor",
+                BorderSizePixel = 1,
+                Position = UDim2.fromScale(0, 1),
+                Size = UDim2.fromScale(1, 1),
+                Parent = Holder,
+            })
+
+            New("UIPadding", {
+                PaddingBottom = UDim.new(0, 3),
+                PaddingLeft = UDim.new(0, 8),
+                PaddingRight = UDim.new(0, 8),
+                PaddingTop = UDim.new(0, 4),
+                Parent = Box,
+            })
+
+            local ViewportFrame = New("ViewportFrame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.fromScale(1, 1),
+                Parent = Box,
+                CurrentCamera = Viewport.Camera,
+                Active = Viewport.Interactive,
+            })
+
+            ViewportFrame.MouseEnter:Connect(function()
+                if not Viewport.Interactive then
+                    return
+                end
+
+                for _, Side in Groupbox.Tab.Sides do
+                    Side.ScrollingEnabled = false
+                end
+            end)
+
+            ViewportFrame.MouseLeave:Connect(function()
+                if not Viewport.Interactive then
+                    return
+                end
+
+                for _, Side in Groupbox.Tab.Sides do
+                    Side.ScrollingEnabled = true
+                end
+            end)
+
+            ViewportFrame.InputBegan:Connect(function(input)
+                if not Viewport.Interactive then
+                    return
+                end
+
+                if input.UserInputType == Enum.UserInputType.MouseButton2 then
+                    Dragging = true
+                    LastMousePos = input.Position
+                elseif input.UserInputType == Enum.UserInputType.Touch and not Pinching then
+                    Dragging = true
+                    LastMousePos = input.Position
+                end
+            end)
+
+            Library:GiveSignal(UserInputService.InputEnded:Connect(function(input)
+                if Library.Unloaded then
+                    return
+                end
+
+                if not Viewport.Interactive then
+                    return
+                end
+
+                if input.UserInputType == Enum.UserInputType.MouseButton2 then
+                    Dragging = false
+                elseif input.UserInputType == Enum.UserInputType.Touch then
+                    Dragging = false
+                end
+            end))
+
+            Library:GiveSignal(UserInputService.InputChanged:Connect(function(input)
+                if Library.Unloaded then
+                    return
+                end
+
+                if not Viewport.Interactive or not Dragging or Pinching then
+                    return
+                end
+
+                if
+                    input.UserInputType == Enum.UserInputType.MouseMovement
+                    or input.UserInputType == Enum.UserInputType.Touch
+                then
+                    local MouseDelta = input.Position - LastMousePos
+                    LastMousePos = input.Position
+
+                    local Position ,Camera ,RotationY = Viewport.Object:GetPivot().Position
+,Viewport.Camera
+,CFrame.fromAxisAngle(Vector3.new(0, 1, 0), -MouseDelta.X * 0.01)
+                    Camera.CFrame = CFrame.new(Position) * RotationY * CFrame.new(-Position) * Camera.CFrame
+
+                    local RotationX = CFrame.fromAxisAngle(Camera.CFrame.RightVector, -MouseDelta.Y * 0.01)
+                    local PitchedCFrame = CFrame.new(Position) * RotationX * CFrame.new(-Position) * Camera.CFrame
+
+                    if PitchedCFrame.UpVector.Y > 0.1 then
+                        Camera.CFrame = PitchedCFrame
+                    end
+                end
+            end))
+
+            ViewportFrame.InputChanged:Connect(function(input)
+                if not Viewport.Interactive then
+                    return
+                end
+
+                if input.UserInputType == Enum.UserInputType.MouseWheel then
+                    local ZoomAmount = input.Position.Z * 2
+                    Viewport.Camera.CFrame += Viewport.Camera.CFrame.LookVector * ZoomAmount
+                end
+            end)
+
+            Library:GiveSignal(UserInputService.TouchPinch:Connect(function(touchPositions, scale, velocity, state)
+                if Library.Unloaded then
+                    return
+                end
+
+                if not Viewport.Interactive or not Library:MouseIsOverFrame(ViewportFrame, touchPositions[1]) then
+                    return
+                end
+
+                if state == Enum.UserInputState.Begin then
+                    Pinching = true
+                    Dragging = false
+                    LastPinchDist = (touchPositions[1] - touchPositions[2]).Magnitude
+                elseif state == Enum.UserInputState.Change then
+                    local currentDist = (touchPositions[1] - touchPositions[2]).Magnitude
+                    local delta = (currentDist - LastPinchDist) * 0.1
+                    LastPinchDist = currentDist
+                    Viewport.Camera.CFrame += Viewport.Camera.CFrame.LookVector * delta
+                elseif state == Enum.UserInputState.End or state == Enum.UserInputState.Cancel then
+                    Pinching = false
+                end
+            end))
+
+            Viewport.Object.Parent = ViewportFrame
+            if Viewport.AutoFocus then
+                FocusCamera()
+            end
+
+            function Viewport:SetObject(Object, Clone)
+                assert(Object, "Object cannot be nil.")
+
+                if Clone then
+                    Object = Object:Clone()
+                end
+
+                if Viewport.Object then
+                    Viewport.Object:Destroy()
+                end
+
+                Viewport.Object = Object
+                Viewport.Object.Parent = ViewportFrame
+
+                Groupbox:Resize()
+            end
+
+            function Viewport:SetHeight(Height)
+                assert(Height > 0, "Height must be greater than 0.")
+
+                Holder.Size = UDim2.new(1, 0, 0, Height)
+                Groupbox:Resize()
+            end
+
+            function Viewport:Focus()
+                if not Viewport.Object then
+                    return
+                end
+
+                FocusCamera()
+            end
+
+            function Viewport:SetCamera(Camera)
+                assert(
+                    Camera and typeof(Camera) == "Instance" and Camera:IsA("Camera"),
+                    "Camera must be a valid Camera instance."
+                )
+
+                Viewport.Camera = Camera
+                ViewportFrame.CurrentCamera = Camera
+            end
+
+            function Viewport:SetInteractive(Interactive)
+                Viewport.Interactive = Interactive
+                ViewportFrame.Active = Interactive
+            end
+
+            function Viewport:SetVisible(Visible)
+                Viewport.Visible = Visible
+
+                Holder.Visible = Viewport.Visible
+                Groupbox:Resize()
+            end
+
+            Groupbox:Resize()
+
+            Viewport.Holder = Holder
+            table.insert(Groupbox.Elements, Viewport)
+
+            Options[Idx] = Viewport
+
+            return Viewport
+        end
+
+        function Funcs:AddImage(Idx, Info)
+            Info = Library:Validate(Info, Templates.Image)
+
+            local Groupbox = self
+            local Container ,Image = Groupbox.Container
+,{
+                Image = Info.Image,
+                Color = Info.Color,
+                RectOffset = Info.RectOffset,
+                RectSize = Info.RectSize,
+                Outline = Info.Outline,
+                Height = Info.Height,
+                ScaleType = Info.ScaleType,
+                Transparency = Info.Transparency,
+                BackgroundTransparency = Info.BackgroundTransparency,
+
+                Visible = Info.Visible,
+                Type = "Image",
+            }
+
+            local Holder = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, Info.Height),
+                Visible = Image.Visible,
+                Parent = Container,
+            })
+
+            local Box = New("Frame", {
+                AnchorPoint = Vector2.new(0, 1),
+                BackgroundColor3 = "MainColor",
+                BorderColor3 = "OutlineColor",
+                BorderSizePixel = 1,
+                BackgroundTransparency = Image.BackgroundTransparency,
+                Position = UDim2.fromScale(0, 1),
+                Size = UDim2.fromScale(1, 1),
+                Parent = Holder,
+            })
+            
+            if Image.Outline then
+                Library:AddOutline(Box)
+            end
+
+            New("UIPadding", {
+                PaddingBottom = UDim.new(0, 3),
+                PaddingLeft = UDim.new(0, 8),
+                PaddingRight = UDim.new(0, 8),
+                PaddingTop = UDim.new(0, 4),
+                Parent = Box,
+            })
+
+            local ImageProperties = {
+                BackgroundTransparency = 1,
+                Size = UDim2.fromScale(1, 1),
+                Image = Image.Image,
+                ImageTransparency = Image.Transparency,
+                ImageColor3 = Image.Color,
+                ImageRectOffset = Image.RectOffset,
+                ImageRectSize = Image.RectSize,
+                ScaleType = Image.ScaleType,
+                Parent = Box,
+            }
+
+            local Icon = Library:GetCustomIcon(ImageProperties.Image)
+            assert(Icon, "Image must be a valid Roblox asset or a valid URL or a valid lucide icon.")
+
+            ImageProperties.Image = Icon.Url
+            ImageProperties.ImageRectOffset = Icon.ImageRectOffset
+            ImageProperties.ImageRectSize = Icon.ImageRectSize
+
+            local ImageLabel = New("ImageLabel", ImageProperties)
+
+            function Image:SetHeight(Height)
+                assert(Height > 0, "Height must be greater than 0.")
+
+                Image.Height = Height
+                Holder.Size = UDim2.new(1, 0, 0, Height)
+                Groupbox:Resize()
+            end
+
+            function Image:SetImage(NewImage)
+                assert(typeof(NewImage) == "string", "Image must be a string.")
+
+                local Icon = Library:GetCustomIcon(NewImage)
+                assert(Icon, "Image must be a valid Roblox asset or a valid URL or a valid lucide icon.")
+
+                NewImage = Icon.Url
+                Image.RectOffset = Icon.ImageRectOffset
+                Image.RectSize = Icon.ImageRectSize
+
+                ImageLabel.Image = NewImage
+                Image.Image = NewImage
+            end
+
+            function Image:SetColor(Color)
+                assert(typeof(Color) == "Color3", "Color must be a Color3 value.")
+
+                ImageLabel.ImageColor3 = Color
+                Image.Color = Color
+            end
+
+            function Image:SetRectOffset(RectOffset)
+                assert(typeof(RectOffset) == "Vector2", "RectOffset must be a Vector2 value.")
+
+                ImageLabel.ImageRectOffset = RectOffset
+                Image.RectOffset = RectOffset
+            end
+
+            function Image:SetRectSize(RectSize)
+                assert(typeof(RectSize) == "Vector2", "RectSize must be a Vector2 value.")
+
+                ImageLabel.ImageRectSize = RectSize
+                Image.RectSize = RectSize
+            end
+
+            function Image:SetScaleType(ScaleType)
+                assert(
+                    typeof(ScaleType) == "EnumItem" and ScaleType:IsA("ScaleType"),
+                    "ScaleType must be a valid Enum.ScaleType."
+                )
+
+                ImageLabel.ScaleType = ScaleType
+                Image.ScaleType = ScaleType
+            end
+
+            function Image:SetTransparency(Transparency)
+                assert(typeof(Transparency) == "number", "Transparency must be a number between 0 and 1.")
+                assert(Transparency >= 0 and Transparency <= 1, "Transparency must be between 0 and 1.")
+
+                ImageLabel.ImageTransparency = Transparency
+                Image.Transparency = Transparency
+            end
+
+            function Image:SetVisible(Visible)
+                Image.Visible = Visible
+
+                Holder.Visible = Image.Visible
+                Groupbox:Resize()
+            end
+
+            Groupbox:Resize()
+
+            Image.Holder = Holder
+            table.insert(Groupbox.Elements, Image)
+
+            Options[Idx] = Image
+
+            return Image
+        end
+
+        function Funcs:AddVideo(Idx, Info)
+            Info = Library:Validate(Info, Templates.Video)
+
+            local Groupbox = self
+            local Container ,Video = Groupbox.Container
+,{
+                Video = Info.Video,
+                Looped = Info.Looped,
+                Playing = Info.Playing,
+                Volume = Info.Volume,
+                Height = Info.Height,
+                Visible = Info.Visible,
+
+                Type = "Video",
+            }
+
+            local Holder = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, Info.Height),
+                Visible = Video.Visible,
+                Parent = Container,
+            })
+
+            local Box = New("Frame", {
+                AnchorPoint = Vector2.new(0, 1),
+                BackgroundColor3 = "MainColor",
+                BorderColor3 = "OutlineColor",
+                BorderSizePixel = 1,
+                Position = UDim2.fromScale(0, 1),
+                Size = UDim2.fromScale(1, 1),
+                Parent = Holder,
+            })
+
+            New("UIPadding", {
+                PaddingBottom = UDim.new(0, 3),
+                PaddingLeft = UDim.new(0, 8),
+                PaddingRight = UDim.new(0, 8),
+                PaddingTop = UDim.new(0, 4),
+                Parent = Box,
+            })
+
+            local VideoFrameInstance = New("VideoFrame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.fromScale(1, 1),
+                Video = Video.Video,
+                Looped = Video.Looped,
+                Volume = Video.Volume,
+                Parent = Box,
+            })
+
+            VideoFrameInstance.Playing = Video.Playing
+
+            function Video:SetHeight(Height)
+                assert(Height > 0, "Height must be greater than 0.")
+
+                Video.Height = Height
+                Holder.Size = UDim2.new(1, 0, 0, Height)
+                Groupbox:Resize()
+            end
+
+            function Video:SetVideo(NewVideo)
+                assert(typeof(NewVideo) == "string", "Video must be a string.")
+
+                VideoFrameInstance.Video = NewVideo
+                Video.Video = NewVideo
+            end
+
+            function Video:SetLooped(Looped)
+                assert(typeof(Looped) == "boolean", "Looped must be a boolean.")
+
+                VideoFrameInstance.Looped = Looped
+                Video.Looped = Looped
+            end
+
+            function Video:SetVolume(Volume)
+                assert(typeof(Volume) == "number", "Volume must be a number between 0 and 10.")
+
+                VideoFrameInstance.Volume = Volume
+                Video.Volume = Volume
+            end
+
+            function Video:SetPlaying(Playing)
+                assert(typeof(Playing) == "boolean", "Playing must be a boolean.")
+
+                VideoFrameInstance.Playing = Playing
+                Video.Playing = Playing
+            end
+
+            function Video:Play()
+                VideoFrameInstance.Playing = true
+                Video.Playing = true
+            end
+
+            function Video:Pause()
+                VideoFrameInstance.Playing = false
+                Video.Playing = false
+            end
+
+            function Video:SetVisible(Visible)
+                Video.Visible = Visible
+
+                Holder.Visible = Video.Visible
+                Groupbox:Resize()
+            end
+
+            Groupbox:Resize()
+
+            Video.Holder = Holder
+            Video.VideoFrame = VideoFrameInstance
+            table.insert(Groupbox.Elements, Video)
+
+            Options[Idx] = Video
+
+            return Video
+        end
+
+        function Funcs:AddUIPassthrough(Idx, Info)
+            Info = Library:Validate(Info, Templates.UIPassthrough)
+
+            local Groupbox = self
+            local Container = Groupbox.Container
+
+            assert(Info.Instance, "Instance must be provided.")
+            assert(
+                typeof(Info.Instance) == "Instance" and Info.Instance:IsA("GuiBase2d"),
+                "Instance must inherit from GuiBase2d."
+            )
+            assert(typeof(Info.Height) == "number" and Info.Height > 0, "Height must be a number greater than 0.")
+
+            local Passthrough = {
+                Instance = Info.Instance,
+                Height = Info.Height,
+                Visible = Info.Visible,
+
+                Type = "UIPassthrough",
+            }
+
+            local Holder = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, Info.Height),
+                Visible = Passthrough.Visible,
+                Parent = Container,
+            })
+
+            Passthrough.Instance.Parent = Holder
+
+            Groupbox:Resize()
+
+            function Passthrough:SetHeight(Height)
+                assert(typeof(Height) == "number" and Height > 0, "Height must be a number greater than 0.")
+
+                Passthrough.Height = Height
+                Holder.Size = UDim2.new(1, 0, 0, Height)
+                Groupbox:Resize()
+            end
+
+            function Passthrough:SetInstance(Instance)
+                assert(Instance, "Instance must be provided.")
+                assert(
+                    typeof(Instance) == "Instance" and Instance:IsA("GuiBase2d"),
+                    "Instance must inherit from GuiBase2d."
+                )
+
+                if Passthrough.Instance then
+                    Passthrough.Instance.Parent = nil
+                end
+
+                Passthrough.Instance = Instance
+                Passthrough.Instance.Parent = Holder
+            end
+
+            function Passthrough:SetVisible(Visible)
+                Passthrough.Visible = Visible
+
+                Holder.Visible = Passthrough.Visible
+                Groupbox:Resize()
+            end
+
+            Passthrough.Holder = Holder
+            table.insert(Groupbox.Elements, Passthrough)
+
+            Options[Idx] = Passthrough
+
+            return Passthrough
+        end
+
+        function Funcs:AddDependencyBox()
+            local Groupbox = self
+            local Container ,DepboxContainer
+,DepboxList
+=(Groupbox.Container
+)
+            do
+                DepboxContainer = New("Frame", {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromScale(1, 1),
+                    Visible = false,
+                    Parent = Container,
+                })
+
+                DepboxList = New("UIListLayout", {
+                    Padding = UDim.new(0, 8),
+                    Parent = DepboxContainer,
+                })
+            end
+
+            local Depbox = {
+                Visible = false,
+                Dependencies = {},
+
+                Holder = DepboxContainer,
+                Container = DepboxContainer,
+
+                Elements = {},
+                DependencyBoxes = {},
+            }
+
+            function Depbox:Resize()
+                DepboxContainer.Size = UDim2.new(1, 0, 0, DepboxList.AbsoluteContentSize.Y / Library.DPIScale)
+                Groupbox:Resize()
+            end
+
+            function Depbox:Update(CancelSearch)
+                for _, Dependency in Depbox.Dependencies do
+                    local Element ,Value = Dependency[1]
+,Dependency[2]
+
+                    if Element.Type == "Toggle" and Element.Value ~= Value then
+                        DepboxContainer.Visible = false
+                        Depbox.Visible = false
+                        return
+                    elseif Element.Type == "Dropdown" then
+                        if typeof(Element.Value) == "table" then
+                            if not Element.Value[Value] then
+                                DepboxContainer.Visible = false
+                                Depbox.Visible = false
+                                return
+                            end
+                        else
+                            if Element.Value ~= Value then
+                                DepboxContainer.Visible = false
+                                Depbox.Visible = false
+                                return
+                            end
+                        end
+                    end
+                end
+
+                Depbox.Visible = true
+                DepboxContainer.Visible = true
+                if not Library.Searching then
+                    task.defer(function()
+                        Depbox:Resize()
+                    end)
+                elseif not CancelSearch then
+                    Library:UpdateSearch(Library.SearchText)
+                end
+            end
+
+            DepboxList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                if not Depbox.Visible then
+                    return
+                end
+
+                Depbox:Resize()
+            end)
+
+            function Depbox:SetupDependencies(Dependencies)
+                for _, Dependency in Dependencies do
+                    assert(typeof(Dependency) == "table", "Dependency should be a table.")
+                    assert(Dependency[1] ~= nil, "Dependency is missing element.")
+                    assert(Dependency[2] ~= nil, "Dependency is missing expected value.")
+                end
+
+                Depbox.Dependencies = Dependencies
+                Depbox:Update()
+            end
+
+            DepboxContainer:GetPropertyChangedSignal("Visible"):Connect(function()
+                Depbox:Resize()
+            end)
+
+            setmetatable(Depbox, BaseGroupbox)
+
+            table.insert(Groupbox.DependencyBoxes, Depbox)
+            table.insert(Library.DependencyBoxes, Depbox)
+
+            return Depbox
+        end
+
+        function Funcs:AddDependencyGroupbox()
+            local Groupbox = self
+            local Tab ,BoxHolder ,DepGroupboxContainer
+,DepGroupboxList
+= Groupbox.Tab
+,(Groupbox.BoxHolder
+)
+            do
+                DepGroupboxContainer = New("Frame", {
+                    BackgroundColor3 = "BackgroundColor",
+                    Size = UDim2.fromScale(1, 0),
+                    Visible = false,
+                    Parent = BoxHolder,
+                })
+                table.insert(
+                    Library.Corners,
+                    New("UICorner", {
+                        CornerRadius = UDim.new(0, Library.CornerRadius),
+                        Parent = DepGroupboxContainer,
+                    })
+                )
+                Library:AddOutline(DepGroupboxContainer)
+
+                DepGroupboxList = New("UIListLayout", {
+                    Padding = UDim.new(0, 8),
+                    Parent = DepGroupboxContainer,
+                })
+                New("UIPadding", {
+                    PaddingBottom = UDim.new(0, 7),
+                    PaddingLeft = UDim.new(0, 7),
+                    PaddingRight = UDim.new(0, 7),
+                    PaddingTop = UDim.new(0, 7),
+                    Parent = DepGroupboxContainer,
+                })
+            end
+
+            local DepGroupbox = {
+                Visible = false,
+                Dependencies = {},
+
+                BoxHolder = BoxHolder,
+                Holder = DepGroupboxContainer,
+                Container = DepGroupboxContainer,
+
+                Tab = Tab,
+                Elements = {},
+                DependencyBoxes = {},
+            }
+
+            function DepGroupbox:Resize()
+                DepGroupboxContainer.Size = UDim2.new(1, 0, 0, (DepGroupboxList.AbsoluteContentSize.Y / Library.DPIScale) + 18)
+            end
+
+            function DepGroupbox:Update(CancelSearch)
+                for _, Dependency in DepGroupbox.Dependencies do
+                    local Element ,Value = Dependency[1]
+,Dependency[2]
+
+                    if Element.Type == "Toggle" and Element.Value ~= Value then
+                        DepGroupboxContainer.Visible = false
+                        DepGroupbox.Visible = false
+                        return
+                    elseif Element.Type == "Dropdown" then
+                        if typeof(Element.Value) == "table" then
+                            if not Element.Value[Value] then
+                                DepGroupboxContainer.Visible = false
+                                DepGroupbox.Visible = false
+                                return
+                            end
+                        else
+                            if Element.Value ~= Value then
+                                DepGroupboxContainer.Visible = false
+                                DepGroupbox.Visible = false
+                                return
+                            end
+                        end
+                    end
+                end
+
+                DepGroupbox.Visible = true
+                if not Library.Searching then
+                    DepGroupboxContainer.Visible = true
+                    DepGroupbox:Resize()
+                elseif not CancelSearch then
+                    Library:UpdateSearch(Library.SearchText)
+                end
+            end
+
+            function DepGroupbox:SetupDependencies(Dependencies)
+                for _, Dependency in Dependencies do
+                    assert(typeof(Dependency) == "table", "Dependency should be a table.")
+                    assert(Dependency[1] ~= nil, "Dependency is missing element.")
+                    assert(Dependency[2] ~= nil, "Dependency is missing expected value.")
+                end
+
+                DepGroupbox.Dependencies = Dependencies
+                DepGroupbox:Update()
+            end
+
+            setmetatable(DepGroupbox, BaseGroupbox)
+
+            table.insert(Tab.DependencyGroupboxes, DepGroupbox)
+            table.insert(Library.DependencyBoxes, DepGroupbox)
+
+            return DepGroupbox
+        end
+
+        BaseGroupbox.__index = Funcs
+        BaseGroupbox.__namecall = function(_, Key, ...)
+            return Funcs[Key](...)
+        end
+    end
+
+    function Library:SetFont(FontFace)
+        if typeof(FontFace) == "EnumItem" then
+            FontFace = Font.fromEnum(FontFace)
+        end
+
+        Library.Scheme.Font = FontFace
+        Library:UpdateColorsUsingRegistry()
+    end
+
+    function Library:SetNotifySide(Side)
+        Library.NotifySide = Side
+
+        if Side:lower() == "left" then
+            NotificationArea.AnchorPoint = Vector2.new(0, 0)
+            NotificationArea.Position = UDim2.fromOffset(6, 6)
+            NotificationList.HorizontalAlignment = Enum.HorizontalAlignment.Left
+        else
+            NotificationArea.AnchorPoint = Vector2.new(1, 0)
+            NotificationArea.Position = UDim2.new(1, -6, 0, 6)
+            NotificationList.HorizontalAlignment = Enum.HorizontalAlignment.Right
+        end
+    end
+
+    function Library:Notify(...)
+        local Data ,Info = {}
+,select(1, ...)
+
+        if typeof(Info) == "table" then
+            Data.Title = tostring(Info.Title)
+            Data.Description = tostring(Info.Description)
+            Data.Time = Info.Time or 5
+            Data.SoundId = Info.SoundId
+            Data.Steps = Info.Steps
+            Data.Persist = Info.Persist
+            Data.Icon = Info.Icon
+            Data.BigIcon = Info.BigIcon
+            Data.IconColor = Info.IconColor
+        else
+            Data.Description = tostring(Info)
+            Data.Time = select(2, ...) or 5
+            Data.SoundId = select(3, ...)
+        end
+        Data.Destroyed = false
+
+        local DeletedInstance ,DeleteConnection = false
+        if typeof(Data.Time) == "Instance" then
+            DeleteConnection = Data.Time.Destroying:Connect(function()
+                DeletedInstance = true
+
+                DeleteConnection:Disconnect()
+                DeleteConnection = nil
+            end)
+        end
+
+        local FakeBackground = New("Frame", {
+            AutomaticSize = Enum.AutomaticSize.Y,
+            BackgroundTransparency = 1,
+            Size = UDim2.fromScale(1, 0),
+            Visible = false,
+            Parent = NotificationArea,
+        })
+
+        local Holder = New("Frame", {
+            AutomaticSize = Enum.AutomaticSize.Y,
+            BackgroundColor3 = "MainColor",
+            Position = Library.NotifySide:lower() == "left" and UDim2.new(-1, -8, 0, -2) or UDim2.new(1, 8, 0, -2),
+            Size = UDim2.fromScale(1, 1),
+            ZIndex = 5,
+            Parent = FakeBackground,
+        })
+        table.insert(
+            Library.Corners,
+            New("UICorner", {
+                CornerRadius = UDim.new(0, Library.CornerRadius),
+                Parent = Holder,
+            })
+        )
+        New("UIListLayout", {
+            Padding = UDim.new(0, 4),
+            Parent = Holder,
+        })
+        New("UIPadding", {
+            PaddingBottom = UDim.new(0, 8),
+            PaddingLeft = UDim.new(0, 8),
+            PaddingRight = UDim.new(0, 8),
+            PaddingTop = UDim.new(0, 8),
+            Parent = Holder,
+        })
+        Library:AddOutline(Holder)
+
+        local ContentContainer = New("Frame", {
+            BackgroundTransparency = 1,
+            AutomaticSize = Enum.AutomaticSize.XY,
+            Size = UDim2.fromScale(1, 0),
+            Parent = Holder,
+        })
+
+        if Data.BigIcon then
+            New("UIListLayout", {
+                Padding = UDim.new(0, 8),
+                FillDirection = Enum.FillDirection.Horizontal,
+                VerticalAlignment = Enum.VerticalAlignment.Center,
+                Parent = ContentContainer,
+            })
+        end
+
+        local BigIconLabel
+        if Data.BigIcon then
+            local ParsedIcon = Library:GetCustomIcon(Data.BigIcon)
+            if ParsedIcon then
+                BigIconLabel = New("ImageLabel", {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromOffset(24, 24),
+                    Image = ParsedIcon.Url,
+                    ImageColor3 = Data.IconColor or "AccentColor",
+                    ImageRectOffset = ParsedIcon.ImageRectOffset,
+                    ImageRectSize = ParsedIcon.ImageRectSize,
+                    Parent = ContentContainer,
+                })
+            end
+        end
+
+        local TextContainer = New("Frame", {
+            BackgroundTransparency = 1,
+            AutomaticSize = Enum.AutomaticSize.XY,
+            Size = UDim2.fromScale(0, 0),
+            Parent = ContentContainer,
+        })
+        New("UIListLayout", {
+            Padding = UDim.new(0, 4),
+            Parent = TextContainer,
+        })
+
+        local TitleContainer
+        if Data.Title then
+            TitleContainer = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.fromScale(0, 0),
+                Parent = TextContainer,
+            })
+        end
+
+        local IconLabel
+        if Data.Icon and TitleContainer then
+            local ParsedIcon = Library:GetCustomIcon(Data.Icon)
+            if ParsedIcon then
+                IconLabel = New("ImageLabel", {
+                    BackgroundTransparency = 1,
+                    AnchorPoint = Vector2.new(0, 0.5),
+                    Position = UDim2.new(0, 0, 0.5, 1),
+                    Size = UDim2.fromOffset(15, 15),
+                    Image = ParsedIcon.Url,
+                    ImageColor3 = Data.IconColor or "FontColor",
+                    ImageRectOffset = ParsedIcon.ImageRectOffset,
+                    ImageRectSize = ParsedIcon.ImageRectSize,
+                    Parent = TitleContainer,
+                })
+            end
+        end
+
+        local TitleX ,DescX ,Title
+,Desc
+,TimerFill
+=0
+,0
+
+        if Data.Title then
+            Title = New("TextLabel", {
+                AutomaticSize = Enum.AutomaticSize.None,
+                BackgroundTransparency = 1,
+                AnchorPoint = Vector2.new(0, 0.5),
+                Position = UDim2.new(0, (Data.Icon and 21 or 0), 0.5, 0),
+                Size = UDim2.fromScale(0, 0),
+                Text = Data.Title,
+                TextSize = 15,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextYAlignment = Enum.TextYAlignment.Center,
+                TextWrapped = true,
+                Parent = TitleContainer,
+            })
+        end
+
+        if Data.Description then
+            Desc = New("TextLabel", {
+                AutomaticSize = Enum.AutomaticSize.None,
+                BackgroundTransparency = 1,
+                Size = UDim2.fromScale(0, 0),
+                Text = Data.Description,
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextWrapped = true,
+                Parent = TextContainer,
+            })
+        end
+
+        function Data:Resize()
+            local ExtraWidth ,IconWidth = BigIconLabel and 32 or 0
+,IconLabel and 21 or 0
+
+            if Title then
+                local X, Y =
+                    Library:GetTextBounds(Title.Text, Title.FontFace, Title.TextSize, (NotificationArea.AbsoluteSize.X / Library.DPIScale) - 24 - ExtraWidth - IconWidth)
+                Title.Size = UDim2.fromOffset(X, Y)
+                TitleX = X + IconWidth
+                TitleContainer.Size = UDim2.fromOffset(TitleX, math.max(Y, IconLabel and 16 or 0))
+            end
+
+            if Desc then
+                local X, Y =
+                    Library:GetTextBounds(Desc.Text, Desc.FontFace, Desc.TextSize, (NotificationArea.AbsoluteSize.X / Library.DPIScale) - 24 - ExtraWidth)
+                Desc.Size = UDim2.fromOffset(X, Y)
+                DescX = X
+            end
+
+            FakeBackground.Size = UDim2.fromOffset(math.max(TitleX, DescX) + 24 + ExtraWidth, 0)
+        end
+
+        function Data:ChangeTitle(Text)
+            if Title then
+                Data.Title = tostring(Text)
+                Title.Text = Data.Title
+                Data:Resize()
+            end
+        end
+
+        function Data:ChangeDescription(Text)
+            if Desc then
+                Data.Description = tostring(Text)
+                Desc.Text = Data.Description
+                Data:Resize()
+            end
+        end
+
+        function Data:ChangeStep(NewStep)
+            if TimerFill and Data.Steps then
+                NewStep = math.clamp(NewStep or 0, 0, Data.Steps)
+                TimerFill.Size = UDim2.fromScale(NewStep / Data.Steps, 1)
+            end
+        end
+
+        function Data:Destroy()
+            Data.Destroyed = true
+
+            if typeof(Data.Time) == "Instance" then
+                pcall(Data.Time.Destroy, Data.Time)
+            end
+
+            if DeleteConnection then
+                DeleteConnection:Disconnect()
+            end
+
+            TweenService
+                :Create(Holder, Library.NotifyTweenInfo, {
+                    Position = Library.NotifySide:lower() == "left" and UDim2.new(-1, -8, 0, -2) or UDim2.new(1, 8, 0, -2),
+                })
+                :Play()
+
+            task.delay(Library.NotifyTweenInfo.Time, function()
+                Library.Notifications[FakeBackground] = nil
+                FakeBackground:Destroy()
+            end)
+        end
+
+        Data:Resize()
+
+        local TimerHolder = New("Frame", {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 7),
+            Visible = (Data.Persist ~= true and typeof(Data.Time) ~= "Instance") or typeof(Data.Steps) == "number",
+            Parent = Holder,
+        })
+        local TimerBar = New("Frame", {
+            BackgroundColor3 = "BackgroundColor",
+            BorderColor3 = "OutlineColor",
+            BorderSizePixel = 1,
+            Position = UDim2.fromOffset(0, 3),
+            Size = UDim2.new(1, 0, 0, 2),
+            Parent = TimerHolder,
+        })
+        TimerFill = New("Frame", {
+            BackgroundColor3 = "AccentColor",
+            Size = UDim2.fromScale(1, 1),
+            Parent = TimerBar,
+        })
+
+        if typeof(Data.Time) == "Instance" then
+            TimerFill.Size = UDim2.fromScale(0, 1)
+        end
+        if Data.SoundId then
+            local SoundId = Data.SoundId
+            if typeof(SoundId) == "number" then
+                SoundId = string.format("rbxassetid://%d", SoundId)
+            end
+
+            New("Sound", {
+                SoundId = SoundId,
+                Volume = 3,
+                PlayOnRemove = true,
+                Parent = SoundService,
+            }):Destroy()
+        end
+
+        Library.Notifications[FakeBackground] = Data
+
+        FakeBackground.Visible = true
+        TweenService:Create(Holder, Library.NotifyTweenInfo, {
+            Position = UDim2.fromOffset(0, 0),
+        }):Play()
+
+        task.delay(Library.NotifyTweenInfo.Time, function()
+            if Data.Persist then
+                return
+            elseif typeof(Data.Time) == "Instance" then
+                repeat
+                    task.wait()
+                until DeletedInstance or Data.Destroyed
+            else
+                TweenService
+                    :Create(TimerFill, TweenInfo.new(Data.Time, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {
+                        Size = UDim2.fromScale(0, 1),
+                    })
+                    :Play()
+                task.wait(Data.Time)
+            end
+
+            if not Data.Destroyed then
+                Data:Destroy()
+            end
+        end)
+
+        return Data
+    end
+
+    function Library:CreateWindow(WindowInfo)
+        WindowInfo = Library:Validate(WindowInfo, Templates.Window)
+        local ViewportSize= workspace.CurrentCamera.ViewportSize
+        if RunService:IsStudio() and ViewportSize.X <= 5 and ViewportSize.Y <= 5 then
+            repeat
+                ViewportSize = workspace.CurrentCamera.ViewportSize
+                task.wait()
+            until ViewportSize.X > 5 and ViewportSize.Y > 5
+        end
+
+        local MaxX ,MaxY = ViewportSize.X - 64
+,ViewportSize.Y - 64
+
+        Library.OriginalMinSize =
+            Vector2.new(math.min(Library.OriginalMinSize.X, MaxX), math.min(Library.OriginalMinSize.Y, MaxY))
+        Library.MinSize = Library.OriginalMinSize
+
+        WindowInfo.Size = UDim2.fromOffset(
+            math.clamp(WindowInfo.Size.X.Offset, Library.MinSize.X, MaxX),
+            math.clamp(WindowInfo.Size.Y.Offset, Library.MinSize.Y, MaxY)
+        )
+        if typeof(WindowInfo.Font) == "EnumItem" then
+            WindowInfo.Font = Font.fromEnum(WindowInfo.Font)
+        end
+        WindowInfo.CornerRadius = math.min(WindowInfo.CornerRadius, 20)
+
+        --// Old Naming \\--
+        if WindowInfo.Compact ~= nil then
+            WindowInfo.SidebarCompacted = WindowInfo.Compact
+        end
+        if WindowInfo.SidebarMinWidth ~= nil then
+            WindowInfo.MinSidebarWidth = WindowInfo.SidebarMinWidth
+        end
+        WindowInfo.MinSidebarWidth = math.max(64, WindowInfo.MinSidebarWidth)
+        WindowInfo.SidebarCompactWidth = math.max(48, WindowInfo.SidebarCompactWidth)
+        WindowInfo.SidebarCollapseThreshold = math.clamp(WindowInfo.SidebarCollapseThreshold, 0.1, 0.9)
+        WindowInfo.CompactWidthActivation = math.max(48, WindowInfo.CompactWidthActivation)
+
+        Library.CornerRadius = WindowInfo.CornerRadius
+        Library:SetNotifySide(WindowInfo.NotifySide)
+        Library.ShowCustomCursor = WindowInfo.ShowCustomCursor
+        Library.Scheme.Font = WindowInfo.Font
+        Library.ToggleKeybind = WindowInfo.ToggleKeybind
+        Library.GlobalSearch = WindowInfo.GlobalSearch
+
+        local IsDefaultSearchbarSize ,InitialLeftWidth ,IsCompact ,MainFrame
+,DividerLine
+,TitleHolder
+,WindowTitle
+,WindowIcon
+,RightWrapper
+,SearchBox
+,CurrentTabInfo
+,CurrentTabLabel
+,CurrentTabDescription
+,ResizeButton
+,Tabs
+,Container
+,BackgroundImage
+,BottomBackground
+,FooterLabel
+= WindowInfo.SearchbarSize == UDim2.fromScale(1, 1)
+,math.ceil(WindowInfo.Size.X.Offset * 0.3)
+,(WindowInfo.SidebarCompacted
+)        local LastExpandedWidth = InitialLeftWidth
+
+        do
+            Library.KeybindFrame, Library.KeybindContainer = Library:AddDraggableMenu("Keybinds")
+            Library.KeybindFrame.AnchorPoint = Vector2.new(0, 0.5)
+            Library.KeybindFrame.Position = UDim2.new(0, 6, 0.5, 0)
+            Library.KeybindFrame.Visible = false
+
+            MainFrame = New("TextButton", {
+                BackgroundColor3 = function()
+                    return Library:GetBetterColor(Library.Scheme.BackgroundColor, -1)
+                end,
+                Name = "Main",
+                Text = "",
+                Position = WindowInfo.Position,
+                Size = WindowInfo.Size,
+                Visible = false,
+                Parent = ScreenGui,
+            })
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
+                    Parent = MainFrame,
+                })
+            )
+            table.insert(
+                Library.Scales,
+                New("UIScale", {
+                    Parent = MainFrame,
+                })
+            )
+            Library:AddOutline(MainFrame)
+            Library:MakeLine(MainFrame, {
+                Position = UDim2.fromOffset(0, 48),
+                Size = UDim2.new(1, 0, 0, 1),
+            })
+
+            DividerLine = New("Frame", {
+                BackgroundColor3 = "OutlineColor",
+                Position = UDim2.fromOffset(InitialLeftWidth, 0),
+                Size = UDim2.new(0, 1, 1, -21),
+                Parent = MainFrame,
+            })
+
+            if WindowInfo.BackgroundImage then
+                BackgroundImage = New("ImageLabel", {
+                    Image = WindowInfo.BackgroundImage,
+                    Position = UDim2.fromScale(0, 0),
+                    Size = UDim2.fromScale(1, 1),
+                    ScaleType = Enum.ScaleType.Stretch,
+                    ZIndex = 999,
+                    BackgroundTransparency = 1,
+                    ImageTransparency = 0.75,
+                    Parent = MainFrame,
+                })
+
+                table.insert(
+                    Library.Corners,
+                    New("UICorner", {
+                        CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
+                        Parent = BackgroundImage,
+                    })
+                )
+            end
+
+            if WindowInfo.Center then
+                MainFrame.Position = UDim2.new(0.5, -MainFrame.Size.X.Offset / 2, 0.5, -MainFrame.Size.Y.Offset / 2)
+            end
+
+            --// Top Bar \\-
+            local TopBar = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 48),
+                Parent = MainFrame,
+            })
+            Library:MakeDraggable(MainFrame, TopBar, false, true)
+
+            --// Title
+            TitleHolder = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(0, InitialLeftWidth, 1, 0),
+                Parent = TopBar,
+            })
+            New("UIListLayout", {
+                FillDirection = Enum.FillDirection.Horizontal,
+                HorizontalAlignment = Enum.HorizontalAlignment.Center,
+                VerticalAlignment = Enum.VerticalAlignment.Center,
+                Padding = UDim.new(0, 6),
+                Parent = TitleHolder,
+            })
+
+            if WindowInfo.Icon then
+                local Icon = Library:GetCustomIcon(WindowInfo.Icon)
+                WindowIcon = New("ImageLabel", {
+                    Image = Icon.Url,
+                    ImageRectOffset = Icon.ImageRectOffset,
+                    ImageRectSize = Icon.ImageRectSize,
+                    Size = WindowInfo.IconSize,
+                    Parent = TitleHolder,
+                })
+            else
+                WindowIcon = New("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Size = WindowInfo.IconSize,
+                    Text = WindowInfo.Title:sub(1, 1),
+                    TextScaled = true,
+                    Visible = false,
+                    Parent = TitleHolder,
+                })
+            end
+
+            local X = Library:GetTextBounds(
+                WindowInfo.Title,
+                Library.Scheme.Font,
+                20,
+                TitleHolder.AbsoluteSize.X - (WindowInfo.Icon and WindowInfo.IconSize.X.Offset + 6 or 0) - 12
+            )
+            WindowTitle = New("TextLabel", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(0, X, 1, 0),
+                Text = WindowInfo.Title,
+                TextSize = 20,
+                Parent = TitleHolder,
+            })
+
+            --// Top Right Bar
+            RightWrapper = New("Frame", {
+                AnchorPoint = Vector2.new(1, 0.5),
+                BackgroundTransparency = 1,
+                Position = UDim2.new(1, -49, 0.5, 0),
+                Size = UDim2.new(1, -InitialLeftWidth - 57 - 1, 1, -16),
+                Parent = TopBar,
+            })
+
+            New("UIListLayout", {
+                FillDirection = Enum.FillDirection.Horizontal,
+                HorizontalAlignment = Enum.HorizontalAlignment.Left,
+                VerticalAlignment = Enum.VerticalAlignment.Center,
+                Padding = UDim.new(0, 8),
+                Parent = RightWrapper,
+            })
+
+            CurrentTabInfo = New("Frame", {
+                Size = UDim2.fromScale(WindowInfo.DisableSearch and 1 or 0.5, 1),
+                Visible = false,
+                BackgroundTransparency = 1,
+                Parent = RightWrapper,
+            })
+
+            New("UIFlexItem", {
+                FlexMode = Enum.UIFlexMode.Grow,
+                Parent = CurrentTabInfo,
+            })
+
+            New("UIListLayout", {
+                FillDirection = Enum.FillDirection.Vertical,
+                HorizontalAlignment = Enum.HorizontalAlignment.Left,
+                VerticalAlignment = Enum.VerticalAlignment.Center,
+                Parent = CurrentTabInfo,
+            })
+
+            New("UIPadding", {
+                PaddingBottom = UDim.new(0, 8),
+                PaddingLeft = UDim.new(0, 8),
+                PaddingRight = UDim.new(0, 8),
+                PaddingTop = UDim.new(0, 8),
+                Parent = CurrentTabInfo,
+            })
+
+            CurrentTabLabel = New("TextLabel", {
+                BackgroundTransparency = 1,
+                Size = UDim2.fromScale(1, 0),
+                AutomaticSize = Enum.AutomaticSize.Y,
+                Text = "",
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                Parent = CurrentTabInfo,
+            })
+
+            CurrentTabDescription = New("TextLabel", {
+                BackgroundTransparency = 1,
+                Size = UDim2.fromScale(1, 0),
+                AutomaticSize = Enum.AutomaticSize.Y,
+                Text = "",
+                TextWrapped = true,
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextTransparency = 0.5,
+                Parent = CurrentTabInfo,
+            })
+
+            SearchBox = New("TextBox", {
+                BackgroundColor3 = "MainColor",
+                PlaceholderText = "Search",
+                Size = WindowInfo.SearchbarSize,
+                TextScaled = true,
+                Visible = not (WindowInfo.DisableSearch or false),
+                Parent = RightWrapper,
+            })
+            New("UIFlexItem", {
+                FlexMode = Enum.UIFlexMode.Shrink,
+                Parent = SearchBox,
+            })
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
+                    Parent = SearchBox,
+                })
+            )
+            New("UIPadding", {
+                PaddingBottom = UDim.new(0, 8),
+                PaddingLeft = UDim.new(0, 8),
+                PaddingRight = UDim.new(0, 8),
+                PaddingTop = UDim.new(0, 8),
+                Parent = SearchBox,
+            })
+            New("UIStroke", {
+                Color = "OutlineColor",
+                Parent = SearchBox,
+            })
+
+            local SearchIcon = Library:GetIcon("search")
+            if SearchIcon then
+                New("ImageLabel", {
+                    Image = SearchIcon.Url,
+                    ImageColor3 = "FontColor",
+                    ImageRectOffset = SearchIcon.ImageRectOffset,
+                    ImageRectSize = SearchIcon.ImageRectSize,
+                    ImageTransparency = 0.5,
+                    Size = UDim2.fromScale(1, 1),
+                    SizeConstraint = Enum.SizeConstraint.RelativeYY,
+                    Parent = SearchBox,
+                })
+            end
+
+            if MoveIcon then
+                New("ImageLabel", {
+                    AnchorPoint = Vector2.new(1, 0.5),
+                    Image = MoveIcon.Url,
+                    ImageColor3 = "OutlineColor",
+                    ImageRectOffset = MoveIcon.ImageRectOffset,
+                    ImageRectSize = MoveIcon.ImageRectSize,
+                    Position = UDim2.new(1, -10, 0.5, 0),
+                    Size = UDim2.fromOffset(28, 28),
+                    SizeConstraint = Enum.SizeConstraint.RelativeYY,
+                    Parent = TopBar,
+                })
+            end
+
+            --// Bottom Bar \\--
+            BottomBackground = New("Frame", {
+                AnchorPoint = Vector2.new(0, 1),
+                BackgroundColor3 = function()
+                    return Library:GetBetterColor(Library.Scheme.BackgroundColor, 4)
+                end,
+                Position = UDim2.fromScale(0, 1),
+                Size = UDim2.new(1, 0, 0, 20 + WindowInfo.CornerRadius),
+                Parent = MainFrame
+            })
+            Library:MakeLine(MainFrame, {
+                AnchorPoint = Vector2.new(0, 1),
+                Position = UDim2.new(0, 0, 1, -20),
+                Size = UDim2.new(1, 0, 0, 1),
+            })
+
+            local BottomBar = New("Frame", {
+                AnchorPoint = Vector2.new(0, 1),
+                BackgroundTransparency = 1,
+                Position = UDim2.fromScale(0, 1),
+                Size = UDim2.new(1, 0, 0, 20),
+                Parent = MainFrame,
+            })
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
+                    Parent = BottomBackground,
+                })
+            )
+
+            --// Footer
+            FooterLabel = New("TextLabel", {
+                BackgroundTransparency = 1,
+                Size = UDim2.fromScale(1, 1),
+                Text = WindowInfo.Footer,
+                TextSize = 14,
+                TextTransparency = 0.5,
+                Parent = BottomBar,
+            })
+
+            --// Resize Button
+            if WindowInfo.Resizable then
+                ResizeButton = New("TextButton", {
+                    AnchorPoint = Vector2.new(1, 0),
+                    BackgroundTransparency = 1,
+                    Position = UDim2.new(1, -WindowInfo.CornerRadius / 4, 0, 0),
+                    Size = UDim2.fromScale(1, 1),
+                    SizeConstraint = Enum.SizeConstraint.RelativeYY,
+                    Text = "",
+                    Parent = BottomBar,
+                })
+
+                Library:MakeResizable(MainFrame, ResizeButton, function()
+                    for _, Tab in Library.Tabs do
+                        Tab:Resize(true)
+                    end
+                end)
+            end
+
+            New("ImageLabel", {
+                Image = ResizeIcon and ResizeIcon.Url or "",
+                ImageColor3 = "FontColor",
+                ImageRectOffset = ResizeIcon and ResizeIcon.ImageRectOffset or Vector2.zero,
+                ImageRectSize = ResizeIcon and ResizeIcon.ImageRectSize or Vector2.zero,
+                ImageTransparency = 0.5,
+                Position = UDim2.fromOffset(2, 2),
+                Size = UDim2.new(1, -4, 1, -4),
+                Parent = ResizeButton,
+            })
+
+            --// Tabs \\--
+            Tabs = New("ScrollingFrame", {
+                AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                BackgroundColor3 = "BackgroundColor",
+                CanvasSize = UDim2.fromScale(0, 0),
+                Position = UDim2.fromOffset(0, 49),
+                ScrollBarThickness = 0,
+                Size = UDim2.new(0, InitialLeftWidth, 1, -70),
+                Parent = MainFrame,
+            })
+            New("UIListLayout", {
+                Parent = Tabs,
+            })
+
+            --// Container \\--
+            Container = New("Frame", {
+                AnchorPoint = Vector2.new(1, 0),
+                BackgroundColor3 = function()
+                    return Library:GetBetterColor(Library.Scheme.BackgroundColor, 1)
+                end,
+                Name = "Container",
+                Position = UDim2.new(1, 0, 0, 49),
+                Size = UDim2.new(1, -InitialLeftWidth - 1, 1, -70),
+                Parent = MainFrame,
+            })
+            New("UIPadding", {
+                PaddingBottom = UDim.new(0, 0),
+                PaddingLeft = UDim.new(0, 6),
+                PaddingRight = UDim.new(0, 6),
+                PaddingTop = UDim.new(0, 0),
+                Parent = Container,
+            })
+        end
+
+        --// Window Table \\--
+        local Window = {}
+
+        function Window:ChangeTitle(title)
+            assert(typeof(title) == "string", "Expected string for title got: " .. typeof(title))
+
+            WindowTitle.Text = title
+            WindowInfo.Title = title
+        end
+
+        if WindowInfo.BackgroundImage then
+            function Window:SetBackgroundImage(Image)
+                assert(typeof(Image) == "string", "Expected string for Image got: " .. typeof(Image))
+
+                BackgroundImage.Image = Image
+                WindowInfo.BackgroundImage = Image
+            end
+        end
+
+        function Window:SetFooter(footer)
+            assert(typeof(footer) == "string", "Expected string for footer got: " .. typeof(footer))
+
+            FooterLabel.Text = footer
+            WindowInfo.Footer = footer
+        end
+
+        function Window:SetCornerRadius(Radius)
+            assert(typeof(Radius) == "number", "Expected number for Radius got: " .. typeof(Radius))
+            Radius = math.min(Radius, 20)
+
+            for _, UICorner in Library.Corners do
+                if UICorner.CornerRadius.Offset == Library.CornerRadius / 2 then
+                    UICorner.CornerRadius = UDim.new(0, Radius / 2)
+                else
+                    UICorner.CornerRadius = UDim.new(0, Radius)
+                end
+            end
+
+            Library.CornerRadius = Radius
+            WindowInfo.CornerRadius = Radius
+
+            ResizeButton.Position = UDim2.new(1, -Radius / 4, 0, 0)
+            BottomBackground.Size = UDim2.new(1, 0, 0, 20 + Radius)
+
+            for _, Tab in Library.Tabs do
+                if Tab.IsKeyTab then
+                    continue
+                end
+
+                for _, Tabbox in Tab.Tabboxes do
+                    Tabbox:UpdateCorners()
+                end
+            end
+        end
+
+        local function ApplyCompact()
+            IsCompact = Window:GetSidebarWidth() == WindowInfo.SidebarCompactWidth
+            if WindowInfo.DisableCompactingSnap then
+                IsCompact = Window:GetSidebarWidth() <= WindowInfo.CompactWidthActivation
+            end
+
+            WindowTitle.Visible = not IsCompact
+            if not WindowInfo.Icon then
+                WindowIcon.Visible = IsCompact
+            end
+
+            for _, Button in Library.TabButtons do
+                if not Button.Icon then
+                    continue
+                end
+
+                Button.Label.Visible = not IsCompact
+                Button.Padding.PaddingBottom = UDim.new(0, IsCompact and 6 or 11)
+                Button.Padding.PaddingLeft = UDim.new(0, IsCompact and 6 or 12)
+                Button.Padding.PaddingRight = UDim.new(0, IsCompact and 6 or 12)
+                Button.Padding.PaddingTop = UDim.new(0, IsCompact and 6 or 11)
+                Button.Icon.SizeConstraint = IsCompact and Enum.SizeConstraint.RelativeXY or Enum.SizeConstraint.RelativeYY
+            end
+        end
+
+        function Window:IsSidebarCompacted()
+            return IsCompact
+        end
+
+        function Window:SetCompact(State)
+            Window:SetSidebarWidth(State and WindowInfo.SidebarCompactWidth or LastExpandedWidth)
+        end
+
+        function Window:GetSidebarWidth()
+            return Tabs.Size.X.Offset
+        end
+
+        function Window:SetSidebarWidth(Width)
+            Width = math.clamp(Width, 48, MainFrame.Size.X.Offset - WindowInfo.MinContainerWidth - 1)
+
+            DividerLine.Position = UDim2.fromOffset(Width, 0)
+
+            TitleHolder.Size = UDim2.new(0, Width, 1, 0)
+            RightWrapper.Size = UDim2.new(1, -Width - 57 - 1, 1, -16)
+            Tabs.Size = UDim2.new(0, Width, 1, -70)
+            Container.Size = UDim2.new(1, -Width - 1, 1, -70)
+
+            if WindowInfo.EnableCompacting then
+                ApplyCompact()
+            end
+            if not IsCompact then
+                LastExpandedWidth = Width
+            end
+        end
+
+        function Window:ShowTabInfo(Name, Description)
+            CurrentTabLabel.Text = Name
+            CurrentTabDescription.Text = Description
+
+            if IsDefaultSearchbarSize then
+                SearchBox.Size = UDim2.fromScale(0.5, 1)
+            end
+            CurrentTabInfo.Visible = true
+        end
+        function Window:HideTabInfo()
+            CurrentTabInfo.Visible = false
+            if IsDefaultSearchbarSize then
+                SearchBox.Size = UDim2.fromScale(1, 1)
+            end
+        end
+
+        function Window:AddTab(...)
+            local Name ,Icon ,Description 
+            if select("#", ...) == 1 and typeof(...) == "table" then
+                local Info = select(1, ...)
+                Name = Info.Name or "Tab"
+                Icon = Info.Icon
+                Description = Info.Description
+            else
+                Name = select(1, ...)
+                Icon = select(2, ...)
+                Description = select(3, ...)
+            end
+
+            local TabButton,TabLabel
+,TabIcon
+,TabContainer
+,TabLeft
+,TabRight
+
+            Icon = Library:GetCustomIcon(Icon)
+            do
+                TabButton = New("TextButton", {
+                    BackgroundColor3 = "MainColor",
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1, 0, 0, 40),
+                    Text = "",
+                    Parent = Tabs,
+                })
+                local ButtonPadding = New("UIPadding", {
+                    PaddingBottom = UDim.new(0, IsCompact and 6 or 11),
+                    PaddingLeft = UDim.new(0, IsCompact and 6 or 12),
+                    PaddingRight = UDim.new(0, IsCompact and 6 or 12),
+                    PaddingTop = UDim.new(0, IsCompact and 6 or 11),
+                    Parent = TabButton,
+                })
+
+                TabLabel = New("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(30, 0),
+                    Size = UDim2.new(1, -30, 1, 0),
+                    Text = Name,
+                    TextSize = 16,
+                    TextTransparency = 0.5,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Visible = not IsCompact,
+                    Parent = TabButton,
+                })
+
+                if Icon then
+                    TabIcon = New("ImageLabel", {
+                        Image = Icon.Url,
+                        ImageColor3 = Icon.Custom and "WhiteColor" or "AccentColor",
+                        ImageRectOffset = Icon.ImageRectOffset,
+                        ImageRectSize = Icon.ImageRectSize,
+                        ImageTransparency = 0.5,
+                        ScaleType = Enum.ScaleType.Fit,
+                        Size = UDim2.fromScale(1, 1),
+                        SizeConstraint = IsCompact and Enum.SizeConstraint.RelativeXY or Enum.SizeConstraint.RelativeYY,
+                        Parent = TabButton,
+                    })
+                end
+
+                table.insert(Library.TabButtons, {
+                    Label = TabLabel,
+                    Padding = ButtonPadding,
+                    Icon = TabIcon,
+                })
+
+                --// Tab Container \\--
+                TabContainer = New("Frame", {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromScale(1, 1),
+                    Visible = false,
+                    Parent = Container,
+                })
+
+                TabLeft = New("ScrollingFrame", {
+                    AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                    BackgroundTransparency = 1,
+                    CanvasSize = UDim2.fromScale(0, 0),
+                    ScrollBarImageTransparency = 1,
+                    ScrollBarThickness = 0,
+                    Size = UDim2.new(0.5, -3, 1, 0),
+                    Parent = TabContainer,
+                })
+                New("UIListLayout", {
+                    Padding = UDim.new(0, 2),
+                    Parent = TabLeft,
+                })
+                New("UIPadding", {
+                    PaddingBottom = UDim.new(0, 2),
+                    PaddingLeft = UDim.new(0, 2),
+                    PaddingRight = UDim.new(0, 2),
+                    PaddingTop = UDim.new(0, 2),
+                    Parent = TabLeft,
+                })
+                do
+                    New("Frame", {
+                        BackgroundTransparency = 1,
+                        LayoutOrder = -1,
+                        Parent = TabLeft,
+                    })
+                    New("Frame", {
+                        BackgroundTransparency = 1,
+                        LayoutOrder = 1,
+                        Parent = TabLeft,
+                    })
+                end
+
+                TabRight = New("ScrollingFrame", {
+                    AnchorPoint = Vector2.new(1, 0),
+                    AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                    BackgroundTransparency = 1,
+                    CanvasSize = UDim2.fromScale(0, 0),
+                    Position = UDim2.fromScale(1, 0),
+                    ScrollBarImageTransparency = 1,
+                    ScrollBarThickness = 0,
+                    Size = UDim2.new(0.5, -3, 1, 0),
+                    Parent = TabContainer,
+                })
+                New("UIListLayout", {
+                    Padding = UDim.new(0, 2),
+                    Parent = TabRight,
+                })
+                New("UIPadding", {
+                    PaddingBottom = UDim.new(0, 2),
+                    PaddingLeft = UDim.new(0, 2),
+                    PaddingRight = UDim.new(0, 2),
+                    PaddingTop = UDim.new(0, 2),
+                    Parent = TabRight,
+                })
+                do
+                    New("Frame", {
+                        BackgroundTransparency = 1,
+                        LayoutOrder = -1,
+                        Parent = TabRight,
+                    })
+                    New("Frame", {
+                        BackgroundTransparency = 1,
+                        LayoutOrder = 1,
+                        Parent = TabRight,
+                    })
+                end
+            end
+
+            --// Warning Box \\--
+            local WarningBoxHolder ,WarningBox
+,WarningBoxOutline
+,WarningBoxShadowOutline
+,WarningBoxScrollingFrame
+,WarningTitle
+,WarningStroke
+,WarningText
+=(New("Frame", {
+                AutomaticSize = Enum.AutomaticSize.Y,
+                BackgroundTransparency = 1,
+                Position = UDim2.fromOffset(0, 7),
+                Size = UDim2.fromScale(1, 0),
+                Visible = false,
+                Parent = TabContainer,
+            })
+)            do
+                WarningBox = New("Frame", {
+                    BackgroundColor3 = "BackgroundColor",
+                    Position = UDim2.fromOffset(2, 0),
+                    Size = UDim2.new(1, -5, 0, 0),
+                    Parent = WarningBoxHolder,
+                })
+                table.insert(
+                    Library.Corners,
+                    New("UICorner", {
+                        CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
+                        Parent = WarningBox,
+                    })
+                )
+                WarningBoxOutline, WarningBoxShadowOutline = Library:AddOutline(WarningBox)
+
+                WarningBoxScrollingFrame = New("ScrollingFrame", {
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    Size = UDim2.fromScale(1, 1),
+                    CanvasSize = UDim2.new(0, 0, 0, 0),
+                    ScrollBarThickness = 3,
+                    ScrollingDirection = Enum.ScrollingDirection.Y,
+                    Parent = WarningBox,
+                })
+                New("UIPadding", {
+                    PaddingBottom = UDim.new(0, 4),
+                    PaddingLeft = UDim.new(0, 6),
+                    PaddingRight = UDim.new(0, 6),
+                    PaddingTop = UDim.new(0, 4),
+                    Parent = WarningBoxScrollingFrame,
+                })
+
+                WarningTitle = New("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1, -4, 0, 14),
+                    Text = "",
+                    TextColor3 = Color3.fromRGB(255, 50, 50),
+                    TextSize = 14,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = WarningBoxScrollingFrame,
+                })
+
+                WarningStroke = New("UIStroke", {
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
+                    Color = Color3.fromRGB(169, 0, 0),
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    Parent = WarningTitle,
+                })
+
+                WarningText = New("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(0, 16),
+                    Size = UDim2.new(1, -4, 0, 0),
+                    Text = "",
+                    TextSize = 14,
+                    TextWrapped = true,
+                    Parent = WarningBoxScrollingFrame,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextYAlignment = Enum.TextYAlignment.Top,
+                })
+
+                New("UIStroke", {
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
+                    Color = "DarkColor",
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    Parent = WarningText,
+                })
+            end
+
+            --// Tab Table \\--
+            local Tab = {
+                Groupboxes = {},
+                Tabboxes = {},
+                DependencyGroupboxes = {},
+                Description = Description,
+                Sides = {
+                    TabLeft,
+                    TabRight,
+                },
+                WarningBox = {
+                    IsNormal = false,
+                    LockSize = false,
+                    Visible = false,
+                    Title = "WARNING",
+                    Text = "",
+                },
+            }
+
+            function Tab:UpdateWarningBox(Info)
+                if typeof(Info.IsNormal) == "boolean" then
+                    Tab.WarningBox.IsNormal = Info.IsNormal
+                end
+                if typeof(Info.LockSize) == "boolean" then
+                    Tab.WarningBox.LockSize = Info.LockSize
+                end
+                if typeof(Info.Visible) == "boolean" then
+                    Tab.WarningBox.Visible = Info.Visible
+                end
+                if typeof(Info.Title) == "string" then
+                    Tab.WarningBox.Title = Info.Title
+                end
+                if typeof(Info.Text) == "string" then
+                    Tab.WarningBox.Text = Info.Text
+                end
+
+                WarningBoxHolder.Visible = Tab.WarningBox.Visible
+                WarningTitle.Text = Tab.WarningBox.Title
+                WarningText.Text = Tab.WarningBox.Text
+                Tab:Resize(true)
+
+                WarningBox.BackgroundColor3 = Tab.WarningBox.IsNormal == true and Library.Scheme.BackgroundColor
+                    or Color3.fromRGB(127, 0, 0)
+
+                WarningBoxShadowOutline.Color = Tab.WarningBox.IsNormal == true and Library.Scheme.DarkColor
+                    or Color3.fromRGB(85, 0, 0)
+                WarningBoxOutline.Color = Tab.WarningBox.IsNormal == true and Library.Scheme.OutlineColor
+                    or Color3.fromRGB(255, 50, 50)
+
+                WarningTitle.TextColor3 = Tab.WarningBox.IsNormal == true and Library.Scheme.FontColor
+                    or Color3.fromRGB(255, 50, 50)
+                WarningStroke.Color = Tab.WarningBox.IsNormal == true and Library.Scheme.OutlineColor
+                    or Color3.fromRGB(169, 0, 0)
+
+                if not Library.Registry[WarningBox] then
+                    Library:AddToRegistry(WarningBox, {})
+                end
+                if not Library.Registry[WarningBoxShadowOutline] then
+                    Library:AddToRegistry(WarningBoxShadowOutline, {})
+                end
+                if not Library.Registry[WarningBoxOutline] then
+                    Library:AddToRegistry(WarningBoxOutline, {})
+                end
+                if not Library.Registry[WarningTitle] then
+                    Library:AddToRegistry(WarningTitle, {})
+                end
+                if not Library.Registry[WarningStroke] then
+                    Library:AddToRegistry(WarningStroke, {})
+                end
+
+                Library.Registry[WarningBox].BackgroundColor3 = function()
+                    return Tab.WarningBox.IsNormal == true and Library.Scheme.BackgroundColor or Color3.fromRGB(127, 0, 0)
+                end
+
+                Library.Registry[WarningBoxShadowOutline].Color = function()
+                    return Tab.WarningBox.IsNormal == true and Library.Scheme.DarkColor or Color3.fromRGB(85, 0, 0)
+                end
+
+                Library.Registry[WarningBoxOutline].Color = function()
+                    return Tab.WarningBox.IsNormal == true and Library.Scheme.OutlineColor or Color3.fromRGB(255, 50, 50)
+                end
+
+                Library.Registry[WarningTitle].TextColor3 = function()
+                    return Tab.WarningBox.IsNormal == true and Library.Scheme.FontColor or Color3.fromRGB(255, 50, 50)
+                end
+
+                Library.Registry[WarningStroke].Color = function()
+                    return Tab.WarningBox.IsNormal == true and Library.Scheme.OutlineColor or Color3.fromRGB(169, 0, 0)
+                end
+            end
+
+            function Tab:RefreshSides()
+                local Offset = WarningBoxHolder.Visible and WarningBox.Size.Y.Offset + 8 or 0
+                for _, Side in Tab.Sides do
+                    Side.Position = UDim2.new(Side.Position.X.Scale, 0, 0, Offset)
+                    Side.Size = UDim2.new(0.5, -3, 1, -Offset)
+                end
+            end
+
+            function Tab:Resize(ResizeWarningBox)
+                if ResizeWarningBox then
+local MaximumSize , _, YText =math.floor(TabContainer.AbsoluteSize.Y / 3.25)
+, Library:GetTextBounds(
+                        WarningText.Text,
+                        Library.Scheme.Font,
+                        WarningText.TextSize,
+                        WarningText.AbsoluteSize.X
+                    )
+
+                    local YBox = 24 + YText
+                    if Tab.WarningBox.LockSize == true and YBox >= MaximumSize then
+                        WarningBoxScrollingFrame.CanvasSize = UDim2.fromOffset(0, YBox)
+                        YBox = MaximumSize
+                    else
+                        WarningBoxScrollingFrame.CanvasSize = UDim2.fromOffset(0, 0)
+                    end
+
+                    WarningText.Size = UDim2.new(1, -4, 0, YText)
+                    WarningBox.Size = UDim2.new(1, -5, 0, YBox + 4)
+                end
+
+                Tab:RefreshSides()
+            end
+
+            function Tab:AddGroupbox(Info)
+                local BoxHolder = New("Frame", {
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromScale(1, 0),
+                    Parent = Info.Side == 1 and TabLeft or TabRight,
+                })
+                New("UIListLayout", {
+                    Padding = UDim.new(0, 6),
+                    Parent = BoxHolder,
+                })
+                New("UIPadding", {
+                    PaddingBottom = UDim.new(0, 4),
+                    PaddingTop = UDim.new(0, 4),
+                    Parent = BoxHolder,
+                })
+
+                local GroupboxHolder
+,GroupboxLabel
+,GroupboxContainer
+,GroupboxList
+
+                do
+                    GroupboxHolder = New("Frame", {
+                        BackgroundColor3 = "BackgroundColor",
+                        Size = UDim2.fromScale(1, 0),
+                        Parent = BoxHolder,
+                    })
+                    table.insert(
+                        Library.Corners,
+                        New("UICorner", {
+                            CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
+                            Parent = GroupboxHolder,
+                        })
+                    )
+                    Library:AddOutline(GroupboxHolder)
+
+                    Library:MakeLine(GroupboxHolder, {
+                        Position = UDim2.fromOffset(0, 34),
+                        Size = UDim2.new(1, 0, 0, 1),
+                    })
+
+                    local BoxIcon = Library:GetCustomIcon(Info.IconName)
+                    if BoxIcon then
+                        New("ImageLabel", {
+                            Image = BoxIcon.Url,
+                            ImageColor3 = BoxIcon.Custom and "WhiteColor" or "AccentColor",
+                            ImageRectOffset = BoxIcon.ImageRectOffset,
+                            ImageRectSize = BoxIcon.ImageRectSize,
+                            Position = UDim2.fromOffset(6, 6),
+                            Size = UDim2.fromOffset(22, 22),
+                            Parent = GroupboxHolder,
+                        })
+                    end
+
+                    GroupboxLabel = New("TextLabel", {
+                        BackgroundTransparency = 1,
+                        Position = UDim2.fromOffset(BoxIcon and 24 or 0, 0),
+                        Size = UDim2.new(1, 0, 0, 34),
+                        Text = Info.Name,
+                        TextSize = 15,
+                        TextXAlignment = Enum.TextXAlignment.Left,
+                        Parent = GroupboxHolder,
+                    })
+                    New("UIPadding", {
+                        PaddingLeft = UDim.new(0, 12),
+                        PaddingRight = UDim.new(0, 12),
+                        Parent = GroupboxLabel,
+                    })
+
+                    GroupboxContainer = New("Frame", {
+                        BackgroundTransparency = 1,
+                        Position = UDim2.fromOffset(0, 35),
+                        Size = UDim2.new(1, 0, 1, -35),
+                        Parent = GroupboxHolder,
+                    })
+
+                    GroupboxList = New("UIListLayout", {
+                        Padding = UDim.new(0, 8),
+                        Parent = GroupboxContainer,
+                    })
+                    New("UIPadding", {
+                        PaddingBottom = UDim.new(0, 7),
+                        PaddingLeft = UDim.new(0, 7),
+                        PaddingRight = UDim.new(0, 7),
+                        PaddingTop = UDim.new(0, 7),
+                        Parent = GroupboxContainer,
+                    })
+                end
+
+                local Groupbox = {
+                    BoxHolder = BoxHolder,
+                    Holder = GroupboxHolder,
+                    Container = GroupboxContainer,
+
+                    Tab = Tab,
+                    DependencyBoxes = {},
+                    Elements = {},
+                }
+
+                function Groupbox:Resize()
+                    GroupboxHolder.Size = UDim2.new(1, 0, 0, (GroupboxList.AbsoluteContentSize.Y / Library.DPIScale) + 49)
+                end
+
+                setmetatable(Groupbox, BaseGroupbox)
+
+                Groupbox:Resize()
+                Tab.Groupboxes[Info.Name] = Groupbox
+
+                return Groupbox
+            end
+
+            function Tab:AddLeftGroupbox(Name, IconName)
+                return Tab:AddGroupbox({ Side = 1, Name = Name, IconName = IconName })
+            end
+
+            function Tab:AddRightGroupbox(Name, IconName)
+                return Tab:AddGroupbox({ Side = 2, Name = Name, IconName = IconName })
+            end
+
+            function Tab:AddTabbox(Info)
+                local BoxHolder = New("Frame", {
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromScale(1, 0),
+                    Parent = Info.Side == 1 and TabLeft or TabRight,
+                })
+                New("UIListLayout", {
+                    Padding = UDim.new(0, 6),
+                    Parent = BoxHolder,
+                })
+                New("UIPadding", {
+                    PaddingBottom = UDim.new(0, 4),
+                    PaddingTop = UDim.new(0, 4),
+                    Parent = BoxHolder,
+                })
+
+                local TabboxHolder
+,TabboxButtons
+
+                do
+                    TabboxHolder = New("Frame", {
+                        BackgroundColor3 = "BackgroundColor",
+                        Size = UDim2.fromScale(1, 0),
+                        Parent = BoxHolder,
+                    })
+                    table.insert(
+                        Library.Corners,
+                        New("UICorner", {
+                            CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
+                            Parent = TabboxHolder,
+                        })
+                    )
+                    Library:AddOutline(TabboxHolder)
+
+                    TabboxButtons = New("Frame", {
+                        BackgroundTransparency = 1,
+                        Size = UDim2.new(1, 0, 0, 34),
+                        Parent = TabboxHolder,
+                    })
+                    New("UIListLayout", {
+                        FillDirection = Enum.FillDirection.Horizontal,
+                        HorizontalFlex = Enum.UIFlexAlignment.Fill,
+                        Parent = TabboxButtons,
+                    })
+                end
+
+                local TotalButtons, TotalTabs ,Tabbox = 0, 1
+,{
+                    ActiveTab = nil,
+
+                    BoxHolder = BoxHolder,
+                    Holder = TabboxHolder,
+                    Tabs = {}
+                }
+
+                function Tabbox:UpdateCorners()
+                    for _, Tab in Tabbox.Tabs do
+                        Tab:UpdateCorners()
+                    end
+                end
+
+                function Tabbox:AddTab(Name, IconName)
+                    local TabIndex = TotalTabs
+
+                    TotalButtons = TotalButtons + 1
+                    TotalTabs = TotalTabs + 1
+
+                    local BoxIcon ,Button = Library:GetCustomIcon(IconName)
+,New("TextButton", {
+                        BackgroundColor3 = "MainColor",
+                        BackgroundTransparency = 0,
+                        Size = UDim2.fromOffset(0, 34),
+                        Text = "",
+                        Parent = TabboxButtons,
+                    })
+
+                    table.insert(
+                        Library.Corners,
+                        New("UICorner", {
+                            CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
+                            Parent = Button,
+                        })
+                    )
+
+                    local BottomCover ,LeftCover ,RightCover ,ButtonContent = New("Frame", {
+                        Name = "BottomCover",
+                        BackgroundColor3 = "MainColor",
+                        BorderSizePixel = 0,
+                        Position = UDim2.new(0, 0, 1, -WindowInfo.CornerRadius),
+                        Size = UDim2.new(1, 0, 0, WindowInfo.CornerRadius),
+                        Parent = Button,
+                    })
+,New("Frame", {
+                        Name = "LeftCover",
+                        BackgroundColor3 = "MainColor",
+                        BorderSizePixel = 0,
+                        Position = UDim2.new(0, 0, 0, 0),
+                        Size = UDim2.new(0, WindowInfo.CornerRadius, 1, 0),
+                        Visible = false,
+                        Parent = Button,
+                    })
+,New("Frame", {
+                        Name = "RightCover",
+                        AnchorPoint = Vector2.new(1, 0),
+                        BackgroundColor3 = "MainColor",
+                        BorderSizePixel = 0,
+                        Position = UDim2.new(1, 0, 0, 0),
+                        Size = UDim2.new(0, WindowInfo.CornerRadius, 1, 0),
+                        Visible = false,
+                        Parent = Button,
+                    })
+,New("Frame", {
+                        AnchorPoint = Vector2.new(0.5, 0.5),
+                        AutomaticSize = Enum.AutomaticSize.X,
+                        BackgroundTransparency = 1,
+                        Position = UDim2.fromScale(0.5, 0.5),
+                        Size = UDim2.fromOffset(0, 16),
+                        Parent = Button,
+                    })
+                    New("UIListLayout", {
+                        FillDirection = Enum.FillDirection.Horizontal,
+                        HorizontalAlignment = Enum.HorizontalAlignment.Center,
+                        VerticalAlignment = Enum.VerticalAlignment.Center,
+                        Padding = UDim.new(0, 8),
+                        Parent = ButtonContent,
+                    })
+
+                    local ButtonIcon
+                    if BoxIcon then
+                        ButtonIcon = New("ImageLabel", {
+                            Image = BoxIcon.Url,
+                            ImageColor3 = BoxIcon.Custom and "WhiteColor" or "AccentColor",
+                            ImageRectOffset = BoxIcon.ImageRectOffset,
+                            ImageRectSize = BoxIcon.ImageRectSize,
+                            ImageTransparency = 0.5,
+                            Size = UDim2.fromOffset(16, 16),
+                            Parent = ButtonContent,
+                        })
+                    end
+
+                    local ButtonLabel ,Line ,Container = New("TextLabel", {
+                        AutomaticSize = Enum.AutomaticSize.X,
+                        BackgroundTransparency = 1,
+                        Size = UDim2.fromOffset(0, 16),
+                        Text = Name,
+                        TextSize = 15,
+                        TextTransparency = 0.5,
+                        Parent = ButtonContent,
+                    })
+,Library:MakeLine(Button, {
+                        AnchorPoint = Vector2.new(0, 1),
+                        Position = UDim2.new(0, 0, 1, 1),
+                        Size = UDim2.new(1, 0, 0, 1),
+                    })
+,New("Frame", {
+                        BackgroundTransparency = 1,
+                        Position = UDim2.fromOffset(0, 35),
+                        Size = UDim2.new(1, 0, 1, -35),
+                        Visible = false,
+                        Parent = TabboxHolder,
+                    })
+                    local List = New("UIListLayout", {
+                        Padding = UDim.new(0, 8),
+                        Parent = Container,
+                    })
+                    New("UIPadding", {
+                        PaddingBottom = UDim.new(0, 7),
+                        PaddingLeft = UDim.new(0, 7),
+                        PaddingRight = UDim.new(0, 7),
+                        PaddingTop = UDim.new(0, 7),
+                        Parent = Container,
+                    })
+
+                    local Tab = {
+                        ButtonHolder = Button,
+                        Container = Container,
+
+                        ButtonCovers = {
+                            BottomCover = BottomCover,
+                            LeftCover = LeftCover,
+                            RightCover = RightCover
+                        },
+
+                        Tab = Tab,
+                        Elements = {},
+                        DependencyBoxes = {},
+                    }
+
+                    function Tab:Show()
+                        if Tabbox.ActiveTab then
+                            Tabbox.ActiveTab:Hide()
+                        end
+
+                        Button.BackgroundTransparency = 1
+                        BottomCover.BackgroundTransparency = 1
+                        LeftCover.BackgroundTransparency = 1
+                        RightCover.BackgroundTransparency = 1
+
+                        ButtonLabel.TextTransparency = 0
+                        if ButtonIcon then
+                            ButtonIcon.ImageTransparency = 0
+                        end
+                        Line.Visible = false
+
+                        Container.Visible = true
+
+                        Tabbox.ActiveTab = Tab
+                        Tab:Resize()
+                    end
+
+                    function Tab:Hide()
+                        Button.BackgroundTransparency = 0
+                        BottomCover.BackgroundTransparency = 0
+                        LeftCover.BackgroundTransparency = 0
+                        RightCover.BackgroundTransparency = 0
+
+                        ButtonLabel.TextTransparency = 0.5
+                        if ButtonIcon then
+                            ButtonIcon.ImageTransparency = 0.5
+                        end
+                        Line.Visible = true
+                        Container.Visible = false
+
+                        Tabbox.ActiveTab = nil
+                    end
+
+                    function Tab:Resize()
+                        if Tabbox.ActiveTab ~= Tab then
+                            return
+                        end
+
+                        TabboxHolder.Size = UDim2.new(1, 0, 0, (List.AbsoluteContentSize.Y / Library.DPIScale) + 49)
+                    end
+
+                    function Tab:UpdateCorners()
+                        LeftCover.Visible = TabIndex ~= 1
+                        RightCover.Visible = TabIndex ~= TotalButtons
+
+                        BottomCover.Position = UDim2.new(0, 0, 1, -WindowInfo.CornerRadius)
+                        BottomCover.Size = UDim2.new(1, 0, 0, WindowInfo.CornerRadius)
+
+                        LeftCover.Size = UDim2.new(0, WindowInfo.CornerRadius, 1, 0)
+                        RightCover.Size = UDim2.new(0, WindowInfo.CornerRadius, 1, 0)
+                    end
+
+                    --// Execution \\--
+                    if not Tabbox.ActiveTab then
+                        Tab:Show()
+                    end
+
+                    Button.MouseButton1Click:Connect(Tab.Show)
+
+                    setmetatable(Tab, BaseGroupbox)
+
+                    Tabbox.Tabs[Name] = Tab
+                    Tabbox:UpdateCorners()
+
+                    return Tab
+                end
+
+                if Info.Name then
+                    Tab.Tabboxes[Info.Name] = Tabbox
+                else
+                    table.insert(Tab.Tabboxes, Tabbox)
+                end
+
+                return Tabbox
+            end
+
+            function Tab:AddLeftTabbox(Name)
+                return Tab:AddTabbox({ Side = 1, Name = Name })
+            end
+
+            function Tab:AddRightTabbox(Name)
+                return Tab:AddTabbox({ Side = 2, Name = Name })
+            end
+
+            function Tab:Hover(Hovering)
+                if Library.ActiveTab == Tab then
+                    return
+                end
+
+                TweenService:Create(TabLabel, Library.TweenInfo, {
+                    TextTransparency = Hovering and 0.25 or 0.5,
+                }):Play()
+                if TabIcon then
+                    TweenService:Create(TabIcon, Library.TweenInfo, {
+                        ImageTransparency = Hovering and 0.25 or 0.5,
+                    }):Play()
+                end
+            end
+
+            function Tab:Show()
+                if Library.ActiveTab then
+                    Library.ActiveTab:Hide()
+                end
+
+                TweenService:Create(TabButton, Library.TweenInfo, {
+                    BackgroundTransparency = 0,
+                }):Play()
+                TweenService:Create(TabLabel, Library.TweenInfo, {
+                    TextTransparency = 0,
+                }):Play()
+                if TabIcon then
+                    TweenService:Create(TabIcon, Library.TweenInfo, {
+                        ImageTransparency = 0,
+                    }):Play()
+                end
+
+                if Description then
+                    Window:ShowTabInfo(Name, Description)
+                end
+
+                TabContainer.Visible = true
+                Tab:RefreshSides()
+
+                Library.ActiveTab = Tab
+
+                if Library.Searching then
+                    Library:UpdateSearch(Library.SearchText)
+                end
+            end
+
+            function Tab:Hide()
+                TweenService:Create(TabButton, Library.TweenInfo, {
+                    BackgroundTransparency = 1,
+                }):Play()
+                TweenService:Create(TabLabel, Library.TweenInfo, {
+                    TextTransparency = 0.5,
+                }):Play()
+                if TabIcon then
+                    TweenService:Create(TabIcon, Library.TweenInfo, {
+                        ImageTransparency = 0.5,
+                    }):Play()
+                end
+                TabContainer.Visible = false
+
+                Window:HideTabInfo()
+
+                Library.ActiveTab = nil
+            end
+
+            function Tab:SetVisible(Visible)
+                TabButton.Visible = Visible
+
+                if not Visible and Library.ActiveTab == Tab then
+                    Tab:Hide()
+                end
+            end
+
+            --// Execution \\--
+            if not Library.ActiveTab then
+                Tab:Show()
+            end
+
+            TabButton.MouseEnter:Connect(function()
+                Tab:Hover(true)
+            end)
+            TabButton.MouseLeave:Connect(function()
+                Tab:Hover(false)
+            end)
+            TabButton.MouseButton1Click:Connect(Tab.Show)
+
+            Library.Tabs[Name] = Tab
+
+            return Tab
+        end
+
+        function Window:AddKeyTab(...)
+            local Name ,Icon ,Description 
+            if select("#", ...) == 1 and typeof(...) == "table" then
+                local Info = select(1, ...)
+                Name = Info.Name or "Tab"
+                Icon = Info.Icon
+                Description = Info.Description
+            else
+                Name = select(1, ...) or "Tab"
+                Icon = select(2, ...)
+                Description = select(3, ...)
+            end
+
+            Icon = Icon or "key"
+
+            local TabButton,TabLabel
+,TabIcon
+,TabContainer
+
+            Icon = if Icon == "key" then KeyIcon else Library:GetCustomIcon(Icon)
+            do
+                TabButton = New("TextButton", {
+                    BackgroundColor3 = "MainColor",
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1, 0, 0, 40),
+                    Text = "",
+                    Parent = Tabs,
+                })
+                local ButtonPadding = New("UIPadding", {
+                    PaddingBottom = UDim.new(0, IsCompact and 6 or 11),
+                    PaddingLeft = UDim.new(0, IsCompact and 6 or 12),
+                    PaddingRight = UDim.new(0, IsCompact and 6 or 12),
+                    PaddingTop = UDim.new(0, IsCompact and 6 or 11),
+                    Parent = TabButton,
+                })
+
+                TabLabel = New("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(30, 0),
+                    Size = UDim2.new(1, -30, 1, 0),
+                    Text = Name,
+                    TextSize = 16,
+                    TextTransparency = 0.5,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Visible = not IsCompact,
+                    Parent = TabButton,
+                })
+
+                if Icon then
+                    TabIcon = New("ImageLabel", {
+                        Image = Icon.Url,
+                        ImageColor3 = Icon.Custom and "WhiteColor" or "AccentColor",
+                        ImageRectOffset = Icon.ImageRectOffset,
+                        ImageRectSize = Icon.ImageRectSize,
+                        ImageTransparency = 0.5,
+                        Size = UDim2.fromScale(1, 1),
+                        SizeConstraint = IsCompact and Enum.SizeConstraint.RelativeXY or Enum.SizeConstraint.RelativeYY,
+                        Parent = TabButton,
+                    })
+                end
+
+                table.insert(Library.TabButtons, {
+                    Label = TabLabel,
+                    Padding = ButtonPadding,
+                    Icon = TabIcon,
+                })
+
+                --// Tab Container \\--
+                TabContainer = New("ScrollingFrame", {
+                    AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                    BackgroundTransparency = 1,
+                    CanvasSize = UDim2.fromScale(0, 0),
+                    ScrollBarThickness = 0,
+                    Size = UDim2.fromScale(1, 1),
+                    Visible = false,
+                    Parent = Container,
+                })
+                New("UIListLayout", {
+                    HorizontalAlignment = Enum.HorizontalAlignment.Center,
+                    Padding = UDim.new(0, 8),
+                    VerticalAlignment = Enum.VerticalAlignment.Center,
+                    Parent = TabContainer,
+                })
+                New("UIPadding", {
+                    PaddingLeft = UDim.new(0, 1),
+                    PaddingRight = UDim.new(0, 1),
+                    Parent = TabContainer,
+                })
+            end
+
+            --// Tab Table \\--
+            local Tab = {
+                Elements = {},
+                Description = Description,
+                IsKeyTab = true,
+            }
+
+            function Tab:AddKeyBox(Callback)
+                assert(typeof(Callback) == "function", "Callback must be a function")
+
+                local Holder = New("Frame", {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(0.75, 0, 0, 21),
+                    Parent = TabContainer,
+                })
+
+                local Box = New("TextBox", {
+                    BackgroundColor3 = "MainColor",
+                    PlaceholderText = "Key",
+                    Size = UDim2.new(1, -71, 1, 0),
+                    TextSize = 14,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Parent = Holder,
+                })
+                New("UIPadding", {
+                    PaddingLeft = UDim.new(0, 8),
+                    PaddingRight = UDim.new(0, 8),
+                    Parent = Box,
+                })
+                New("UIStroke", {
+                    Color = "OutlineColor",
+                    Parent = Box,
+                })
+                table.insert(
+                    Library.Corners,
+                    New("UICorner", {
+                        CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                        Parent = Box,
+                    })
+                )
+
+                local Button = New("TextButton", {
+                    AnchorPoint = Vector2.new(1, 0),
+                    BackgroundColor3 = "MainColor",
+                    Position = UDim2.fromScale(1, 0),
+                    Size = UDim2.new(0, 63, 1, 0),
+                    Text = "Execute",
+                    TextSize = 14,
+                    Parent = Holder,
+                })
+                New("UIStroke", {
+                    Color = "OutlineColor",
+                    Parent = Button,
+                })
+                table.insert(
+                    Library.Corners,
+                    New("UICorner", {
+                        CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                        Parent = Button,
+                    })
+                )
+
+                Button.InputBegan:Connect(function(Input)
+                    if not IsClickInput(Input) then
+                        return
+                    end
+
+                    if not Library:MouseIsOverFrame(Button, Input.Position) then
+                        return
+                    end
+
+                    Callback(Box.Text)
+                end)
+            end
+
+            function Tab:RefreshSides() end
+            function Tab:Resize() end
+            function Tab:UpdateCorners() end
+
+            function Tab:Hover(Hovering)
+                if Library.ActiveTab == Tab then
+                    return
+                end
+
+                TweenService:Create(TabLabel, Library.TweenInfo, {
+                    TextTransparency = Hovering and 0.25 or 0.5,
+                }):Play()
+                if TabIcon then
+                    TweenService:Create(TabIcon, Library.TweenInfo, {
+                        ImageTransparency = Hovering and 0.25 or 0.5,
+                    }):Play()
+                end
+            end
+
+            function Tab:Show()
+                if Library.ActiveTab then
+                    Library.ActiveTab:Hide()
+                end
+
+                TweenService:Create(TabButton, Library.TweenInfo, {
+                    BackgroundTransparency = 0,
+                }):Play()
+                TweenService:Create(TabLabel, Library.TweenInfo, {
+                    TextTransparency = 0,
+                }):Play()
+                if TabIcon then
+                    TweenService:Create(TabIcon, Library.TweenInfo, {
+                        ImageTransparency = 0,
+                    }):Play()
+                end
+                TabContainer.Visible = true
+
+                if Description then
+                    Window:ShowTabInfo(Name, Description)
+                end
+
+                Tab:RefreshSides()
+
+                Library.ActiveTab = Tab
+
+                if Library.Searching then
+                    Library:UpdateSearch(Library.SearchText)
+                end
+            end
+
+            function Tab:Hide()
+                TweenService:Create(TabButton, Library.TweenInfo, {
+                    BackgroundTransparency = 1,
+                }):Play()
+                TweenService:Create(TabLabel, Library.TweenInfo, {
+                    TextTransparency = 0.5,
+                }):Play()
+                if TabIcon then
+                    TweenService:Create(TabIcon, Library.TweenInfo, {
+                        ImageTransparency = 0.5,
+                    }):Play()
+                end
+                TabContainer.Visible = false
+
+                Window:HideTabInfo()
+
+                Library.ActiveTab = nil
+            end
+
+            function Tab:SetVisible(Visible)
+                TabButton.Visible = Visible
+
+                if not Visible and Library.ActiveTab == Tab then
+                    Tab:Hide()
+                end
+            end
+
+            --// Execution \\--
+            if not Library.ActiveTab then
+                Tab:Show()
+            end
+
+            TabButton.MouseEnter:Connect(function()
+                Tab:Hover(true)
+            end)
+            TabButton.MouseLeave:Connect(function()
+                Tab:Hover(false)
+            end)
+            TabButton.MouseButton1Click:Connect(Tab.Show)
+
+            Tab.Container = TabContainer
+            setmetatable(Tab, BaseGroupbox)
+
+            Library.Tabs[Name] = Tab
+
+            return Tab
+        end
+
+        function Window:AddDialog(Idx, Info)
+            Info = Library:Validate(Info, Templates.Dialog)
+
+            local FooterButtonsList ,DialogFrame
+,DialogOverlay
+,DialogContainer
+,ButtonsHolder
+={}
+
+            DialogOverlay = New("TextButton", {
+                AutoButtonColor = false,
+                BackgroundColor3 = "DarkColor",
+                BackgroundTransparency = 1,
+                Size = UDim2.fromScale(1, 1),
+                Text = "",
+                Active = false,
+                ZIndex = 9000,
+                Visible = true,
+                Parent = MainFrame,
+            })
+            TweenService:Create(DialogOverlay, Library.TweenInfo, {
+                BackgroundTransparency = 0.5,
+            }):Play()
+
+            DialogFrame = New("TextButton", {
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                BackgroundColor3 = "BackgroundColor",
+                Position = UDim2.fromScale(0.5, 0.5),
+                Size = UDim2.fromOffset(300, 0),
+                AutomaticSize = Enum.AutomaticSize.Y,
+                Text = "",
+                AutoButtonColor = false,
+                ZIndex = 9001,
+                Parent = DialogOverlay,
+            })
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
+                    Parent = DialogFrame,
+                })
+            )
+            Library:AddOutline(DialogFrame)
+
+            local InnerContainer ,DialogScale = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.fromScale(1, 0),
+                AutomaticSize = Enum.AutomaticSize.Y,
+                ZIndex = 9002,
+                Parent = DialogFrame,
+            })
+,New("UIScale", {
+                Scale = 0.95,
+                Parent = DialogFrame,
+            })
+            TweenService:Create(DialogScale, Library.TweenInfo, {
+                Scale = 1
+            }):Play()
+local _InnerPadding , _InnerLayout , HeaderContainer =New("UIPadding", {
+                PaddingBottom = UDim.new(0, 15),
+                PaddingLeft = UDim.new(0, 15),
+                PaddingRight = UDim.new(0, 15),
+                PaddingTop = UDim.new(0, 15),
+                Parent = InnerContainer,
+            })
+, New("UIListLayout", {
+                Padding = UDim.new(0, 10),
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                Parent = InnerContainer,
+            })
+, New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.fromScale(1, 0),
+                AutomaticSize = Enum.AutomaticSize.Y,
+                LayoutOrder = 1,
+                ZIndex = 9002,
+                Parent = InnerContainer,
+            })
+            New("UIListLayout", {
+                Padding = UDim.new(0, 6),
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                Parent = HeaderContainer,
+            })
+            New("UIPadding", {
+                PaddingBottom = UDim.new(0, 5),
+                Parent = HeaderContainer,
+            })
+
+            local TitleRow = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 20),
+                AutomaticSize = Enum.AutomaticSize.Y,
+                LayoutOrder = 1,
+                ZIndex = 9002,
+                Parent = HeaderContainer,
+            })
+            New("UIListLayout", {
+                Padding = UDim.new(0, 6),
+                FillDirection = Enum.FillDirection.Horizontal,
+                VerticalAlignment = Enum.VerticalAlignment.Center,
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                Parent = TitleRow,
+            })
+
+            if Info.Icon then
+                local ParsedIcon = Library:GetCustomIcon(Info.Icon)
+                if ParsedIcon then
+                    local IconImg = New("ImageLabel", {
+                        BackgroundTransparency = 1,
+                        Size = UDim2.fromOffset(16, 16),
+                        Image = ParsedIcon.Url,
+                        ImageColor3 = "FontColor",
+                        ImageRectOffset = ParsedIcon.ImageRectOffset,
+                        ImageRectSize = ParsedIcon.ImageRectSize,
+                        LayoutOrder = 1,
+                        ZIndex = 9002,
+                        Parent = TitleRow,
+                    })
+                    if Info.TitleColor then
+                        IconImg.ImageColor3 = Info.TitleColor
+                    end
+                end
+            end
+
+            local TitleLabel = New("TextLabel", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 18),
+                AutomaticSize = Enum.AutomaticSize.Y,
+                Text = Info.Title,
+                TextSize = 18,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                LayoutOrder = 2,
+                ZIndex = 9002,
+                Parent = TitleRow,
+            })
+            if Info.TitleColor then
+                TitleLabel.TextColor3 = Info.TitleColor
+            end
+
+            local DescriptionLabel = New("TextLabel", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 14),
+                AutomaticSize = Enum.AutomaticSize.Y,
+                Text = Info.Description,
+                TextSize = 14,
+                TextTransparency = Info.DescriptionColor and 0 or 0.2,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextWrapped = true,
+                LayoutOrder = 2,
+                ZIndex = 9002,
+                Parent = HeaderContainer,
+            })
+            if Info.DescriptionColor then
+                DescriptionLabel.TextColor3 = Info.DescriptionColor
+            end
+
+            DialogContainer = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.fromScale(1, 0),
+                AutomaticSize = Enum.AutomaticSize.Y,
+                LayoutOrder = 4,
+                ZIndex = 9002,
+                Parent = InnerContainer,
+            })
+New("UIListLayout", {
+                Padding = UDim.new(0, 8),
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                Parent = DialogContainer,
+            })
+            New("UIPadding", {
+                PaddingBottom = UDim.new(0, 5),
+                Parent = DialogContainer,
+            })
+
+            local _Sep2 = New("Frame", {
+                BackgroundColor3 = "OutlineColor",
+                BackgroundTransparency = 0,
+                BorderSizePixel = 0,
+                Size = UDim2.new(1, 0, 0, 1),
+                LayoutOrder = 5,
+                ZIndex = 9002,
+                Parent = InnerContainer,
+            })
+
+            ButtonsHolder = New("Frame", {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, 0),
+                AutomaticSize = Enum.AutomaticSize.Y,
+                LayoutOrder = 6,
+                ZIndex = 9002,
+                Parent = InnerContainer,
+            })
+            New("UIListLayout", {
+                Padding = UDim.new(0, 8),
+                FillDirection = Enum.FillDirection.Horizontal,
+                HorizontalAlignment = Enum.HorizontalAlignment.Right,
+                Wraps = true,
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                Parent = ButtonsHolder,
+            })
+            New("UIPadding", {
+                PaddingTop = UDim.new(0, 5),
+                Parent = ButtonsHolder,
+            })
+
+            local Dialog = {
+                Elements = {},
+                Container = DialogContainer,
+            }
+
+            function Dialog:Resize()
+                local MaxWidth ,MinWidth ,TotalButtonWidth ,ButtonCount ,HasButtons = MainFrame.AbsoluteSize.X * 0.75
+,400
+,0
+,0
+,false
+
+                for _, BtnWrap in FooterButtonsList do
+                    HasButtons = true
+                    ButtonCount = ButtonCount + 1
+                    TotalButtonWidth = TotalButtonWidth + BtnWrap.Container.Size.X.Offset
+                end
+
+                local TargetWidth = MinWidth
+                if HasButtons then
+                    local RequiredWidth = TotalButtonWidth + ((ButtonCount - 1) * 8) + 30
+                    TargetWidth = math.max(MinWidth, math.min(RequiredWidth, MaxWidth))
+                end
+
+                DialogFrame.Size = UDim2.fromOffset(TargetWidth, 0)
+local _DescX, DescY =Library:GetTextBounds(DescriptionLabel.Text, Library.Scheme.Font, 14, TargetWidth - 30)
+                DescriptionLabel.Size = UDim2.new(1, 0, 0, DescY)
+
+                local HasElements = false
+                for _, v in DialogContainer:GetChildren() do
+                    if not v:IsA("UIListLayout") and not v:IsA("UIPadding") then
+                        HasElements = true
+                        break
+                    end
+                end
+                DialogContainer.Visible = HasElements
+
+                ButtonsHolder.Visible = HasButtons
+                _Sep2.Visible = HasButtons
+            end
+
+            function Dialog:SetTitle(Title)
+                TitleLabel.Text = Title
+                Dialog:Resize()
+            end
+
+            function Dialog:SetDescription(Description)
+                DescriptionLabel.Text = Description
+                Dialog:Resize()
+            end
+
+            function Dialog:Dismiss()
+                Library.ActiveDialog = nil
+                local CloseTween = TweenService:Create(DialogScale, Library.TweenInfo, { Scale = 0.95 })
+                TweenService:Create(DialogOverlay, Library.TweenInfo, { BackgroundTransparency = 1 }):Play()
+                CloseTween:Play()
+
+                task.delay(Library.TweenInfo.Time, function()
+                    DialogOverlay:Destroy()
+                end)
+                Library.Dialogues[Idx] = nil
+            end
+
+            DialogOverlay.MouseButton1Click:Connect(function()
+                if Info.OutsideClickDismiss then
+                    Dialog:Dismiss()
+                end
+            end)
+
+            function Dialog:RemoveFooterButton(ButtonIdx)
+                if FooterButtonsList[ButtonIdx] then
+                    FooterButtonsList[ButtonIdx].Container:Destroy()
+                    FooterButtonsList[ButtonIdx] = nil
+                end
+            end
+
+            function Dialog:SetButtonDisabled(ButtonIdx, Disabled)
+                if FooterButtonsList[ButtonIdx] and type(FooterButtonsList[ButtonIdx].SetDisabled) == "function" then
+                    FooterButtonsList[ButtonIdx]:SetDisabled(Disabled)
+                end
+            end
+
+            function Dialog:SetButtonOrder(ButtonIdx, Order)
+                if FooterButtonsList[ButtonIdx] and FooterButtonsList[ButtonIdx].Container then
+                    FooterButtonsList[ButtonIdx].Container.LayoutOrder = Order
+                end
+            end
+
+            function Dialog:AddFooterButton(ButtonIdx, ButtonInfo)
+                Dialog:RemoveFooterButton(ButtonIdx)
+
+                local WaitTime ,ButtonContainer ,BtnColor ,BtnOutline ,Variant = ButtonInfo.WaitTime or 0
+,New("Frame", {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromOffset(0, 26),
+                    LayoutOrder = ButtonInfo.Order or 0,
+                    ZIndex = 9002,
+                    Parent = ButtonsHolder,
+                })
+,"MainColor"
+,"OutlineColor"
+,ButtonInfo.Variant or "Primary"
+
+                if Variant == "Primary" then
+                    BtnColor = "FontColor"
+                    BtnOutline = "FontColor"
+                elseif Variant == "Secondary" then
+                    BtnColor = "MainColor"
+                    BtnOutline = "OutlineColor"
+                elseif Variant == "Destructive" then
+                    BtnColor = "DestructiveColor"
+                    BtnOutline = "DestructiveColor"
+                elseif Variant == "Ghost" then
+                    BtnColor = "BackgroundColor"
+                    BtnOutline = "BackgroundColor"
+                end
+
+                local TextBtn = New("TextButton", {
+                    BackgroundColor3 = BtnColor,
+                    BorderColor3 = BtnOutline,
+                    BackgroundTransparency = WaitTime > 0 and 0.5 or 0,
+                    Size = UDim2.fromOffset(0, 26),
+                    Text = "",
+                    AutoButtonColor = false,
+                    ZIndex = 9002,
+                    Parent = ButtonContainer,
+                })
+                Library:AddOutline(TextBtn)
+                table.insert(
+                    Library.Corners,
+                    New("UICorner", { 
+                        CornerRadius = UDim.new(0, Library.CornerRadius), 
+                        Parent = TextBtn 
+                    })
+                )
+local _BtnPadding , TextColor =New("UIPadding", {
+                    PaddingLeft = UDim.new(0, 15),
+                    PaddingRight = UDim.new(0, 15),
+                    Parent = TextBtn,
+                })
+, Library.Scheme.FontColor
+                if Variant == "Primary" then
+                    TextColor = Library.Scheme.BackgroundColor
+                elseif Variant == "Destructive" then
+                    TextColor = Color3.new(1, 1, 1)
+                end
+
+                local BtnLabel = New("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromScale(1, 1),
+                    Text = ButtonInfo.Title or ButtonIdx,
+                    TextColor3 = TextColor,
+                    TextTransparency = WaitTime > 0 and 0.5 or 0,
+                    TextSize = 14,
+                    ZIndex = 9002,
+                    Parent = TextBtn,
+                })
+local LabelX=Library:GetTextBounds(BtnLabel.Text, Library.Scheme.Font, 14, 250)
+                ButtonContainer.Size = UDim2.fromOffset(LabelX + 30, 26)
+                TextBtn.Size = UDim2.fromOffset(LabelX + 30, 26)
+
+                local ProgressBar
+                if WaitTime > 0 then
+                    ProgressBar = New("Frame", {
+                        BackgroundColor3 = "AccentColor",
+                        BorderSizePixel = 0,
+                        Position = UDim2.new(0, 0, 1, -2),
+                        Size = UDim2.new(0, 0, 0, 2),
+                        ZIndex = 2,
+                        Parent = TextBtn,
+                    })
+                    table.insert(
+                        Library.Corners,
+                        New("UICorner", { 
+                            CornerRadius = UDim.new(0, Library.CornerRadius), 
+                            Parent = ProgressBar 
+                        })
+                    )
+                end
+
+                local IsActive = WaitTime <= 0
+
+                local ButtonWrap ,ActiveColor = {
+                    Container = ButtonContainer,
+                    SetDisabled = function(self, Disabled)
+                        IsActive = not Disabled
+                        if Disabled then
+                            TweenService:Create(TextBtn, Library.TweenInfo, { BackgroundTransparency = 0.5 }):Play()
+                            TweenService:Create(BtnLabel, Library.TweenInfo, { TextTransparency = 0.5 }):Play()
+                        else
+                            TweenService:Create(TextBtn, Library.TweenInfo, { BackgroundTransparency = 0 }):Play()
+                            TweenService:Create(BtnLabel, Library.TweenInfo, { TextTransparency = 0 }):Play()
+                        end
+                    end
+                }
+,typeof(BtnColor) == "Color3" and BtnColor or Library.Scheme[BtnColor]
+                local HoverColor = Variant == "Ghost" and Library.Scheme.MainColor or Library:GetBetterColor(ActiveColor, 10)
+
+                TextBtn.MouseEnter:Connect(function()
+                    if not IsActive then return end
+                    TweenService:Create(TextBtn, Library.TweenInfo, {
+                        BackgroundColor3 = HoverColor
+                    }):Play()
+                end)
+                TextBtn.MouseLeave:Connect(function()
+                    if not IsActive then return end
+                    TweenService:Create(TextBtn, Library.TweenInfo, {
+                        BackgroundColor3 = ActiveColor
+                    }):Play()
+                end)
+
+                TextBtn.MouseButton1Click:Connect(function()
+                    if not IsActive then return end
+                    if ButtonInfo.Callback then
+                        ButtonInfo.Callback(Dialog)
+                    end
+                    if Info.AutoDismiss then
+                        Dialog:Dismiss()
+                    end
+                end)
+
+                if WaitTime > 0 then
+                    TweenService:Create(ProgressBar, TweenInfo.new(WaitTime, Enum.EasingStyle.Linear), {
+                        Size = UDim2.new(1, 0, 0, 2)
+                    }):Play()
+
+                    task.delay(WaitTime, function()
+                        ButtonWrap:SetDisabled(false)
+                        if ProgressBar then
+                            TweenService:Create(ProgressBar, Library.TweenInfo, {
+                                BackgroundTransparency = 1
+                            }):Play()
+                        end
+                    end)
+                end
+
+                FooterButtonsList[ButtonIdx] = ButtonWrap
+            end
+
+            for BIdx, BInfo in Info.FooterButtons do
+                if type(BIdx) == "number" and BInfo.Id then BIdx = BInfo.Id end
+                Dialog:AddFooterButton(BIdx, BInfo)
+            end
+
+            setmetatable(Dialog, BaseGroupbox)
+            Library.Dialogues[Idx] = Dialog
+
+            Dialog:Resize()
+
+            Library.ActiveDialog = Dialog
+            return Dialog
+        end
+
+        function Window:Toggle(Value)
+            if Library.ActiveLoading then
+                if Value == true then
+                    return
+                end
+
+                if not Library.Toggled then
+                    return
+                end
+            end
+
+            if typeof(Value) == "boolean" then
+                Library.Toggled = Value
+            else
+                Library.Toggled = not Library.Toggled
+            end
+
+            MainFrame.Visible = Library.Toggled
+
+            if WindowInfo.UnlockMouseWhileOpen then
+                ModalElement.Modal = Library.Toggled
+            end
+
+            if Library.Toggled and not Library.IsMobile then
+                local OldMouseIconEnabled ,ShowCursorBinding = UserInputService.MouseIconEnabled
+,Library.ShowCursorBinding
+                pcall(function()
+                    RunService:UnbindFromRenderStep(ShowCursorBinding)
+                end)
+                RunService:BindToRenderStep(ShowCursorBinding, Enum.RenderPriority.Last.Value, function()
+                    UserInputService.MouseIconEnabled = not Library.ShowCustomCursor
+
+                    Cursor.Position = UDim2.fromOffset(Mouse.X, Mouse.Y)
+                    Cursor.Visible = Library.ShowCustomCursor
+
+                    if not (Library.Toggled and ScreenGui and ScreenGui.Parent) then
+                        UserInputService.MouseIconEnabled = OldMouseIconEnabled
+                        Cursor.Visible = false
+                        RunService:UnbindFromRenderStep(ShowCursorBinding)
+                    end
+                end)
+            elseif not Library.Toggled then
+                TooltipLabel.Visible = false
+
+                for _, Option in Library.Options do
+                    if Option.Type == "ColorPicker" then
+                        Option.ColorMenu:Close()
+                        Option.ContextMenu:Close()
+                    elseif Option.Type == "Dropdown" or Option.Type == "KeyPicker" then
+                        Option.Menu:Close()
+                    end
+                end
+            end
+        end
+
+        function Library:Toggle(Value)
+            return Window:Toggle(Value)
+        end
+
+        if WindowInfo.EnableSidebarResize then
+            local Threshold ,Dragging ,SidebarGrabber ,StartPos,StartWidth
+,Changed
+= (WindowInfo.MinSidebarWidth + WindowInfo.SidebarCompactWidth) * WindowInfo.SidebarCollapseThreshold
+,false
+,(New("TextButton", {
+                AnchorPoint = Vector2.new(0.5, 0),
+                BackgroundTransparency = 1,
+                Position = UDim2.fromScale(0.5, 0),
+                Size = UDim2.new(0, 8, 1, 0),
+                Text = "",
+                Parent = DividerLine,
+            })
+)            SidebarGrabber.MouseEnter:Connect(function()
+                TweenService:Create(DividerLine, Library.TweenInfo, {
+                    BackgroundColor3 = Library:GetLighterColor(Library.Scheme.OutlineColor),
+                }):Play()
+            end)
+            SidebarGrabber.MouseLeave:Connect(function()
+                if Dragging then
+                    return
+                end
+                TweenService:Create(DividerLine, Library.TweenInfo, {
+                    BackgroundColor3 = Library.Scheme.OutlineColor,
+                }):Play()
+            end)
+
+            SidebarGrabber.InputBegan:Connect(function(Input)
+                if not IsClickInput(Input) then
+                    return
+                end
+
+                Library.CantDragForced = true
+
+                StartPos = Input.Position
+                StartWidth = Window:GetSidebarWidth()
+                Dragging = true
+
+                Changed = Input.Changed:Connect(function()
+                    if Input.UserInputState ~= Enum.UserInputState.End then
+                        return
+                    end
+
+                    Library.CantDragForced = false
+                    TweenService:Create(DividerLine, Library.TweenInfo, {
+                        BackgroundColor3 = Library.Scheme.OutlineColor,
+                    }):Play()
+
+                    Dragging = false
+                    if Changed and Changed.Connected then
+                        Changed:Disconnect()
+                        Changed = nil
+                    end
+                end)
+            end)
+
+            Library:GiveSignal(UserInputService.InputChanged:Connect(function(Input)
+                if not Library.Toggled or not (ScreenGui and ScreenGui.Parent) then
+                    Dragging = false
+                    if Changed and Changed.Connected then
+                        Changed:Disconnect()
+                        Changed = nil
+                    end
+
+                    return
+                end
+
+                if Dragging and IsHoverInput(Input) then
+                    local Delta = Input.Position - StartPos
+                    local Width = StartWidth + Delta.X
+
+                    if WindowInfo.DisableCompactingSnap then
+                        Window:SetSidebarWidth(Width)
+                        return
+                    end
+
+                    if Width > Threshold then
+                        Window:SetSidebarWidth(math.max(Width, WindowInfo.MinSidebarWidth))
+                    else
+                        Window:SetSidebarWidth(WindowInfo.SidebarCompactWidth)
+                    end
+                end
+            end))
+        end
+        if WindowInfo.EnableCompacting and WindowInfo.SidebarCompacted then
+            Window:SetSidebarWidth(WindowInfo.SidebarCompactWidth)
+        end
+        if WindowInfo.AutoShow and not Library.ActiveLoading then
+            task.spawn(Library.Toggle)
+        end
+
+        if Library.IsMobile then
+            local ToggleButton ,LockButton = Library:AddDraggableButton("Toggle", function()
+                Library:Toggle()
+            end, true)
+,Library:AddDraggableButton("Lock", function(self)
+                Library.CantDragForced = not Library.CantDragForced
+                self:SetText(Library.CantDragForced and "Unlock" or "Lock")
+            end, true)
+
+            if WindowInfo.MobileButtonsSide == "Right" then
+                ToggleButton.Button.Position = UDim2.new(1, -6, 0, 6)
+                ToggleButton.Button.AnchorPoint = Vector2.new(1, 0)
+
+                LockButton.Button.Position = UDim2.new(1, -6, 0, 46)
+                LockButton.Button.AnchorPoint = Vector2.new(1, 0)
+            else
+                LockButton.Button.Position = UDim2.fromOffset(6, 46)
+            end
+
+            if WindowInfo.ShowMobileButtons == false then
+                ToggleButton.Button.Visible = false
+                LockButton.Button.Visible = false
+            end
+        end
+
+        --// Execution \\--
+        SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+            Library:UpdateSearch(SearchBox.Text)
+        end)
+
+        Library:GiveSignal(UserInputService.InputBegan:Connect(function(Input)
+            if Library.Unloaded then
+                return
+            end
+
+            if UserInputService:GetFocusedTextBox() then
+                return
+            end
+
+            if
+                (
+                    typeof(Library.ToggleKeybind) == "table"
+                        and Library.ToggleKeybind.Type == "KeyPicker"
+                        and Input.KeyCode.Name == Library.ToggleKeybind.Value
+                ) or Input.KeyCode == Library.ToggleKeybind
+            then
+                Library.Toggle()
+            end
+        end))
+
+        Library:GiveSignal(UserInputService.WindowFocused:Connect(function()
+            Library.IsRobloxFocused = true
+        end))
+        Library:GiveSignal(UserInputService.WindowFocusReleased:Connect(function()
+            Library.IsRobloxFocused = false
+        end))
+
+        return Window
+    end
+
+    function Library:CreateLoading(LoadingInfo)
+        if Library.ActiveLoading then
+            warn("Loading GUI already exists, you cannot create multiple Loading GUIs.")
+            return Library.ActiveLoading
+        end
+
+        LoadingInfo = Library:Validate(LoadingInfo, Templates.Loading)
+
+        local Loading ,ScreenGui = {
+            CurrentStep = LoadingInfo.CurrentStep,
+            TotalSteps = LoadingInfo.TotalSteps,
+
+            ShowSidebar = LoadingInfo.ShowSidebar,
+            AutoResizeHeight = LoadingInfo.AutoResizeHeight,
+            IsError = false,
+            Destroyed = false,
+
+            WindowWidth = LoadingInfo.WindowWidth,
+            WindowHeight = LoadingInfo.WindowHeight,
+            BaseWindowHeight = LoadingInfo.WindowHeight,
+            WindowErrorHeight = LoadingInfo.WindowHeight,
+
+            ContentWidth = LoadingInfo.ContentWidth,
+            SidebarWidth = LoadingInfo.SidebarWidth,
+        }
+,New("ScreenGui", {
+            Name = "ObsidianLoading",
+            DisplayOrder = 999,
+            ResetOnSpawn = false
+        })
+        ParentUI(ScreenGui)
+        Loading.ScreenGui = ScreenGui
+
+        ScreenGui.DescendantRemoving:Connect(function(Instance)
+            Library:RemoveFromRegistry(Instance)
+        end)
+
+        --// Main Frame \\--
+        local MainFrame = New("TextButton", {
+            Name = "Main",
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            BackgroundColor3 = function()
+                return Library:GetBetterColor(Library.Scheme.BackgroundColor, -1)
+            end,
+            Position = UDim2.fromScale(0.5, 0.5),
+            Size = UDim2.fromOffset(Loading.ShowSidebar and (Loading.ContentWidth + Loading.SidebarWidth) or Loading.WindowWidth, Loading.WindowHeight),
+            ClipsDescendants = true,
+            Text = "",
+            AutoButtonColor = false,
+            Parent = ScreenGui,
+        })
+        Library:AddOutline(MainFrame)
+        table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, Library.CornerRadius), Parent = MainFrame }))
+
+        local MainScale = New("UIScale", {
+            Scale = Library.IsMobile and 0.8 or 1,
+            Parent = MainFrame
+        })
+        table.insert(Library.Scales, MainScale)
+        Library.ScalesOffset[MainScale] = Library.IsMobile and 0.2 or 0
+
+        --// Layout Containers \\--
+        local Container ,SideBar = New("Frame", {
+            Name = "Content",
+            BackgroundTransparency = 1,
+            Position = UDim2.fromOffset(0, 0),
+            Size = UDim2.new(0, Loading.ContentWidth, 1, 0),
+            Parent = MainFrame,
+        })
+,New("Frame", {
+            Name = "SideBar",
+            BackgroundTransparency = 1,
+            Position = UDim2.fromOffset(Loading.ContentWidth, 0),
+            Size = UDim2.new(0, Loading.ShowSidebar and Loading.SidebarWidth or 0, 1, 0),
+            ClipsDescendants = true,
+            Visible = Loading.ShowSidebar,
+            Parent = MainFrame,
+        })
+        local SidebarCorner = New("UICorner", { CornerRadius = UDim.new(0, Library.CornerRadius), Parent = SideBar })
+        table.insert(Library.Corners, SidebarCorner)
+
+        Library:AddOutline(SideBar)
+
+        local SidebarDivider ,TopBar = New("Frame", {
+            BackgroundColor3 = "OutlineColor",
+            BorderSizePixel = 0,
+            Position = UDim2.fromOffset(0, 0),
+            Size = UDim2.new(0, 1, 1, 0),
+            Visible = Loading.ShowSidebar,
+            Parent = SideBar,
+        })
+,New("Frame", {
+            Name = "TopBar",
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 48),
+            ZIndex = 2,
+            Parent = Container,
+        })
+        Library:MakeDraggable(MainFrame, TopBar, true, true)
+
+        local TitleHolder = New("Frame", {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 1, 0),
+            Parent = TopBar,
+        })
+        New("UIListLayout", {
+            FillDirection = Enum.FillDirection.Horizontal,
+            HorizontalAlignment = Enum.HorizontalAlignment.Left,
+            VerticalAlignment = Enum.VerticalAlignment.Center,
+            Padding = UDim.new(0, 6),
+            Parent = TitleHolder,
+        })
+        New("UIPadding", {
+            PaddingLeft = UDim.new(0, 12),
+            Parent = TitleHolder,
+        })
+
+        if LoadingInfo.Icon then
+            local Icon = Library:GetCustomIcon(LoadingInfo.Icon)
+New("ImageLabel", {
+                Image = Icon.Url,
+                ImageRectOffset = Icon.ImageRectOffset,
+                ImageRectSize = Icon.ImageRectSize,
+                Size = LoadingInfo.IconSize,
+                Parent = TitleHolder,
+            })
+        else
+New("TextLabel", {
+                BackgroundTransparency = 1,
+                Size = LoadingInfo.IconSize,
+                Text = LoadingInfo.Title:sub(1, 1),
+                TextScaled = true,
+                Visible = false,
+                Parent = TitleHolder,
+            })
+        end
+
+        local TitleX = Library:GetTextBounds(
+            LoadingInfo.Title,
+            Library.Scheme.Font,
+            20,
+            TitleHolder.AbsoluteSize.X - (LoadingInfo.Icon and (LoadingInfo.IconSize.X.Offset + 6) or 0) - 12
+        )
+New("TextLabel", {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(0, TitleX, 1, 0),
+            Text = LoadingInfo.Title,
+            TextSize = 20,
+            Parent = TitleHolder,
+        })
+
+        Library:MakeLine(Container, {
+            Position = UDim2.fromOffset(0, 48),
+            Size = UDim2.new(1, 0, 0, 1),
+        })
+
+        --// Loading Content Elements \\--
+        local InnerContent = New("Frame", {
+            Name = "InnerContent",
+            BackgroundTransparency = 1,
+            Position = UDim2.fromOffset(0, 49),
+            Size = UDim2.new(1, 0, 1, -49),
+            Parent = Container,
+        })
+
+        New("UIListLayout", {
+            FillDirection = Enum.FillDirection.Vertical,
+            HorizontalAlignment = Enum.HorizontalAlignment.Center,
+            VerticalAlignment = Enum.VerticalAlignment.Center,
+            Padding = UDim.new(0, 12),
+            Parent = InnerContent,
+        })
+
+        local IconHolder ,LoaderIcon = New("Frame", {
+            Name = "IconHolder",
+            BackgroundTransparency = 1,
+            Size = UDim2.fromOffset(64, 64),
+            Parent = InnerContent,
+        })
+,Library:GetCustomIcon(LoadingInfo.LoadingIcon)
+        local LoadingIcon ,RotationTween
+=(New("ImageLabel", {
+            Name = "LoaderIcon",
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            BackgroundTransparency = 1,
+            Position = UDim2.fromScale(0.5, 0.5),
+            Size = UDim2.fromScale(1, 1),
+            Image = LoaderIcon.Url,
+            ImageRectOffset = LoaderIcon.ImageRectOffset,
+            ImageRectSize = LoaderIcon.ImageRectSize,
+            ImageColor3 = LoadingInfo.LoadingIconColor or ((LoadingInfo.LoadingIcon == Templates.Loading.LoadingIcon) and "AccentColor" or "WhiteColor"),
+            Parent = IconHolder,
+        })
+)        if LoadingInfo.LoadingIconTweenTime > 0 then
+            RotationTween = TweenService:Create(
+                LoadingIcon,
+                TweenInfo.new(LoadingInfo.LoadingIconTweenTime, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1),
+                { Rotation = 360 }
+            )
+            RotationTween:Play()
+        end
+
+        local MessageLabel ,DescriptionLabel ,SliderBar = New("TextLabel", {
+            BackgroundTransparency = 1,
+            AutomaticSize = Loading.AutoResizeHeight and Enum.AutomaticSize.Y or Enum.AutomaticSize.XY,
+            Size = Loading.AutoResizeHeight and UDim2.new(1, -60, 0, 0) or UDim2.fromOffset(0, 0),
+            Text = "",
+            TextSize = 18,
+            TextWrapped = Loading.AutoResizeHeight,
+            Parent = InnerContent,
+        })
+,New("TextLabel", {
+            BackgroundTransparency = 1,
+            AutomaticSize = Loading.AutoResizeHeight and Enum.AutomaticSize.Y or Enum.AutomaticSize.XY,
+            Size = Loading.AutoResizeHeight and UDim2.new(1, -60, 0, 0) or UDim2.fromOffset(0, 0),
+            Text = "",
+            TextSize = 14,
+            TextTransparency = 0.5,
+            TextWrapped = Loading.AutoResizeHeight,
+            Parent = InnerContent,
+        })
+,New("Frame", {
+            BackgroundColor3 = "MainColor",
+            Size = UDim2.new(0.7, 0, 0, 15),
+            Parent = InnerContent,
+        })
+        Library:AddOutline(SliderBar)
+        table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, Library.CornerRadius / 2), Parent = SliderBar }))
+
+        local SliderFill = New("Frame", {
+            BackgroundColor3 = "AccentColor",
+            BorderSizePixel = 0,
+            Size = UDim2.fromScale(0, 1),
+            Parent = SliderBar,
+        })
+        table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, Library.CornerRadius / 2), Parent = SliderFill }))
+
+        local ProgressLabel = New("TextLabel", {
+            BackgroundTransparency = 1,
+            Size = UDim2.fromScale(1, 1),
+            Text = "",
+            TextSize = 14,
+            ZIndex = 2,
+            Parent = SliderBar,
+        })
+        New("UIStroke", {
+            ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
+            Color = "DarkColor",
+            LineJoinMode = Enum.LineJoinMode.Miter,
+            Parent = ProgressLabel,
+        })
+
+        --// Sidebar Object \\--
+        local SidebarScrolling = New("ScrollingFrame", {
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            Size = UDim2.fromScale(1, 1),
+            ScrollBarThickness = 2,
+            ScrollBarImageColor3 = "OutlineColor",
+            Parent = SideBar,
+        })
+        local SidebarList = New("UIListLayout", {
+            Padding = UDim.new(0, 8),
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            Parent = SidebarScrolling,
+        })
+        New("UIPadding", {
+            PaddingBottom = UDim.new(0, 12),
+            PaddingLeft = UDim.new(0, 12),
+            PaddingRight = UDim.new(0, 12),
+            PaddingTop = UDim.new(0, 12),
+            Parent = SidebarScrolling,
+        })
+
+        local SidebarObject = {
+            Elements = {},
+            DependencyBoxes = {},
+            Tabboxes = {},
+
+            BoxHolder = SidebarScrolling,
+            Container = SidebarScrolling,
+
+            Resize = function(self)
+                SidebarScrolling.CanvasSize = UDim2.fromOffset(0, SidebarList.AbsoluteContentSize.Y + 24)
+            end,
+            Tab = {
+                Elements = {},
+                DependencyBoxes = {},
+                DependencyGroupboxes = {},
+                Tabboxes = {},
+            },
+        }
+
+        SidebarList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            SidebarObject:Resize()
+        end)
+
+        setmetatable(SidebarObject, BaseGroupbox)
+        Loading.Sidebar = SidebarObject
+
+        --// Error Frame \\--
+        local ErrorFrame = New("Frame", {
+            Name = "Error",
+            BackgroundTransparency = 1,
+            Position = UDim2.fromOffset(0, 49),
+            Size = UDim2.new(1, 0, 1, -49),
+            ClipsDescendants = true,
+            Visible = false,
+            Parent = Container,
+        })
+local _ErrorTitle , ErrorLabel , ErrorButtonsDivider , ErrorButtonsHolder =New("TextLabel", {
+            BackgroundTransparency = 1,
+            Position = UDim2.fromOffset(15, 15),
+            Size = UDim2.new(1, -30, 0, 18),
+            Text = "Error",
+            TextColor3 = "RedColor",
+            TextSize = 18,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = ErrorFrame,
+        })
+, New("TextLabel", {
+            BackgroundTransparency = 1,
+            Position = UDim2.fromOffset(15, 39),
+            Size = UDim2.new(1, -30, 1, -90),
+            Text = "Error Message",
+            TextSize = 14,
+            TextTransparency = 0.2,
+            TextWrapped = true,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextYAlignment = Enum.TextYAlignment.Top,
+            Parent = ErrorFrame,
+        })
+, New("Frame", {
+            BackgroundColor3 = "OutlineColor",
+            BackgroundTransparency = 0,
+            BorderSizePixel = 0,
+            AnchorPoint = Vector2.new(0.5, 0),
+            Position = UDim2.new(0.5, 0, 1, -48),
+            Size = UDim2.new(1, -30, 0, 1),
+            Visible = false,
+            Parent = ErrorFrame,
+        })
+, New("Frame", {
+            AnchorPoint = Vector2.new(0.5, 1),
+            BackgroundTransparency = 1,
+            Position = UDim2.new(0.5, 0, 1, 0),
+            Size = UDim2.new(1, 0, 0, 42),
+            Visible = false,
+            Parent = ErrorFrame,
+        })
+        New("UIListLayout", {
+            Padding = UDim.new(0, 8),
+            FillDirection = Enum.FillDirection.Horizontal,
+            HorizontalAlignment = Enum.HorizontalAlignment.Right,
+            VerticalAlignment = Enum.VerticalAlignment.Center,
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            Parent = ErrorButtonsHolder,
+        })
+        New("UIPadding", {
+            PaddingTop = UDim.new(0, 5),
+            PaddingBottom = UDim.new(0, 15),
+            PaddingRight = UDim.new(0, 15),
+            Parent = ErrorButtonsHolder,
+        })
+
+        function Loading:UpdateLayout()
+            if Loading.IsError then
+                Loading:RecalculateErrorHeight()
+            end
+
+            local ShowSidebar = Loading.ShowSidebar
+            local FinalWidth ,FinalHeight = ShowSidebar and (Loading.ContentWidth + Loading.SidebarWidth) or Loading.WindowWidth
+,Loading.IsError and Loading.WindowErrorHeight or Loading.WindowHeight
+
+            if ShowSidebar then
+                SideBar.Visible = true
+                SidebarDivider.Visible = true
+            end
+
+            TweenService:Create(MainFrame, Library.TweenInfo, { Size = UDim2.fromOffset(FinalWidth, FinalHeight) }):Play()
+            TweenService:Create(SideBar, Library.TweenInfo, { Position = UDim2.fromOffset(Loading.ContentWidth, 0), Size = UDim2.new(0, ShowSidebar and Loading.SidebarWidth or 0, 1, 0) }):Play()
+            TweenService:Create(Container, Library.TweenInfo, { Size = UDim2.new(0, ShowSidebar and Loading.ContentWidth or Loading.WindowWidth, 1, 0) }):Play()
+
+            if not ShowSidebar then
+                task.delay(Library.TweenInfo.Time, function()
+                    if not Loading.ShowSidebar then
+                        SideBar.Visible = false
+                        SidebarDivider.Visible = false
+                    end
+                end)
+            end
+        end
+
+        --// Content Page \\--
+        function Loading:RecalculateLoadingHeight()
+            if not Loading.AutoResizeHeight then
+                return
+            end
+
+            local RequiredHeight = 
+97                + InnerContent.UIListLayout.AbsoluteContentSize.Y
+
+            Loading.WindowHeight = math.max(Loading.BaseWindowHeight, RequiredHeight)
+        end
+
+        function Loading:SetMessage(Text)
+            MessageLabel.Text = Text
+
+            if Loading.AutoResizeHeight then
+                Loading:RecalculateLoadingHeight()
+                Loading:UpdateLayout()
+            end
+        end
+
+        function Loading:SetDescription(Text)
+            DescriptionLabel.Text = Text
+
+            if Loading.AutoResizeHeight then
+                Loading:RecalculateLoadingHeight()
+                Loading:UpdateLayout()
+            end
+        end
+
+        function Loading:SetLoadingIcon(Icon)
+            local IconData = Library:GetCustomIcon(Icon)
+            LoadingIcon.Image = IconData.Url
+            LoadingIcon.ImageRectOffset = IconData.ImageRectOffset
+            LoadingIcon.ImageRectSize = IconData.ImageRectSize
+        end
+
+        function Loading:SetLoadingIconTweenTime(TweenTime)
+            if RotationTween then
+                RotationTween:Cancel()
+                RotationTween:Destroy()
+            end
+
+            if TweenTime > 0 then
+                RotationTween = TweenService:Create(
+                    LoadingIcon,
+                    TweenInfo.new(TweenTime, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1),
+                    { Rotation = 360 }
+                )
+                RotationTween:Play()
+            else
+                LoadingIcon.Rotation = 0
+            end
+        end
+
+        function Loading:SetLoadingIconColor(Color)
+            LoadingIcon.ImageColor3 = Color
+        end
+
+        function Loading:SetCurrentStep(Step)
+            Loading.CurrentStep = math.clamp(Step, 0, Loading.TotalSteps)
+
+            local Progress = Loading.CurrentStep / Loading.TotalSteps
+            TweenService:Create(SliderFill, Library.TweenInfo, { Size = UDim2.fromScale(Progress, 1) }):Play()
+
+            ProgressLabel.Text = string.format("%d/%d", Loading.CurrentStep, Loading.TotalSteps)
+        end
+
+        function Loading:SetTotalSteps(Steps)
+            Loading.TotalSteps = Steps
+            Loading:SetCurrentStep(Loading.CurrentStep)
+        end
+
+        --// Size \\--
+        function Loading:SetWindowHeight(Height)
+            Loading.WindowHeight = Height
+            Loading:UpdateLayout()
+        end
+
+        function Loading:SetWindowWidth(Width)
+            Loading.WindowWidth = Width
+            Loading:UpdateLayout()
+        end
+
+        function Loading:SetContentWidth(Width)
+            Loading.ContentWidth = Width
+            Loading:UpdateLayout()
+        end
+
+        function Loading:SetSidebarWidth(Width)
+            Loading.SidebarWidth = Width
+            Loading:UpdateLayout()
+        end
+
+        --// Sidebar \\--
+        function Loading:ShowSidebarPage(Bool)
+            Loading.ShowSidebar = Bool
+            Loading:UpdateLayout()
+        end
+
+        --// Error Page \\--
+        function Loading:ShowErrorPage(Enabled)
+            Loading.IsError = Enabled
+            InnerContent.Visible = not Enabled
+            ErrorFrame.Visible = Enabled
+
+            if Loading.ShowSidebar then
+                Loading:ShowSidebarPage(not Enabled)
+            else
+                Loading:UpdateLayout()
+            end
+        end
+
+        function Loading:RecalculateErrorHeight()
+            local TargetWidth = (Loading.ShowSidebar and Loading.ContentWidth or Loading.WindowWidth) - 30
+local _, ErrorY =Library:GetTextBounds(ErrorLabel.Text, Library.Scheme.Font, 14, TargetWidth)
+
+            ErrorLabel.Size = UDim2.new(1, -30, 0, ErrorY)
+
+            local HasButtons = ErrorButtonsHolder.Visible
+            local RequiredHeight =
+88                + ErrorY                    -- Label Height
+                + 15                        -- Padding between Label and Buttons
+                + (HasButtons and 48 or 0)  -- Buttons Area
+
+            Loading.WindowErrorHeight = RequiredHeight -- math.max(Loading.WindowHeight, RequiredHeight)
+        end
+
+        function Loading:SetErrorMessage(Text)
+            ErrorLabel.Text = Text
+            Loading:UpdateLayout()
+        end
+
+        function Loading:SetErrorButtons(Buttons)
+            assert(typeof(Buttons) == "table", "Buttons must be a table")
+
+            for _, button in ErrorButtonsHolder:GetChildren() do
+                if button:IsA("Frame") then 
+                    button:Destroy() 
+                end
+            end
+
+            local HasButtons = GetTableSize(Buttons) > 0
+            ErrorButtonsHolder.Visible = HasButtons
+            ErrorButtonsDivider.Visible = HasButtons
+
+            for Idx, ButtonInfo in Buttons do
+                local ButtonContainer ,BtnColor ,BtnOutline ,Variant = New("Frame", {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromOffset(0, 26),
+                    Parent = ErrorButtonsHolder,
+                })
+,"MainColor"
+,"OutlineColor"
+,ButtonInfo.Variant or "Primary"
+
+                if Variant == "Primary" then
+                    BtnColor = "FontColor"
+                    BtnOutline = "FontColor"
+                elseif Variant == "Secondary" then
+                    BtnColor = "MainColor"
+                    BtnOutline = "OutlineColor"
+                elseif Variant == "Destructive" then
+                    BtnColor = "DestructiveColor"
+                    BtnOutline = "DestructiveColor"
+                elseif Variant == "Ghost" then
+                    BtnColor = "BackgroundColor"
+                    BtnOutline = "BackgroundColor"
+                end
+
+                local TextBtn = New("TextButton", {
+                    BackgroundColor3 = BtnColor,
+                    BorderColor3 = BtnOutline,
+                    Size = UDim2.fromOffset(0, 26),
+                    Text = "",
+                    AutoButtonColor = false,
+                    Parent = ButtonContainer,
+                })
+                Library:AddOutline(TextBtn)
+                table.insert(
+                    Library.Corners,
+                    New("UICorner", { 
+                        CornerRadius = UDim.new(0, Library.CornerRadius), 
+                        Parent = TextBtn 
+                    })
+                )
+
+                New("UIPadding", {
+                    PaddingLeft = UDim.new(0, 15),
+                    PaddingRight = UDim.new(0, 15),
+                    Parent = TextBtn,
+                })
+
+                local TextColor = Library.Scheme.FontColor
+                if Variant == "Primary" then
+                    TextColor = Library.Scheme.BackgroundColor
+                elseif Variant == "Destructive" then
+                    TextColor = Color3.new(1, 1, 1)
+                end
+
+                local BtnLabel = New("TextLabel", {
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromScale(1, 1),
+                    Text = ButtonInfo.Title or Idx,
+                    TextColor3 = TextColor,
+                    TextSize = 14,
+                    Parent = TextBtn,
+                })
+local LabelX=Library:GetTextBounds(BtnLabel.Text, Library.Scheme.Font, 14, 250)
+                ButtonContainer.Size = UDim2.fromOffset(LabelX + 30, 26)
+                TextBtn.Size = UDim2.fromOffset(LabelX + 30, 26)
+
+                local ActiveColor = typeof(BtnColor) == "Color3" and BtnColor or Library.Scheme[BtnColor]
+                local HoverColor = Variant == "Ghost" and Library.Scheme.MainColor or Library:GetBetterColor(ActiveColor, 10)
+
+                TextBtn.MouseEnter:Connect(function()
+                    TweenService:Create(TextBtn, Library.TweenInfo, {
+                        BackgroundColor3 = HoverColor
+                    }):Play()
+                end)
+                TextBtn.MouseLeave:Connect(function()
+                    TweenService:Create(TextBtn, Library.TweenInfo, {
+                        BackgroundColor3 = ActiveColor
+                    }):Play()
+                end)
+
+                TextBtn.MouseButton1Click:Connect(function()
+                    if ButtonInfo.Callback then
+                        ButtonInfo.Callback(Loading)
+                    end
+                end)
+            end
+
+            Loading:UpdateLayout()
+        end
+
+        --// Destroy/Continue \\--
+        function Loading:Destroy()
+            if RotationTween then
+                RotationTween:Cancel()
+            end
+
+            ScreenGui:Destroy()
+            Loading.Destroyed = true
+            Library.ActiveLoading = nil
+
+            if Library.Toggle and Library.Toggled == false and Library.Unloaded ~= true then
+                Library:Toggle(true)
+            end
+        end
+
+        Loading.Continue = Loading.Destroy
+        if Library.Toggle and Library.Toggled and Library.Unloaded ~= true then
+            Library:Toggle(false)
+        end
+
+        Loading:SetCurrentStep(Loading.CurrentStep)
+
+        Library.ActiveLoading = Loading
+        return Loading
+    end
+
+    local function OnPlayerChange()
+        if Library.Unloaded then
+            return
+        end
+
+        local PlayerList, ExcludedPlayerList = GetPlayers(), GetPlayers(true)
+        for _, Dropdown in Options do
+            if Dropdown.Type == "Dropdown" and Dropdown.SpecialType == "Player" then
+                Dropdown:SetValues(Dropdown.ExcludeLocalPlayer and ExcludedPlayerList or PlayerList)
+            end
+        end
+    end
+
+    local function OnTeamChange()
+        if Library.Unloaded then
+            return
+        end
+
+        local TeamList = GetTeams()
+        for _, Dropdown in Options do
+            if Dropdown.Type == "Dropdown" and Dropdown.SpecialType == "Team" then
+                Dropdown:SetValues(TeamList)
+            end
+        end
+    end
+
+    Library:GiveSignal(Players.PlayerAdded:Connect(OnPlayerChange))
+    Library:GiveSignal(Players.PlayerRemoving:Connect(OnPlayerChange))
+
+    Library:GiveSignal(Teams.ChildAdded:Connect(OnTeamChange))
+    Library:GiveSignal(Teams.ChildRemoved:Connect(OnTeamChange))
+
+    getgenv().Library = Library
+    return Library
+end
+end)() end,[12]=function()ImportGlobals(12)return (function(...)return function(Shared)
+    local cloneref ,clonefunction = (cloneref or clonereference or function(instance)
+        return instance
+    end)
+,(clonefunction or copyfunction or function(func) 
+        return func 
+    end)
+
+    local HttpService,isfolder,isfile,listfiles = cloneref(game:GetService("HttpService"))
+,isfolder,isfile,listfiles
+
+    if typeof(clonefunction) == "function" then
+        -- Fix is_____ functions for shitsploits, those functions should never error, only return a boolean.
+
+        local
+        isfolder_copy,
+        isfile_copy,
+        listfiles_copy = clonefunction(isfolder), clonefunction(isfile), clonefunction(listfiles)
+
+        local isfolder_success, isfolder_error = pcall(function()
+            return isfolder_copy("test" .. tostring(math.random(1000000, 9999999)))
+        end)
+
+        if isfolder_success == false or typeof(isfolder_error) ~= "boolean" then
+            isfolder = function(folder)
+                local success, data = pcall(isfolder_copy, folder)
+                return (if success then data else false)
+            end
+
+            isfile = function(file)
+                local success, data = pcall(isfile_copy, file)
+                return (if success then data else false)
+            end
+
+            listfiles = function(folder)
+                local success, data = pcall(listfiles_copy, folder)
+                return (if success then data else {})
+            end
+        end
+    end
+
+    local SaveManager = {} do
+        SaveManager.Folder = "ObsidianLibSettings"
+        SaveManager.SubFolder = ""
+        SaveManager.Ignore = {}
+        SaveManager.Library = nil
+        SaveManager.UseLoadingOrder = false
+        SaveManager.LoadingOrder = {}
+        SaveManager.Parser = {
+            Toggle = {
+                Save = function(idx, object)
+                    return { type = "Toggle", idx = idx, value = object.Value }
+                end,
+                Load = function(idx, data)
+                    local object = SaveManager.Library.Toggles[idx]
+                    if object and object.Value ~= data.value then
+                        object:SetValue(data.value)
+                    end
+                end,
+            },
+            Slider = {
+                Save = function(idx, object)
+                    return { type = "Slider", idx = idx, value = tostring(object.Value) }
+                end,
+                Load = function(idx, data)
+                    local object = SaveManager.Library.Options[idx]
+                    if object and object.Value ~= data.value then
+                        object:SetValue(data.value)
+                    end
+                end,
+            },
+            Dropdown = {
+                Save = function(idx, object)
+                    return { type = "Dropdown", idx = idx, value = object.Value, multi = object.Multi }
+                end,
+                Load = function(idx, data)
+                    local object = SaveManager.Library.Options[idx]
+                    if object and object.Value ~= data.value then
+                        object:SetValue(data.value)
+                    end
+                end,
+            },
+            ColorPicker = {
+                Save = function(idx, object)
+                    return { type = "ColorPicker", idx = idx, value = object.Value:ToHex(), transparency = object.Transparency }
+                end,
+                Load = function(idx, data)
+                    if SaveManager.Library.Options[idx] then
+                        SaveManager.Library.Options[idx]:SetValueRGB(Color3.fromHex(data.value), data.transparency)
+                    end
+                end,
+            },
+            KeyPicker = {
+                Save = function(idx, object)
+                    return { type = "KeyPicker", idx = idx, mode = object.Mode, key = object.Value, modifiers = object.Modifiers }
+                end,
+                Load = function(idx, data)
+                    if SaveManager.Library.Options[idx] then
+                        SaveManager.Library.Options[idx]:SetValue({ data.key, data.mode, data.modifiers })
+                    end
+                end,
+            },
+            Input = {
+                Save = function(idx, object)
+                    return { type = "Input", idx = idx, text = object.Value }
+                end,
+                Load = function(idx, data)
+                    local object = SaveManager.Library.Options[idx]
+                    if object and object.Value ~= data.text and type(data.text) == "string" then
+                        SaveManager.Library.Options[idx]:SetValue(data.text)
+                    end
+                end,
+            },
+        }
+
+        function SaveManager:SetLibrary(library)
+            self.Library = library
+        end
+
+        function SaveManager:SetLoadingOrder(enabled, order)
+            self.UseLoadingOrder = enabled
+
+            if typeof(order) == "table" then
+                self.LoadingOrder = order
+            end
+        end
+
+        function SaveManager:IgnoreThemeSettings()
+            self:SetIgnoreIndexes({
+                "BackgroundColor", "MainColor", "AccentColor", "OutlineColor", "FontColor", "FontFace", -- themes
+                "ThemeManager_ThemeList", "ThemeManager_CustomThemeList", "ThemeManager_CustomThemeName", -- themes
+            })
+        end
+
+        --// Folders \\--
+        function SaveManager:CheckSubFolder(createFolder)
+            if typeof(self.SubFolder) ~= "string" or self.SubFolder == "" then return false end
+
+            if createFolder == true then
+                if not isfolder(self.Folder .. "/settings/" .. self.SubFolder) then
+                    makefolder(self.Folder .. "/settings/" .. self.SubFolder)
+                end
+            end
+
+            return true
+        end
+
+        function SaveManager:GetPaths()
+            local paths ,parts = {}
+,self.Folder:split("/")
+            for idx = 1, #parts do
+                local path = table.concat(parts, "/", 1, idx)
+                if not table.find(paths, path) then paths[#paths + 1] = path end
+            end
+
+            paths[#paths + 1] = self.Folder .. "/themes"
+            paths[#paths + 1] = self.Folder .. "/settings"
+
+            if self:CheckSubFolder(false) then
+                local subFolder = self.Folder .. "/settings/" .. self.SubFolder
+                parts = subFolder:split("/")
+
+                for idx = 1, #parts do
+                    local path = table.concat(parts, "/", 1, idx)
+                    if not table.find(paths, path) then paths[#paths + 1] = path end
+                end
+            end
+
+            return paths
+        end
+
+        function SaveManager:BuildFolderTree()
+            local paths = self:GetPaths()
+
+            for i = 1, #paths do
+                local str = paths[i]
+                if isfolder(str) then continue end
+
+                makefolder(str)
+            end
+        end
+
+        function SaveManager:CheckFolderTree()
+            if isfolder(self.Folder) then return end
+            SaveManager:BuildFolderTree()
+
+            task.wait(0.1)
+        end
+
+        function SaveManager:SetIgnoreIndexes(list)
+            for _, key in pairs(list) do
+                self.Ignore[key] = true
+            end
+        end
+
+        function SaveManager:SetFolder(folder)
+            self.Folder = folder
+            self:BuildFolderTree()
+        end
+
+        function SaveManager:SetSubFolder(folder)
+            self.SubFolder = folder
+            self:BuildFolderTree()
+        end
+
+        --// Save, Load, Delete, Refresh \\--
+        function SaveManager:Save(name)
+            if (not name) then
+                return false, "no config file is selected"
+            end
+            SaveManager:CheckFolderTree()
+
+            local fullPath = self.Folder .. "/settings/" .. name .. ".json"
+            if SaveManager:CheckSubFolder(true) then
+                fullPath = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
+            end
+
+            local data = {
+                objects = {}
+            }
+
+            for idx, toggle in pairs(self.Library.Toggles) do
+                if not toggle.Type then continue end
+                if not self.Parser[toggle.Type] then continue end
+                if self.Ignore[idx] then continue end
+
+                table.insert(data.objects, self.Parser[toggle.Type].Save(idx, toggle))
+            end
+
+            for idx, option in pairs(self.Library.Options) do
+                if not option.Type then continue end
+                if not self.Parser[option.Type] then continue end
+                if self.Ignore[idx] then continue end
+
+                table.insert(data.objects, self.Parser[option.Type].Save(idx, option))
+            end
+
+            local success, encoded = pcall(HttpService.JSONEncode, HttpService, data)
+            if not success then
+                return false, "failed to encode data"
+            end
+
+            writefile(fullPath, encoded)
+            return true
+        end
+
+        function SaveManager:Load(name)
+            if (not name) then
+                return false, "no config file is selected"
+            end
+            SaveManager:CheckFolderTree()
+
+            local file = self.Folder .. "/settings/" .. name .. ".json"
+            if SaveManager:CheckSubFolder(true) then
+                file = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
+            end
+
+            if not isfile(file) then return false, "invalid file" end
+
+            local success, decoded = pcall(HttpService.JSONDecode, HttpService, readfile(file))
+            if not success then return false, "decode error" end
+
+            if self.UseLoadingOrder == true and typeof(self.LoadingOrder) == "table" then
+                table.sort(decoded.objects, function(a, b)
+                    local aIndex ,bIndex = table.find(self.LoadingOrder, a.type) or math.huge
+,table.find(self.LoadingOrder, b.type) or math.huge
+                    return aIndex < bIndex
+                end)
+            end
+
+            for _, option in decoded.objects do
+                if not option.type then continue end
+                if not self.Parser[option.type] then continue end
+                if self.Ignore[option.idx] then continue end
+
+                task.spawn(self.Parser[option.type].Load, option.idx, option) -- task.spawn() so the config loading wont get stuck.
+            end
+
+            return true
+        end
+
+        function SaveManager:Delete(name)
+            if (not name) then
+                return false, "no config file is selected"
+            end
+
+            local file = self.Folder .. "/settings/" .. name .. ".json"
+            if SaveManager:CheckSubFolder(true) then
+                file = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
+            end
+
+            if not isfile(file) then return false, "invalid file" end
+
+            local success = pcall(delfile, file)
+            if not success then return false, "delete file error" end
+
+            return true
+        end
+
+        function SaveManager:RefreshConfigList()
+            local success, data = pcall(function()
+                SaveManager:CheckFolderTree()
+
+                local list ,out = {}
+,{}
+
+                if SaveManager:CheckSubFolder(true) then
+                    list = listfiles(self.Folder .. "/settings/" .. self.SubFolder)
+                else
+                    list = listfiles(self.Folder .. "/settings")
+                end
+                if typeof(list) ~= "table" then list = {} end
+
+                for i = 1, #list do
+                    local file = list[i]
+                    if file:sub(-5) == ".json" then
+                        -- i hate this but it has to be done ...
+
+                        local pos = file:find(".json", 1, true)
+                        local start ,char = pos
+,file:sub(pos, pos)
+                        while char ~= "/" and char ~= "\\" and char ~= "" do
+                            pos = pos - 1
+                            char = file:sub(pos, pos)
+                        end
+
+                        if char == "/" or char == "\\" then
+                            table.insert(out, file:sub(pos + 1, start - 1))
+                        end
+                    end
+                end
+
+                return out
+            end)
+
+            if (not success) then
+                if self.Library then
+                    self.Library:Notify("Failed to load config list: " .. tostring(data))
+                else
+                    warn("Failed to load config list: " .. tostring(data))
+                end
+
+                return {}
+            end
+
+            return data
+        end
+
+        --// Auto Load \\--
+        function SaveManager:GetAutoloadConfig()
+            SaveManager:CheckFolderTree()
+
+            local autoLoadPath = self.Folder .. "/settings/autoload.txt"
+            if SaveManager:CheckSubFolder(true) then
+                autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
+            end
+
+            if isfile(autoLoadPath) then
+                local successRead, name = pcall(readfile, autoLoadPath)
+                if not successRead then
+                    return "none"
+                end
+
+                name = tostring(name)
+                return if name == "" then "none" else name
+            end
+
+            return "none"
+        end
+
+        function SaveManager:LoadAutoloadConfig()
+            SaveManager:CheckFolderTree()
+
+            local autoLoadPath = self.Folder .. "/settings/autoload.txt"
+            if SaveManager:CheckSubFolder(true) then
+                autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
+            end
+
+            if isfile(autoLoadPath) then
+                local successRead, name = pcall(readfile, autoLoadPath)
+                if not successRead then
+                    self.Library:Notify("Failed to load autoload config: write file error")
+                    return
+                end
+
+                local success, err = self:Load(name)
+                if not success then
+                    self.Library:Notify("Failed to load autoload config: " .. err)
+                    return
+                end
+
+                self.Library:Notify(string.format("Auto loaded config %q", name))
+            end
+        end
+
+        function SaveManager:SaveAutoloadConfig(name)
+            SaveManager:CheckFolderTree()
+
+            local autoLoadPath = self.Folder .. "/settings/autoload.txt"
+            if SaveManager:CheckSubFolder(true) then
+                autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
+            end
+
+            local success = pcall(writefile, autoLoadPath, name)
+            if not success then return false, "write file error" end
+
+            return true, ""
+        end
+
+        function SaveManager:DeleteAutoLoadConfig()
+            SaveManager:CheckFolderTree()
+
+            local autoLoadPath = self.Folder .. "/settings/autoload.txt"
+            if SaveManager:CheckSubFolder(true) then
+                autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
+            end
+
+            local success = pcall(delfile, autoLoadPath)
+            if not success then return false, "delete file error" end
+
+            return true, ""
+        end
+
+        --// GUI \\--
+        function SaveManager:BuildConfigSection(tab)
+            assert(self.Library, "Must set SaveManager.Library")
+
+            local section = tab:AddRightGroupbox("Configuration", "folder-cog")
+
+            section:AddInput("SaveManager_ConfigName", { Text = "Config name" })
+            section:AddButton({
+                Text = "Create config",
+                Tooltip = "creates a new config file with the name entered above",
+                Func = function()
+                    local name = self.Library.Options.SaveManager_ConfigName.Value
+
+                    if name:gsub(" ", "") == "" then
+                        self.Library:Notify("Invalid config name (empty)", 2)
+                        return
+                    end
+
+                    local success, err = self:Save(name)
+                    if not success then
+                        self.Library:Notify("Failed to create config: " .. err)
+                        return
+                    end
+
+                    self.Library:Notify(string.format("Created config %q", name))
+                    self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
+                    self.Library.Options.SaveManager_ConfigList:SetValue(nil)
+                end,
+            })
+
+            section:AddDivider({Text = "config options"})
+
+            section:AddDropdown("SaveManager_ConfigList", { Text = "Config list", Values = self:RefreshConfigList(), AllowNull = true })
+            section:AddButton({
+                Text = "Load config",
+                Tooltip = "loads the selected config from the list",
+                Func = function()
+                    local name = self.Library.Options.SaveManager_ConfigList.Value
+
+                    local success, err = self:Load(name)
+                    if not success then
+                        self.Library:Notify("Failed to load config: " .. err)
+                        return
+                    end
+
+                    self.Library:Notify(string.format("Loaded config %q", name))
+                end,
+            })
+            section:AddButton({
+                Text = "Overwrite config",
+                Tooltip = "overwrites the selected config with current settings",
+                Func = function()
+                    local name = self.Library.Options.SaveManager_ConfigList.Value
+
+                    local success, err = self:Save(name)
+                    if not success then
+                        self.Library:Notify("Failed to overwrite config: " .. err)
+                        return
+                    end
+
+                    self.Library:Notify(string.format("Overwrote config %q", name))
+                end,
+            })
+            section:AddButton({
+                Text = "Delete config",
+                Tooltip = "permanently deletes the selected config file",
+                Risky = true,
+                DoubleClick = true,
+                Func = function()
+                    local name = self.Library.Options.SaveManager_ConfigList.Value
+
+                    local success, err = self:Delete(name)
+                    if not success then
+                        self.Library:Notify("Failed to delete config: " .. err)
+                        return
+                    end
+
+                    self.Library:Notify(string.format("Deleted config %q", name))
+                    self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
+                    self.Library.Options.SaveManager_ConfigList:SetValue(nil)
+                end,
+            })
+            section:AddButton({
+                Text = "Refresh list",
+                Tooltip = "refreshes the config list from disk",
+                Func = function()
+                    self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
+                    self.Library.Options.SaveManager_ConfigList:SetValue(nil)
+                end,
+            })
+            section:AddButton({
+                Text = "Set as autoload",
+                Tooltip = "sets the selected config to automatically load on next launch",
+                Func = function()
+                    local name = self.Library.Options.SaveManager_ConfigList.Value
+
+                    local success, err = self:SaveAutoloadConfig(name)
+                    if not success then
+                        self.Library:Notify("Failed to set autoload config: " .. err)
+                        return
+                    end
+
+                    self.Library:Notify(string.format("Set %q to auto load", name))
+                    self.AutoloadConfigLabel:SetText("Current autoload config: " .. name)
+                end,
+            })
+            section:AddButton({
+                Text = "Reset autoload",
+                Tooltip = "clears the autoload config so nothing loads automatically",
+                Func = function()
+                    local success, err = self:DeleteAutoLoadConfig()
+                    if not success then
+                        self.Library:Notify("Failed to set autoload config: " .. err)
+                        return
+                    end
+
+                    self.Library:Notify("Set autoload to none")
+                    self.AutoloadConfigLabel:SetText("Current autoload config: none")
+                end,
+            })
+
+            self.AutoloadConfigLabel = section:AddLabel("Current autoload config: " .. self:GetAutoloadConfig(), true)
+
+            self:SetIgnoreIndexes({ "SaveManager_ConfigList", "SaveManager_ConfigName" })
+        end
+
+        SaveManager:BuildFolderTree()
+    end
+
+    return SaveManager
+end
+end)() end,[13]=function()local wax, script, require=ImportGlobals(13)return (function(...)return function(Root)
+    return {
+        Home = require(script.Home)(Root),
+        Settings = require(script.Settings)(Root)
+    }
+end
+end)() end,[14]=function()ImportGlobals(14)return (function(...)return function(Root)
+    local Services ,Global = Root.Services,getgenv()local Players, RunService, TeleportService, Constants =Services.Players
+, Services.RunService
+, Services.TeleportService
+, Root:Get('Constants')local Characters , Places , Color , TaskManager , Preference , Time , Numbers , Strings , GetPing , PromptDiscord , LocalPlayer =Constants.Characters, Root:Get('Modules/Places')
+, Root:Get('Modules/Color')
+, Root:Get('Modules/TaskManager'), Root:Get('Modules/Preference'), Root:Get('Functions/Time')
+, Root:Get('Functions/Numbers'), Root:Get('Functions/Strings'), Root:Get('Functions/GetPing'), Root:Get('Functions/PromptDiscord'), Players.LocalPlayer
+    local SessionStart ,Pink ,Blue ,CurrentKey ,GenericPreference = Time.now(),Color3.fromRGB(255, 170, 255)
+,Color3.fromRGB(0, 170, 255)
+,Global.script_key or "abcdef",Preference.new()    
+    local function GetTimeOfTheDay()
+        local Hour = os.date("*t").hour        
+        if Hour >= 0 and Hour < 6 then
+            return "Night"
+        elseif Hour >= 6 and Hour < 12 then
+            return "Morning"
+        elseif Hour >= 12 and Hour < 16 then
+            return "Afternoon"
+        elseif Hour >= 16 and Hour < 20 then
+            return "Evening"
+        end 
+        
+        return "Night"    end
+    
+	return function(Tab, Window)
+        local Interface ,CurrentPlace ,LRM_Constants ,AccountGroupbox = Root:Get('Modules/Interface').GetInterface('Obsidian'),Places.GetPlaceFromId(game.PlaceId)
+,Constants.LRM_Constants
+,Tab:AddGroupbox({Side = 1, Name = 'Account', IconName = 'circle-user'})        
+        local UserImage = AccountGroupbox:AddImage("UserImage", {
+            Image = "http://www.roblox.com/asset/?id=131927632408540",
+            Height = 200,
+            Outline = true,
+            ScaleType = Enum.ScaleType.Stretch,
+            BackgroundTransparency = 1,
+        })
+        
+        task.spawn(function()
+            local Success, Result = pcall(Players.GetUserThumbnailAsync, Players, LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size352x352)
+            if Success then
+                UserImage:SetImage(Result)
+            end
+        end)
+        
+        AccountGroupbox:AddLabel({Text = `Good {GetTimeOfTheDay()}, <b>{LocalPlayer.DisplayName}</b>!`, DoesWrap = true})        AccountGroupbox:AddLabel({Text = `Welcome to <b>{Color.Paint("strelizia.cc", Pink)}</b>!`, DoesWrap = true})        
+        AccountGroupbox:AddDivider({Text = "account info"})        
+        AccountGroupbox:AddLabel({Text = `{Characters.BulletPoint} User Id: <b>{LocalPlayer.UserId}</b>`})
+        
+        AccountGroupbox:AddLabel({Text = `{Characters.BulletPoint} Account Age: <b>{LocalPlayer.AccountAge} Days</b>`})
+        local FriendsOnline = AccountGroupbox:AddLabel({Text = `{Characters.BulletPoint} Friends Online: <b>?</b>`})        
+        task.spawn(function()
+            local Success, Result = pcall(LocalPlayer.GetFriendsOnlineAsync, LocalPlayer)            
+            if Success then
+                FriendsOnline:SetText(`{Characters.BulletPoint} Friends Online: <b>{Numbers.Comma(#Result)}</b>`)
+            end
+        end)
+        
+        -- // Session 
+        
+        local SessionGroupbox = Tab:AddGroupbox({Side = 1, Name = "Session", IconName = "server"})        
+        local SessionTime ,FPSLabel ,PingLabel ,FPS = SessionGroupbox:AddLabel({Text = `{Characters.BulletPoint} Session Time: <b>00:00:00</b>`, DoesWrap = true}),SessionGroupbox:AddLabel({Text = `{Characters.BulletPoint} FPS: <b>?</b>`, DoesWrap = true}),(SessionGroupbox:AddLabel({Text = `{Characters.BulletPoint} Ping: <b>? ms</b>`, DoesWrap = true}))do
+            local FrameCount ,NextUpdate = 0,Time.now()            TaskManager.AddTask(TaskManager.Task.new("FrameCounter", function(Task)
+                FrameCount += 1
+
+                local Now = Time.now()
+                if Now >= NextUpdate then
+                    FPS = FrameCount
+
+                    FrameCount = 0
+                    NextUpdate = Now + 1
+                end
+            end, 0))
+        end
+        
+        TaskManager.AddTask(TaskManager.Task.new("SessionGroupboxUpdater", function(Task)
+            SessionTime:SetText(`{Characters.BulletPoint} Session Time: <b>{Time.FormatDuration(Time.now() - SessionStart, "%h:%m:%s", true)}</b>`)            FPSLabel:SetText(`{Characters.BulletPoint} FPS: <b>{FPS or "N/A"}</b>`)            PingLabel:SetText(`{Characters.BulletPoint} Ping: <b>{math.floor(GetPing() * 1000)} ms</b>`)        end, 1))
+        
+        SessionGroupbox:AddDivider({Text = "server info"})        
+        local PlayersLabel = SessionGroupbox:AddLabel({Text = `{Characters.BulletPoint} Players Online: ? out of ?`, DoesWrap = true})        
+        do 
+            local function Update()
+                PlayersLabel:SetText(`{Characters.BulletPoint} Players Online: <b>{#Players:GetPlayers()}</b> out of <b>{Players.MaxPlayers}</b>`)
+            end
+            
+            local Joined, Left = Players.PlayerAdded:Connect(Update), Players.PlayerRemoving:Connect(Update)
+            
+            Interface.Main:OnUnload(function()
+                Joined:Disconnect()Left:Disconnect()            end)
+            
+            Update()
+        end
+        
+        SessionGroupbox:AddLabel({Text = `{Characters.BulletPoint} Place Version: <b>v{game.PlaceVersion}</b>`, DoesWrap = true})        
+        SessionGroupbox:AddDivider({Text = "session sharing"})        
+        local SelectedJobId = SessionGroupbox:AddInput("SessionShareJobId", {
+            Text = "Server Job Id",
+            Tooltip = "enter job id of the server you want to join, must be in the same game",
+
+            Placeholder = "click here",
+            ClearTextOnFocus = true,
+        })
+        
+        SessionGroupbox:AddButton({
+            Text = "Join Server",
+            Tooltip = "joins the server using the job id from above",
+            DoubleClick = true,
+            Func = function()
+                local JobId = SelectedJobId.Value or ''                
+                if #JobId ~= 36 then
+                    return Interface.Main:Notify({Title = "strelizia.cc", Description = "invalid job id", Duration = 2})                end
+                
+                local Success, Result = pcall(TeleportService.TeleportToPlaceInstance, TeleportService, game.PlaceId, JobId, LocalPlayer)                if (not Success) then
+                    Interface.Main:Notify({Title = "strelizia.cc", Description = `failed to join server: {tostring(Result)}; click to try again`, Duration = 2})                end
+            end
+        })
+        
+        SessionGroupbox:AddButton({
+            Text = "Copy Job Id",
+            Tooltip = "copies the job id from the current server to clipboard",
+            Func = function()
+                setclipboard(game.JobId)                Interface.Main:Notify({Title = "strelizia.cc", Description = "copied job id to clipboard", Duration = 2})            end
+        })
+        
+        -- // Key Information
+        
+        if LRM_Constants.Authenticated then
+            local KeyGroupbox ,IsLifetime ,ExpiryTimestamp = Tab:AddGroupbox({Side = 2, Name = "Key Information", IconName = "key"}),(LRM_Constants.SecondsLeft == -1) or (LRM_Constants.SecondsLeft == math.huge),Time.now() + LRM_Constants.SecondsLeft
+            KeyGroupbox:AddLabel({Text = `{Characters.BulletPoint} Key Expiry: <b>{if IsLifetime then Color.Paint('Never!', Blue) else Time.FormatTime(ExpiryTimestamp, 'MM/DD/YYYY HH:mm')}</b>`, DoesWrap = true})
+            KeyGroupbox:AddLabel({Text = `{Characters.BulletPoint} Total Executions: <b>{Numbers.Comma(LRM_Constants.TotalExecutions)}</b>`, DoesWrap = true})
+            KeyGroupbox:AddLabel({Text = `{Characters.BulletPoint} User Note: <b>{LRM_Constants.UserNote}</b>`, DoesWrap = true})
+            
+            KeyGroupbox:AddDivider({Text = "key stuff"})            
+            KeyGroupbox:AddLabel({Text = `{Characters.BulletPoint} Script Key: <b>...{string.sub(CurrentKey, -5)}</b>`, DoesWrap = true})
+            KeyGroupbox:AddButton({
+                Text = "Copy Script Key",
+                Tooltip = "copies user key to clipboard",
+                Func = function()
+                    setclipboard(CurrentKey)                    Interface.Main:Notify({Title = "strelizia.cc", Description = "copied script key to clipboard", Duration = 2})                end
+            })
+        end
+        
+        -- // Credits
+        
+        local CreditsGroupbox ,CreditsList = Tab:AddGroupbox({Side = 2, Name = "Credits", IconName = "list"}),{}        
+        for _, Data in (CurrentPlace.Credits or {}) do 
+            local RoleInfo = Constants.ProductionRoleInfo[Data.Role] or Constants.ProductionRoleInfo.generic            
+            table.insert(CreditsList, `{Characters.BulletPoint} {Data.Name} - <b>{Color.Paint(Data.Role, RoleInfo.Color)}</b>`) 
+        end        
+        CreditsGroupbox:AddLabel('CreditsLabel', {Text = table.concat(CreditsList, '\n'), DoesWrap = true})
+        CreditsGroupbox:AddDivider({Text = "discord (pls join)"})        
+        local JoinDiscordButton = CreditsGroupbox:AddButton({
+            Text = 'Join Discord Server', 
+            Func = function()
+                PromptDiscord(Constants.DiscordInviteCode, true)                Interface.Main:Notify({Title = 'strelizia.cc', Description = 'successfully copied/prompted discord join code!'})
+            end
+        })
+        
+        if (not GenericPreference:Read("PRESSED_JOIN_DISCORD")) then
+            print('mueheheh')            task.spawn(function()
+                task.wait(math.random(5, 10))                
+                local Dialog = Window:AddDialog("DiscordJoinDialog", {
+                    Title = "sorry for disturbing you",
+                    Description = "would you please join our discord? it helps us grow and stay connected with our community. you also benefit from being able to make suggestions, bug reports and stay updated with latest features.",
+                    FooterButtons = {
+                        Confirm = {
+                            Title = "yes!",
+                            Variant = "Primary",
+                            Callback = function()
+                                GenericPreference:Write("PRESSED_JOIN_DISCORD", true)                                
+                                JoinDiscordButton.Func()                            end,
+                        },
+                        Decline = {
+                            Title = "no, thanks",
+                            Variant = "Secondary",
+                            WaitTime = 3
+                        }
+                    }
+                }) 
+
+                Dialog:AddToggle("DontAskDiscord", {Text = "don't ask me again", Tooltip = "okay :(", Callback = function(Value) GenericPreference:Write("PRESSED_JOIN_DISCORD", Value) end})            end)
+        end
+	end
+end
+end)() end,[15]=function()ImportGlobals(15)return (function(...)return function(Root)
+	local Places = Root:Get("Modules/Places")
+	
+    return function(Tab)
+        local Components ,CurrentPlace = Root:Get("Modules/Interface").GetInterface("Obsidian")
+,Places.GetPlaceFromId(game.PlaceId)
+		
+		local Main ,SaveManager ,ThemeManager ,InterfaceSettingsGroupbox = Components.Main
+,Components.SaveManager
+,Components.ThemeManager
+,Tab:AddGroupbox({Side = 1, Name = "Menu", IconName = "wrench"})
+        
+        InterfaceSettingsGroupbox:AddButton({
+            Text = "Clear User Key",
+            Tooltip = "clears saved key from the loader allowing you to enter a new one",
+            Disabled = (not isfile("strelizia/key.bin")),
+            DoubleClick = true,
+            Func = function()
+                delfile("strelizia/key.bin")
+                
+                Main:Notify({Title = "strelizia.cc", Description = "successfully deleted the saved key, re-execute the loader in order to enter a new one", Time = 2})            end,
+        })
+        
+        InterfaceSettingsGroupbox:AddButton({
+            Text = "Erase Cache",
+            Tooltip = "deletes cache files used for quality of life, only run if you experience issues",
+            DoubleClick = true,
+            Func = function()
+                if (not isfolder("strelizia/cache")) then
+                    return
+                end
+
+                for _, SubFolder in listfiles("strelizia/cache") do 
+                    for _, FilePath in listfiles(SubFolder) do 
+                        delfile(FilePath)                    end
+                end
+                
+                for _, PreferencePath in listfiles("strelizia/pref") do 
+                    delfile(PreferencePath)                end
+                
+                Main:Notify({Title = "strelizia.cc", Description = `successfully deleted all cached files!`, Time = 2})            end,
+        })
+
+        InterfaceSettingsGroupbox:AddDivider({Text = "ui settings"})        
+		InterfaceSettingsGroupbox:AddToggle("KeybindMenuOpen", {
+			Default = Main.KeybindFrame.Visible,
+            Text = "Open Keybind Menu",
+            Tooltip = "opens menu with keybinds",
+			Callback = function(value)
+				Main.KeybindFrame.Visible = value
+			end,
+		})
+		InterfaceSettingsGroupbox:AddToggle("ShowCustomCursor", {
+            Text = "Custom Cursor",
+            Tooltip = "determines if roblox cursor will be replaced with a custom one",
+			Default = true,
+			Callback = function(Value)
+				Main.ShowCustomCursor = Value
+			end,
+		})
+		InterfaceSettingsGroupbox:AddDropdown("NotificationSide", {
+			Values = { "Left", "Right" },
+			Default = "Right",
+
+            Text = "Notification Side",
+            Tooltip = "determines on which side will ui notifications pop up",
+
+			Callback = function(Value)
+				Main:SetNotifySide(Value)
+			end,
+		})
+		InterfaceSettingsGroupbox:AddDropdown("DPIDropdown", {
+			Values = { "50%", "75%", "100%", "125%", "150%", "175%", "200%" },
+			Default = "100%",
+
+            Text = "DPI Scale",
+            Tooltip = "determines the size of the ui",
+
+			Callback = function(Value)
+				Value = Value:gsub("%%", "")
+				local DPI = tonumber(Value)
+
+				Main:SetDPIScale(DPI)
+			end,
+        })
+        
+        InterfaceSettingsGroupbox:AddDivider({Text = "misc"})        
+		InterfaceSettingsGroupbox:AddLabel("Menu bind")
+			:AddKeyPicker("MenuKeybind", { Default = "RightShift", NoUI = true, Text = "Menu keybind" })
+
+        InterfaceSettingsGroupbox:AddButton({
+            Text = "Unload",
+            Tooltip = "unloads the script",
+            Risky = true,
+            DoubleClick = true,
+            Func = function()
+                Main:Unload()
+            end,
+        })
+        
+		Main.ToggleKeybind = Main.Options.MenuKeybind 
+		
+		ThemeManager:SetLibrary(Main)
+		SaveManager:SetLibrary(Main)
+		SaveManager:IgnoreThemeSettings()
+        SaveManager:SetIgnoreIndexes({ "MenuKeybind", "DontAskDiscord", "RememberMyChoiceProvider" })
+		ThemeManager:SetFolder("strelizia/ui")
+		SaveManager:SetFolder(`strelizia/ui/configs/{CurrentPlace.Name}`)
+		SaveManager:BuildConfigSection(Tab)
+		ThemeManager:ApplyToTab(Tab)
+		SaveManager:LoadAutoloadConfig()
+	end
+end
+end)() end,[16]=function()ImportGlobals(16)return (function(...)return function(Shared)
+    local cloneref ,clonefunction = (cloneref or clonereference or function(instance)
+        return instance
+    end)
+,(clonefunction or copyfunction or function(func) 
+        return func 
+    end)
+
+    local HttpService,isfolder,isfile,listfiles = cloneref(game:GetService("HttpService"))
+,isfolder,isfile,listfiles
+
+    if typeof(clonefunction) == "function" then
+        -- Fix is_____ functions for shitsploits, those functions should never error, only return a boolean.
+
+        local
+        isfolder_copy,
+        isfile_copy,
+        listfiles_copy = clonefunction(isfolder), clonefunction(isfile), clonefunction(listfiles)
+
+        local isfolder_success, isfolder_error = pcall(function()
+            return isfolder_copy("test" .. tostring(math.random(1000000, 9999999)))
+        end)
+
+        if isfolder_success == false or typeof(isfolder_error) ~= "boolean" then
+            isfolder = function(folder)
+                local success, data = pcall(isfolder_copy, folder)
+                return (if success then data else false)
+            end
+
+            isfile = function(file)
+                local success, data = pcall(isfile_copy, file)
+                return (if success then data else false)
+            end
+
+            listfiles = function(folder)
+                local success, data = pcall(listfiles_copy, folder)
+                return (if success then data else {})
+            end
+        end
+    end
+
+    local ThemeManager = {}
+    do
+        local ThemeFields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor" }
+        ThemeManager.Folder = "ObsidianLibSettings"
+        -- if not isfolder(ThemeManager.Folder) then makefolder(ThemeManager.Folder) end
+
+        ThemeManager.Library = nil
+        ThemeManager.AppliedToTab = false
+        ThemeManager.BuiltInThemes = {
+Default={
+                1,
+                { FontColor = "ffffff", MainColor = "191919", AccentColor = "7d55ff", BackgroundColor = "0f0f0f", OutlineColor = "282828" },
+            },
+BBot={
+                2,
+                { FontColor = "ffffff", MainColor = "1e1e1e", AccentColor = "7e48a3", BackgroundColor = "232323", OutlineColor = "141414" },
+            },
+Fatality={
+                3,
+                { FontColor = "ffffff", MainColor = "1e1842", AccentColor = "c50754", BackgroundColor = "191335", OutlineColor = "3c355d" },
+            },
+Jester={
+                4,
+                { FontColor = "ffffff", MainColor = "242424", AccentColor = "db4467", BackgroundColor = "1c1c1c", OutlineColor = "373737" },
+            },
+Mint={
+                5,
+                { FontColor = "ffffff", MainColor = "242424", AccentColor = "3db488", BackgroundColor = "1c1c1c", OutlineColor = "373737" },
+            },
+            ["Tokyo Night"] = {
+                6,
+                { FontColor = "ffffff", MainColor = "191925", AccentColor = "6759b3", BackgroundColor = "16161f", OutlineColor = "323232" },
+            },
+Ubuntu={
+                7,
+                { FontColor = "ffffff", MainColor = "3e3e3e", AccentColor = "e2581e", BackgroundColor = "323232", OutlineColor = "191919" },
+            },
+Quartz={
+                8,
+                { FontColor = "ffffff", MainColor = "232330", AccentColor = "426e87", BackgroundColor = "1d1b26", OutlineColor = "27232f" },
+            },
+Nord={
+                9,
+                { FontColor = "eceff4", MainColor = "3b4252", AccentColor = "88c0d0", BackgroundColor = "2e3440", OutlineColor = "4c566a" },
+            },
+Dracula={
+                10,
+                { FontColor = "f8f8f2", MainColor = "44475a", AccentColor = "ff79c6", BackgroundColor = "282a36", OutlineColor = "6272a4" },
+            },
+Monokai={
+                11,
+                { FontColor = "f8f8f2", MainColor = "272822", AccentColor = "f92672", BackgroundColor = "1e1f1c", OutlineColor = "49483e" },
+            },
+Gruvbox={
+                12,
+                { FontColor = "ebdbb2", MainColor = "3c3836", AccentColor = "fb4934", BackgroundColor = "282828", OutlineColor = "504945" },
+            },
+Solarized={
+                13,
+                { FontColor = "839496", MainColor = "073642", AccentColor = "cb4b16", BackgroundColor = "002b36", OutlineColor = "586e75" },
+            },
+Catppuccin={
+                14,
+                { FontColor = "d9e0ee", MainColor = "302d41", AccentColor = "f5c2e7", BackgroundColor = "1e1e2e", OutlineColor = "575268" },
+            },
+            ["One Dark"] = {
+                15,
+                { FontColor = "abb2bf", MainColor = "282c34", AccentColor = "c678dd", BackgroundColor = "21252b", OutlineColor = "5c6370" },
+            },
+Cyberpunk={
+                16,
+                { FontColor = "f9f9f9", MainColor = "262335", AccentColor = "00ff9f", BackgroundColor = "1a1a2e", OutlineColor = "413c5e" },
+            },
+            ["Oceanic Next"] = {
+                17,
+                { FontColor = "d8dee9", MainColor = "1b2b34", AccentColor = "6699cc", BackgroundColor = "16232a", OutlineColor = "343d46" },
+            },
+Material={
+                18,
+                { FontColor = "eeffff", MainColor = "212121", AccentColor = "82aaff", BackgroundColor = "151515", OutlineColor = "424242" },
+            }
+        }
+
+        function ThemeManager:SetLibrary(library)
+            self.Library = library
+        end
+
+        --// Folders \\--
+        function ThemeManager:GetPaths()
+            local paths ,parts = {}
+,self.Folder:split("/")
+            for idx = 1, #parts do
+                paths[#paths + 1] = table.concat(parts, "/", 1, idx)
+            end
+
+            paths[#paths + 1] = self.Folder .. "/themes"
+
+            return paths
+        end
+
+        function ThemeManager:BuildFolderTree()
+            local paths = self:GetPaths()
+
+            for i = 1, #paths do
+                local str = paths[i]
+                if isfolder(str) then
+                    continue
+                end
+                makefolder(str)
+            end
+        end
+
+        function ThemeManager:CheckFolderTree()
+            if isfolder(self.Folder) then
+                return
+            end
+            self:BuildFolderTree()
+
+            task.wait(0.1)
+        end
+
+        function ThemeManager:SetFolder(folder)
+            self.Folder = folder
+            self:BuildFolderTree()
+        end
+
+        --// Apply, Update theme \\--
+        function ThemeManager:ApplyTheme(theme)
+            local customThemeData = self:GetCustomTheme(theme)
+            local data = customThemeData or self.BuiltInThemes[theme]
+
+            if not data then
+                return
+            end
+
+            local scheme = data[2]
+            for idx, val in pairs(customThemeData or scheme) do
+                if idx == "VideoLink" then
+                    continue
+                elseif idx == "FontFace" then
+                    self.Library:SetFont(Enum.Font[val])
+
+                    if self.Library.Options[idx] then
+                        self.Library.Options[idx]:SetValue(val)
+                    end
+                else
+                    self.Library.Scheme[idx] = Color3.fromHex(val)
+
+                    if self.Library.Options[idx] then
+                        self.Library.Options[idx]:SetValueRGB(Color3.fromHex(val))
+                    end
+                end
+            end
+
+            self:ThemeUpdate()
+        end
+
+        function ThemeManager:ThemeUpdate()
+            for i, field in ThemeFields do
+                if self.Library.Options and self.Library.Options[field] then
+                    self.Library.Scheme[field] = self.Library.Options[field].Value
+                end
+            end
+
+            self.Library:UpdateColorsUsingRegistry()
+        end
+
+        --// Get, Load, Save, Delete, Refresh \\--
+        function ThemeManager:GetCustomTheme(file)
+            local path = self.Folder .. "/themes/" .. file .. ".json"
+            if not isfile(path) then
+                return nil
+            end
+
+            local data = readfile(path)
+            local success, decoded = pcall(HttpService.JSONDecode, HttpService, data)
+
+            if not success then
+                return nil
+            end
+
+            return decoded
+        end
+
+        function ThemeManager:LoadDefault()
+            local theme ,content ,isDefault = "Default"
+,isfile(self.Folder .. "/themes/default.txt") and readfile(self.Folder .. "/themes/default.txt")
+,true
+            if content then
+                if self.BuiltInThemes[content] then
+                    theme = content
+                elseif self:GetCustomTheme(content) then
+                    theme = content
+                    isDefault = false
+                end
+            elseif self.BuiltInThemes[self.DefaultTheme] then
+                theme = self.DefaultTheme
+            end
+
+            if isDefault then
+                self.Library.Options.ThemeManager_ThemeList:SetValue(theme)
+            else
+                self:ApplyTheme(theme)
+            end
+        end
+
+        function ThemeManager:SaveDefault(theme)
+            writefile(self.Folder .. "/themes/default.txt", theme)
+        end
+
+        function ThemeManager:SetDefaultTheme(theme)
+            assert(self.Library, "Must set ThemeManager.Library first!")
+            assert(not self.AppliedToTab, "Cannot set default theme after applying ThemeManager to a tab!")
+
+            local FinalTheme ,LibraryScheme = {}
+,{}
+            for _, field in ThemeFields do
+                if typeof(theme[field]) == "Color3" then
+                    FinalTheme[field] = "#" .. theme[field]:ToHex()
+                    LibraryScheme[field] = theme[field]
+
+                elseif typeof(theme[field]) == "string" then
+                    FinalTheme[field] = if theme[field]:sub(1, 1) == "#" then theme[field] else ("#" .. theme[field])
+                    LibraryScheme[field] = Color3.fromHex(theme[field])
+
+                else
+                    FinalTheme[field] = ThemeManager.BuiltInThemes.Default[2][field]
+                    LibraryScheme[field] = Color3.fromHex(ThemeManager.BuiltInThemes.Default[2][field])
+                end
+            end
+
+            if typeof(theme.FontFace) == "EnumItem" then
+                FinalTheme.FontFace= theme.FontFace.Name
+                LibraryScheme.Font= Font.fromEnum(theme.FontFace)
+
+            elseif typeof(theme.FontFace) == "string" then
+                FinalTheme.FontFace= theme.FontFace                LibraryScheme.Font= Font.fromEnum(Enum.Font[theme.FontFace])
+
+            else
+                FinalTheme.FontFace= "Code"
+                LibraryScheme.Font= Font.fromEnum(Enum.Font.Code)
+            end
+
+            for _, field in { "RedColor", "DarkColor", "WhiteColor" } do
+                LibraryScheme[field] = self.Library.Scheme[field]
+            end
+
+            self.Library.Scheme = LibraryScheme
+            self.BuiltInThemes.Default= { 1, FinalTheme }
+
+            self.Library:UpdateColorsUsingRegistry()
+        end
+
+        function ThemeManager:SaveCustomTheme(file)
+            if file:gsub(" ", "") == "" then
+                self.Library:Notify("Invalid file name for theme (empty)", 3)
+                return
+            end
+
+            local theme = {}
+            for _, field in ThemeFields do
+                theme[field] = self.Library.Options[field].Value:ToHex()
+            end
+            theme.FontFace= self.Library.Options.FontFace.Value
+
+            writefile(self.Folder .. "/themes/" .. file .. ".json", HttpService:JSONEncode(theme))
+        end
+
+        function ThemeManager:Delete(name)
+            if not name then
+                return false, "no config file is selected"
+            end
+
+            local file = self.Folder .. "/themes/" .. name .. ".json"
+            if not isfile(file) then
+                return false, "invalid file"
+            end
+
+            local success = pcall(delfile, file)
+            if not success then
+                return false, "delete file error"
+            end
+
+            return true
+        end
+
+        function ThemeManager:ReloadCustomThemes()
+            local list ,out = listfiles(self.Folder .. "/themes")
+,{}
+            for i = 1, #list do
+                local file = list[i]
+                if file:sub(-5) == ".json" then
+                    -- i hate this but it has to be done ...
+
+                    local pos = file:find(".json", 1, true)
+                    local start ,char = pos
+,file:sub(pos, pos)
+                    while char ~= "/" and char ~= "\\" and char ~= "" do
+                        pos = pos - 1
+                        char = file:sub(pos, pos)
+                    end
+
+                    if char == "/" or char == "\\" then
+                        table.insert(out, file:sub(pos + 1, start - 1))
+                    end
+                end
+            end
+
+            return out
+        end
+
+        --// GUI \\--
+        function ThemeManager:CreateThemeManager(groupbox)
+            groupbox
+                :AddLabel("Background color")
+                :AddColorPicker("BackgroundColor", { Default = self.Library.Scheme.BackgroundColor })
+            groupbox:AddLabel("Main color"):AddColorPicker("MainColor", { Default = self.Library.Scheme.MainColor })
+            groupbox:AddLabel("Accent color"):AddColorPicker("AccentColor", { Default = self.Library.Scheme.AccentColor })
+            groupbox
+                :AddLabel("Outline color")
+                :AddColorPicker("OutlineColor", { Default = self.Library.Scheme.OutlineColor })
+            groupbox:AddLabel("Font color"):AddColorPicker("FontColor", { Default = self.Library.Scheme.FontColor })
+            groupbox:AddDropdown("FontFace", {
+                Text = "Font Face",
+                Default = "Code",
+                Values = { "BuilderSans", "Code", "Fantasy", "Gotham", "Jura", "Roboto", "RobotoMono", "SourceSans" },
+            })
+
+            local ThemesArray = {}
+            for Name, Theme in pairs(self.BuiltInThemes) do
+                table.insert(ThemesArray, Name)
+            end
+
+            table.sort(ThemesArray, function(a, b)
+                return self.BuiltInThemes[a][1] < self.BuiltInThemes[b][1]
+            end)
+
+            groupbox:AddDivider({ Text = "built-in themes" })
+
+            groupbox:AddDropdown("ThemeManager_ThemeList", { Text = "Theme list", Values = ThemesArray, Default = 1 })
+            groupbox:AddButton({
+                Text = "Set as default",
+                Tooltip = "sets the selected built-in theme as the default on load",
+                Func = function()
+                    self:SaveDefault(self.Library.Options.ThemeManager_ThemeList.Value)
+                    self.Library:Notify(
+                        string.format("Set default theme to %q", self.Library.Options.ThemeManager_ThemeList.Value)
+                    )
+                end,
+            })
+
+            self.Library.Options.ThemeManager_ThemeList:OnChanged(function()
+                self:ApplyTheme(self.Library.Options.ThemeManager_ThemeList.Value)
+            end)
+
+            groupbox:AddDivider({ Text = "custom themes" })
+
+            groupbox:AddInput("ThemeManager_CustomThemeName", { Text = "Custom theme name" })
+            groupbox:AddButton({
+                Text = "Create theme",
+                Tooltip = "creates a new custom theme from current colors using the name entered above",
+                Func = function()
+                    local name = self.Library.Options.ThemeManager_CustomThemeName.Value
+
+                    if name:gsub(" ", "") == "" then
+                        self.Library:Notify("Invalid theme name (empty)", 2)
+                        return
+                    end
+
+                    self:SaveCustomTheme(name)
+
+                    self.Library:Notify(string.format("Created theme %q", name))
+                    self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
+                    self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
+                end,
+            })
+
+            groupbox:AddDivider({ Text = "custom theme options" })
+
+            groupbox:AddDropdown(
+                "ThemeManager_CustomThemeList",
+                { Text = "Custom themes", Values = self:ReloadCustomThemes(), AllowNull = true, Default = 1 }
+            )
+            groupbox:AddButton({
+                Text = "Load theme",
+                Tooltip = "loads the selected custom theme and applies it",
+                Func = function()
+                    local name = self.Library.Options.ThemeManager_CustomThemeList.Value
+
+                    self:ApplyTheme(name)
+                    self.Library:Notify(string.format("Loaded theme %q", name))
+                end,
+            })
+            groupbox:AddButton({
+                Text = "Overwrite theme",
+                Tooltip = "overwrites the selected custom theme with current colors",
+                Func = function()
+                    local name = self.Library.Options.ThemeManager_CustomThemeList.Value
+
+                    self:SaveCustomTheme(name)
+                    self.Library:Notify(string.format("Overwrote theme %q", name))
+                end,
+            })
+            groupbox:AddButton({
+                Text = "Delete theme",
+                Tooltip = "permanently deletes the selected custom theme file",
+                Risky = true,
+                DoubleClick = true,
+                Func = function()
+                    local name = self.Library.Options.ThemeManager_CustomThemeList.Value
+
+                    local success, err = self:Delete(name)
+                    if not success then
+                        self.Library:Notify("Failed to delete theme: " .. err)
+                        return
+                    end
+
+                    self.Library:Notify(string.format("Deleted theme %q", name))
+                    self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
+                    self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
+                end,
+            })
+            groupbox:AddButton({
+                Text = "Refresh list",
+                Tooltip = "refreshes the custom theme list from disk",
+                Func = function()
+                    self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
+                    self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
+                end,
+            })
+            groupbox:AddButton({
+                Text = "Set as default",
+                Tooltip = "sets the selected custom theme as the default on load",
+                Func = function()
+                    if
+                        self.Library.Options.ThemeManager_CustomThemeList.Value ~= nil
+                        and self.Library.Options.ThemeManager_CustomThemeList.Value ~= ""
+                    then
+                        self:SaveDefault(self.Library.Options.ThemeManager_CustomThemeList.Value)
+                        self.Library:Notify(
+                            string.format("Set default theme to %q", self.Library.Options.ThemeManager_CustomThemeList.Value)
+                        )
+                    end
+                end,
+            })
+            groupbox:AddButton({
+                Text = "Reset default",
+                Tooltip = "clears the saved default theme so nothing is applied on load",
+                Func = function()
+                    local success = pcall(delfile, self.Folder .. "/themes/default.txt")
+                    if not success then
+                        self.Library:Notify("Failed to reset default: delete file error")
+                        return
+                    end
+
+                    self.Library:Notify("Set default theme to nothing")
+                    self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
+                    self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
+                end,
+            })
+
+            self:LoadDefault()
+            self.AppliedToTab = true
+
+            local function UpdateTheme()
+                self:ThemeUpdate()
+            end
+
+            self.Library.Options.BackgroundColor:OnChanged(UpdateTheme)
+            self.Library.Options.MainColor:OnChanged(UpdateTheme)
+            self.Library.Options.AccentColor:OnChanged(UpdateTheme)
+            self.Library.Options.OutlineColor:OnChanged(UpdateTheme)
+            self.Library.Options.FontColor:OnChanged(UpdateTheme)
+            self.Library.Options.FontFace:OnChanged(function(Value)
+                self.Library:SetFont(Enum.Font[Value])
+                self.Library:UpdateColorsUsingRegistry()
+            end)
+        end
+
+        function ThemeManager:CreateGroupBox(tab)
+            assert(self.Library, "Must set ThemeManager.Library first!")
+            return tab:AddLeftGroupbox("Themes", "paintbrush")
+        end
+
+        function ThemeManager:ApplyToTab(tab)
+            assert(self.Library, "Must set ThemeManager.Library first!")
+            local groupbox = self:CreateGroupBox(tab)
+            self:CreateThemeManager(groupbox)
+        end
+
+        function ThemeManager:ApplyToGroupbox(groupbox)
+            assert(self.Library, "Must set ThemeManager.Library first!")
+            self:CreateThemeManager(groupbox)
+        end
+
+        ThemeManager:BuildFolderTree()
+    end
+
+    getgenv().ObsidianThemeManager = ThemeManager
+    return ThemeManager
+end
+end)() end,[17]=function()local wax, script, require=ImportGlobals(17)return (function(...)return function(Root)
+    local Places = {List = {}}    
+    Places.RecommendedExecutors = {
+        {Name = "Volt", Paid = true, Price = "$20 monthly", Note = "dev tested"},
+        {Name = "Potassium", Paid = true, Price = "20$ lifetime", Note = "dev tested"},
+        {Name = "Velocity", Paid = false},
+        {Name = "Delta", Paid = false, Note = "emulator only"}
+    }
+	
+	for _, Place in script:GetChildren() do 
+		table.insert(Places.List, require(Place)(Root))	end
+	
+	function Places.GetPlaceFromId(PlaceId)
+		for _, Place in Places.List do 
+			if not Place.Ids[tostring(PlaceId)] then continue end 
+			
+			return Place 
+		end
+		
+		return nil
+	end
+	
+    function Places.IsExecutorBlacklisted(List)
+        local GetNameFunction = (identifyexecutor or getexecutorname)        if not GetNameFunction then
+            return true
+        end
+
+        local ExecutorName = GetNameFunction()        if not ExecutorName then
+            return true
+        end
+
+        for _, Blacklisted in List or {} do
+            if ExecutorName:find(Blacklisted, 1, true) ~= nil then
+                return true
+            end
+        end
+
+        return false
+    end
+	
+	
+	return Places
+end
+end)() end,[18]=function()ImportGlobals(18)return (function(...)return function(Root)
+local Color , Green , Red , Yellow =Root:Get('Modules/Color'), Color3.new(0, 1, 0), Color3.new(1, 0, 0), Color3.new(0, 0, 1)	
+	return {
+		Name = 'Slime RNG',
+		Ids = {
+			['92416421522960'] = true
+		},
+		
+		Keyless = false,
+        Downtime = {Status = false, Message = 'Placeholder'},
+        
+		BlacklistedExecutors = {'Solara', 'Xeno'},
+		
+		Credits = {
+			{Name = 'vma', Role = 'developer'},
+			{Name = 'felik', Role = 'contributor'}
+		},
+		
+        Script = 'd0595bedc8bfc40178f522fe49b5285f',
+        Update = {
+            Time = 1780179066,
+            Log = {
+                Color.Paint('[+] Added auto use special dices', Green),
+                Color.Paint('[+] Added auto craft slimes', Green),
+                Color.Paint('[+] Added auto find crafting recipe', Green),
+                Color.Paint('[+] Added auto follow UFO', Green),
+                Color.Paint('[+] Added auto apply power fruits', Green),
+                Color.Paint('[+] Added auto upgrade power fruits', Green),
+                Color.Paint('[+] Added auto extract power fruits', Green),
+                Color.Paint('[+] Added auto claim codes', Green),
+                Color.Paint('[+] Added auto equip best pets', Green),
+                Color.Paint('[+] Added goop gun target priority', Green),
+                Color.Paint('[+] Added manual enemy farming zone', Green),
+                Color.Paint('[+] Added FPS cap', Green),
+                Color.Paint('[+] Added disable rendering', Green),
+                Color.Paint('[+] Added rejoin on disconnect', Green),
+                Color.Paint('[+] Added execute on teleport', Green),
+                Color.Paint('[+] Added auto load config on teleport', Green),
+                '\n',
+                Color.Paint('[*] Decoupled enemy farming (auto teleport to zone, auto goop gun)', Yellow),
+                Color.Paint('[*] Mitigated unexpected auto equip behavior', Yellow),
+                Color.Paint('[*] Mitigated unexpected XP transfer behavior', Yellow),
+            }
+        }
+	}
+end
+end)() end,[19]=function()ImportGlobals(19)return (function(...)return function(Root)
+local Color , Green , Red , Yellow =Root:Get("Modules/Color"), Color3.new(0, 1, 0), Color3.new(1, 0, 0), Color3.new(0, 0, 1)	
+	return {
+		Name = "Kick a Lucky Block",
+		Ids = {
+            ["89469502395769"] = true
+		},
+		
+		Keyless = false,
+		Downtime = {Status = false, Message = "Placeholder"},
+		BlacklistedExecutors = {"Solara", "Xeno"},
+		
+		Credits = {
+			{Name = "felix", Role = "developer"},
+		},
+		
+        Script = "dbf4452a0cf919c7bad6aef8117e789f",
+		Update = {
+			Time = 1763296128,
+			Log = {
+				Color.Paint("[+] Released", Green),
+			}
+		}
+	}
+end
+end)() end,[20]=function()ImportGlobals(20)return (function(...)return function(Root)
+    local Services = Root.Services    
+    local HttpService,t ,PREFERENCE_BASE_PATH ,GENERIC_PREF = Services.HttpService 
+,Root:Get("Modules/t"),"strelizia/pref","generic"
+    
+    local ALLOWED_TYPES ,OptionalString ,Preference = t.union(t.string, t.number, t.table, t.boolean, t["nil"]),t.optional(t.string)
+,{}    Preference.__index = Preference
+    
+    function Preference.new(Subcategory)
+        Subcategory = Subcategory or GENERIC_PREF
+        return setmetatable({
+            Path = `{PREFERENCE_BASE_PATH}/{Subcategory}.json`,
+        }, Preference)
+    end
+    
+    function Preference:Read(Key)        assert(OptionalString(Key))        
+        local AssertedReturn = if Key then nil else {}        
+        if (not isfile(self.Path)) then
+            return AssertedReturn
+        end
+        
+        local Success, Result = pcall(HttpService.JSONDecode, HttpService, readfile(self.Path))        if (not Success) then
+            self:Erase()            
+            return AssertedReturn        end
+        
+        return if Key then Result[Key] else Result    end
+    
+    function Preference:Write(Key, Value)        assert(t.string(Key))        assert(ALLOWED_TYPES(Value))        
+        local Data = self:Read()        Data[Key] = Value        
+        local Success, Result = pcall(HttpService.JSONEncode, HttpService, Data)        if Success then
+            writefile(self.Path, Result)        end
+
+        return self
+    end
+    
+    function Preference:Update(Key, Predicate)
+        assert(t.string(Key))        assert(t['function'](Predicate))
+        
+        return self:Write(Key, Predicate(self:Read(Key)))
+    end
+    
+    function Preference:Erase()
+        writefile(self.Path, "{}")        
+        return self 
+    end
+    
+    return Preference
+end
+end)() end,[21]=function()local wax, script=ImportGlobals(21)return (function(...)return function(Root)
+	return Root.new(Root):Extend(Root.Extensions.Children(script))
+end
+end)() end,[22]=function()ImportGlobals(22)return (function(...)return function(Root)
+    local TableUtil = {}
+    
+    function TableUtil.IsDict(T)
+        return T[1] == nil    end
+
+	function TableUtil.Dictionary(Table)
+		local Result = {}
+		for _, Value in Table do 
+			Result[Value] = true
+		end
+
+		return Result
+	end
+
+	function TableUtil.Filter(Table, Predicate)
+		local Result ,IsDictionary = {},TableUtil.IsDict(Table)
+		for Key, Value in Table do 
+			local Ok = Predicate(Value, Key)			if (not Ok) then continue end
+			if IsDictionary then
+				Result[Key] = Value
+			else 
+				table.insert(Result, Value)
+			end
+		end
+
+		return Result
+	end
+
+	function TableUtil.Reconcile(To, From)
+		for Index, Value in From do
+			local v1 ,TypeValue = To[Index],typeof(Value)
+			if v1 == nil or typeof(v1) ~= TypeValue then
+				To[Index] = Value			elseif TypeValue == 'table' then
+				TableUtil.Reconcile(v1, Value)			end
+		end
+
+		return To    end
+    
+    function TableUtil.FullMap(Table, Predicate)
+        local Result ,IsDictionary = {},TableUtil.IsDict(Table)        
+        for Index, Value in Table do 
+            local NewValue, NewIndex = Predicate(Value, Index)            if not (NewValue) then continue end
+            if IsDictionary then
+                Result[NewIndex] = NewValue
+            else
+                table.insert(Result, NewValue)            end
+        end
+
+        return Result
+    end
+    
+    function TableUtil.JoinArrays(...)        local Result = {}
+
+        for i = 1, select('#', ...) do
+            for _, Value in select(i, ...) do
+                Result[#Result + 1] = Value
+            end
+        end
+
+        return Result
+    end
+
+	return TableUtil
+end
+end)() end,[23]=function()ImportGlobals(23)return (function(...)return function(Root)
+	-- // Good Signal
+	
+	local freeRunnerThread 
+	local function acquireRunnerThreadAndCallEventHandler(fn, ...)
+		local acquiredRunnerThread = freeRunnerThread
+		freeRunnerThread = nil
+		fn(...)
+		freeRunnerThread = acquiredRunnerThread
+	end
+
+	local function runEventHandlerInFreeThread()
+		while true do
+			acquireRunnerThreadAndCallEventHandler(coroutine.yield())
+		end
+	end
+
+	local Connection = {}
+	Connection.__index = Connection
+
+	function Connection.new(signal, fn)
+		return setmetatable({
+			_connected = true,
+			_signal = signal,
+			_fn = fn,
+			_next = false,
+		}, Connection)
+	end
+
+	function Connection:Disconnect()
+		self._connected = false
+
+		if self._signal._handlerListHead == self then
+			self._signal._handlerListHead = self._next
+		else
+			local prev = self._signal._handlerListHead
+			while prev and prev._next ~= self do
+				prev = prev._next
+			end
+			if prev then
+				prev._next = self._next
+			end
+		end
+	end
+
+	setmetatable(Connection, {
+		__index = function(tb, key)
+			error(("Attempt to get Connection::%s (not a valid member)"):format(tostring(key)), 2)
+		end,
+		__newindex = function(tb, key, value)
+			error(("Attempt to set Connection::%s (not a valid member)"):format(tostring(key)), 2)
+		end
+	})
+
+	local Signal = {}
+	Signal.__index = Signal
+
+	function Signal.new()
+		return setmetatable({
+			_handlerListHead = false,
+		}, Signal)
+	end
+
+	function Signal:Connect(fn)
+		local connection = Connection.new(self, fn)
+		if self._handlerListHead then
+			connection._next = self._handlerListHead
+			self._handlerListHead = connection
+		else
+			self._handlerListHead = connection
+		end
+		return connection
+	end
+
+	function Signal:DisconnectAll()
+		self._handlerListHead = false
+	end
+
+	function Signal:Fire(...)
+		local item = self._handlerListHead
+		while item do
+			if item._connected then
+				if not freeRunnerThread then
+					freeRunnerThread = coroutine.create(runEventHandlerInFreeThread)
+					coroutine.resume(freeRunnerThread)
+				end
+				task.spawn(freeRunnerThread, item._fn, ...)
+			end
+			item = item._next
+		end
+	end
+
+	function Signal:Wait()
+		local waitingCoroutine ,cn=(coroutine.running()
+)		cn = self:Connect(function(...)
+			cn:Disconnect()
+			task.spawn(waitingCoroutine, ...)
+		end)
+		return coroutine.yield()
+	end
+
+	function Signal:Once(fn)
+		local cn		cn = self:Connect(function(...)
+			if cn._connected then
+				cn:Disconnect()
+			end
+			fn(...)
+		end)
+		return cn
+	end
+
+	setmetatable(Signal, {
+		__index = function(tb, key)
+			error(("Attempt to get Signal::%s (not a valid member)"):format(tostring(key)), 2)
+		end,
+		__newindex = function(tb, key, value)
+			error(("Attempt to set Signal::%s (not a valid member)"):format(tostring(key)), 2)
+		end
+	})
+
+	return Signal
+end
+end)() end,[24]=function()ImportGlobals(24)return (function(...)return function(Root)
+    --[[
+	An implementation of Promises similar to Promise/A+.
+]]
+
+    local ERROR_NON_PROMISE_IN_LIST ,ERROR_NON_LIST ,ERROR_NON_FUNCTION ,MODE_KEY_METATABLE = "Non-promise value passed into %s at index %s"
+,"Please pass a list of promises to %s"
+,"Please pass a handler function to %s!"
+,{ __mode = "k" }
+
+    local function isCallable(value)
+        if type(value) == "function" then
+            return true
+        end
+
+        if type(value) == "table" then
+            local metatable = getmetatable(value)
+            if metatable and type(rawget(metatable, "__call")) == "function" then
+                return true
+            end
+        end
+
+        return false
+    end
+
+--[[
+	Creates an enum dictionary with some metamethods to prevent common mistakes.
+]]
+    local function makeEnum(enumName, members)
+        local enum = {}
+
+        for _, memberName in ipairs(members) do
+            enum[memberName] = memberName
+        end
+
+        return setmetatable(enum, {
+            __index = function(_, k)
+                error(string.format("%s is not in %s!", k, enumName), 2)
+            end,
+            __newindex = function()
+                error(string.format("Creating new members in %s is not allowed!", enumName), 2)
+            end,
+        })
+    end
+
+--[=[
+	An object to represent runtime errors that occur during execution.
+	Promises that experience an error like this will be rejected with
+	an instance of this object.
+
+	@class Error
+]=]
+    local Error
+    do
+        Error = {
+            Kind = makeEnum("Promise.Error.Kind", {
+                "ExecutionError",
+                "AlreadyCancelled",
+                "NotResolvedInTime",
+                "TimedOut",
+            }),
+        }
+        Error.__index = Error
+
+        function Error.new(options, parent)
+            options = options or {}
+            return setmetatable({
+                error = tostring(options.error) or "[This error has no error text.]",
+                trace = options.trace,
+                context = options.context,
+                kind = options.kind,
+                parent = parent,
+                createdTick = os.clock(),
+                createdTrace = debug.traceback(),
+            }, Error)
+        end
+
+        function Error.is(anything)
+            if type(anything) == "table" then
+                local metatable = getmetatable(anything)
+
+                if type(metatable) == "table" then
+                    return rawget(anything, "error") ~= nil and type(rawget(metatable, "extend")) == "function"
+                end
+            end
+
+            return false
+        end
+
+        function Error.isKind(anything, kind)
+            assert(kind ~= nil, "Argument #2 to Promise.Error.isKind must not be nil")
+
+            return Error.is(anything) and anything.kind == kind
+        end
+
+        function Error:extend(options)
+            options = options or {}
+
+            options.kind = options.kind or self.kind
+
+            return Error.new(options, self)
+        end
+
+        function Error:getErrorChain()
+            local runtimeErrors = { self }
+
+            while runtimeErrors[#runtimeErrors].parent do
+                table.insert(runtimeErrors, runtimeErrors[#runtimeErrors].parent)
+            end
+
+            return runtimeErrors
+        end
+
+        function Error:__tostring()
+            local errorStrings = {
+                string.format("-- Promise.Error(%s) --", self.kind or "?"),
+            }
+
+            for _, runtimeError in ipairs(self:getErrorChain()) do
+                table.insert(
+                    errorStrings,
+                    table.concat({
+                        runtimeError.trace or runtimeError.error,
+                        runtimeError.context,
+                    }, "\n")
+                )
+            end
+
+            return table.concat(errorStrings, "\n")
+        end
+    end
+
+--[[
+	Packs a number of arguments into a table and returns its length.
+
+	Used to cajole varargs without dropping sparse values.
+]]
+    local function pack(...)
+        return select("#", ...), { ... }
+    end
+
+--[[
+	Returns first value (success), and packs all following values.
+]]
+    local function packResult(success, ...)
+        return success, select("#", ...), { ... }
+    end
+
+    local function makeErrorHandler(traceback)
+        assert(traceback ~= nil, "traceback is nil")
+
+        return function(err)
+            -- If the error object is already a table, forward it directly.
+            -- Should we extend the error here and add our own trace?
+
+            if type(err) == "table" then
+                return err
+            end
+
+            return Error.new({
+                error = err,
+                kind = Error.Kind.ExecutionError,
+                trace = debug.traceback(tostring(err), 2),
+                context = "Promise created at:\n\n" .. traceback,
+            })
+        end
+    end
+
+--[[
+	Calls a Promise executor with error handling.
+]]
+    local function runExecutor(traceback, callback, ...)
+        return packResult(xpcall(callback, makeErrorHandler(traceback), ...))
+    end
+
+--[[
+	Creates a function that invokes a callback with correct error handling and
+	resolution mechanisms.
+]]
+    local function createAdvancer(traceback, callback, resolve, reject)
+        return function(...)
+            local ok, resultLength, result = runExecutor(traceback, callback, ...)
+
+            if ok then
+                resolve(unpack(result, 1, resultLength))
+            else
+                reject(result[1])
+            end
+        end
+    end
+
+    local function isEmpty(t)
+        return next(t) == nil
+    end
+
+--[=[
+	An enum value used to represent the Promise's status.
+	@interface Status
+	@tag enum
+	@within Promise
+	.Started "Started" -- The Promise is executing, and not settled yet.
+	.Resolved "Resolved" -- The Promise finished successfully.
+	.Rejected "Rejected" -- The Promise was rejected.
+	.Cancelled "Cancelled" -- The Promise was cancelled before it finished.
+]=]
+--[=[
+	@prop Status Status
+	@within Promise
+	@readonly
+	@tag enums
+	A table containing all members of the `Status` enum, e.g., `Promise.Status.Resolved`.
+]=]
+--[=[
+	A Promise is an object that represents a value that will exist in the future, but doesn't right now.
+	Promises allow you to then attach callbacks that can run once the value becomes available (known as *resolving*),
+	or if an error has occurred (known as *rejecting*).
+
+	@class Promise
+	@__index prototype
+]=]
+    local Promise = {
+        Error = Error,
+        Status = makeEnum("Promise.Status", { "Started", "Resolved", "Rejected", "Cancelled" }),
+        _getTime = os.clock,
+        _timeEvent = game:GetService("RunService").Heartbeat,
+        _unhandledRejectionCallbacks = {},
+    }
+    Promise.prototype = {}
+    Promise.__index = Promise.prototype
+
+    function Promise._new(traceback, callback, parent)
+        if parent ~= nil and not Promise.is(parent) then
+            error("Argument #2 to Promise.new must be a promise or nil", 2)
+        end
+
+        local self = {
+            -- The executor thread.
+            _thread = nil,
+
+            -- Used to locate where a promise was created
+            _source = traceback,
+
+            _status = Promise.Status.Started,
+
+            -- A table containing a list of all results, whether success or failure.
+            -- Only valid if _status is set to something besides Started
+            _values = nil,
+
+            -- Lua doesn't like sparse arrays very much, so we explicitly store the
+            -- length of _values to handle middle nils.
+            _valuesLength = -1,
+
+            -- Tracks if this Promise has no error observers..
+            _unhandledRejection = true,
+
+            -- Queues representing functions we should invoke when we update!
+            _queuedResolve = {},
+            _queuedReject = {},
+            _queuedFinally = {},
+
+            -- The function to run when/if this promise is cancelled.
+            _cancellationHook = nil,
+
+            -- The "parent" of this promise in a promise chain. Required for
+            -- cancellation propagation upstream.
+            _parent = parent,
+
+            -- Consumers are Promises that have chained onto this one.
+            -- We track them for cancellation propagation downstream.
+            _consumers = setmetatable({}, MODE_KEY_METATABLE),
+        }
+
+        if parent and parent._status == Promise.Status.Started then
+            parent._consumers[self] = true
+        end
+
+        setmetatable(self, Promise)
+
+        local function resolve(...)
+            self:_resolve(...)
+        end
+
+        local function reject(...)
+            self:_reject(...)
+        end
+
+        local function onCancel(cancellationHook)
+            if cancellationHook then
+                if self._status == Promise.Status.Cancelled then
+                    cancellationHook()
+                else
+                    self._cancellationHook = cancellationHook
+                end
+            end
+
+            return self._status == Promise.Status.Cancelled
+        end
+
+        self._thread = coroutine.create(function()
+local ok, _, result =runExecutor(self._source, callback, resolve, reject, onCancel)
+
+            if not ok then
+                reject(result[1])
+            end
+        end)
+
+        task.spawn(self._thread)
+
+        return self
+    end
+
+--[=[
+	Construct a new Promise that will be resolved or rejected with the given callbacks.
+
+	If you `resolve` with a Promise, it will be chained onto.
+
+	You can safely yield within the executor function and it will not block the creating thread.
+
+	```lua
+	local myFunction()
+		return Promise.new(function(resolve, reject, onCancel)
+			wait(1)
+			resolve("Hello world!")
+		end)
+	end
+
+	myFunction():andThen(print)
+	```
+
+	You do not need to use `pcall` within a Promise. Errors that occur during execution will be caught and turned into a rejection automatically. If `error()` is called with a table, that table will be the rejection value. Otherwise, string errors will be converted into `Promise.Error(Promise.Error.Kind.ExecutionError)` objects for tracking debug information.
+
+	You may register an optional cancellation hook by using the `onCancel` argument:
+
+	* This should be used to abort any ongoing operations leading up to the promise being settled.
+	* Call the `onCancel` function with a function callback as its only argument to set a hook which will in turn be called when/if the promise is cancelled.
+	* `onCancel` returns `true` if the Promise was already cancelled when you called `onCancel`.
+	* Calling `onCancel` with no argument will not override a previously set cancellation hook, but it will still return `true` if the Promise is currently cancelled.
+	* You can set the cancellation hook at any time before resolving.
+	* When a promise is cancelled, calls to `resolve` or `reject` will be ignored, regardless of if you set a cancellation hook or not.
+
+	:::caution
+	If the Promise is cancelled, the `executor` thread is closed with `coroutine.close` after the cancellation hook is called.
+
+	You must perform any cleanup code in the cancellation hook: any time your executor yields, it **may never resume**.
+	:::
+
+	@param executor (resolve: (...: any) -> (), reject: (...: any) -> (), onCancel: (abortHandler?: () -> ()) -> boolean) -> ()
+	@return Promise
+]=]
+    function Promise.new(executor)
+        return Promise._new(debug.traceback(nil, 2), executor)
+    end
+
+    function Promise:__tostring()
+        return string.format("Promise(%s)", self._status)
+    end
+
+--[=[
+	The same as [Promise.new](/api/Promise#new), except execution begins after the next `Heartbeat` event.
+
+	This is a spiritual replacement for `spawn`, but it does not suffer from the same [issues](https://eryn.io/gist/3db84579866c099cdd5bb2ff37947cec) as `spawn`.
+
+	```lua
+	local function waitForChild(instance, childName, timeout)
+	  return Promise.defer(function(resolve, reject)
+		local child = instance:WaitForChild(childName, timeout)
+
+		;(child and resolve or reject)(child)
+	  end)
+	end
+	```
+
+	@param executor (resolve: (...: any) -> (), reject: (...: any) -> (), onCancel: (abortHandler?: () -> ()) -> boolean) -> ()
+	@return Promise
+]=]
+    function Promise.defer(executor)
+        local traceback ,promise
+=(debug.traceback(nil, 2)
+)        promise = Promise._new(traceback, function(resolve, reject, onCancel)
+            local connection
+            connection = Promise._timeEvent:Connect(function()
+                connection:Disconnect()
+local ok, _, result =runExecutor(traceback, executor, resolve, reject, onCancel)
+
+                if not ok then
+                    reject(result[1])
+                end
+            end)
+        end)
+
+        return promise
+    end
+
+    -- Backwards compatibility
+    Promise.async = Promise.defer
+
+--[=[
+	Creates an immediately resolved Promise with the given value.
+
+	```lua
+	-- Example using Promise.resolve to deliver cached values:
+	function getSomething(name)
+		if cache[name] then
+			return Promise.resolve(cache[name])
+		else
+			return Promise.new(function(resolve, reject)
+				local thing = getTheThing()
+				cache[name] = thing
+
+				resolve(thing)
+			end)
+		end
+	end
+	```
+
+	@param ... any
+	@return Promise<...any>
+]=]
+    function Promise.resolve(...)
+        local length, values = pack(...)
+        return Promise._new(debug.traceback(nil, 2), function(resolve)
+            resolve(unpack(values, 1, length))
+        end)
+    end
+
+--[=[
+	Creates an immediately rejected Promise with the given value.
+
+	:::caution
+	Something needs to consume this rejection (i.e. `:catch()` it), otherwise it will emit an unhandled Promise rejection warning on the next frame. Thus, you should not create and store rejected Promises for later use. Only create them on-demand as needed.
+	:::
+
+	@param ... any
+	@return Promise<...any>
+]=]
+    function Promise.reject(...)
+        local length, values = pack(...)
+        return Promise._new(debug.traceback(nil, 2), function(_, reject)
+            reject(unpack(values, 1, length))
+        end)
+    end
+
+--[[
+	Runs a non-promise-returning function as a Promise with the
+  given arguments.
+]]
+    function Promise._try(traceback, callback, ...)
+        local valuesLength, values = pack(...)
+
+        return Promise._new(traceback, function(resolve)
+            resolve(callback(unpack(values, 1, valuesLength)))
+        end)
+    end
+
+--[=[
+	Begins a Promise chain, calling a function and returning a Promise resolving with its return value. If the function errors, the returned Promise will be rejected with the error. You can safely yield within the Promise.try callback.
+
+	:::info
+	`Promise.try` is similar to [Promise.promisify](#promisify), except the callback is invoked immediately instead of returning a new function.
+	:::
+
+	```lua
+	Promise.try(function()
+		return math.random(1, 2) == 1 and "ok" or error("Oh an error!")
+	end)
+		:andThen(function(text)
+			print(text)
+		end)
+		:catch(function(err)
+			warn("Something went wrong")
+		end)
+	```
+
+	@param callback (...: T...) -> ...any
+	@param ... T... -- Additional arguments passed to `callback`
+	@return Promise
+]=]
+    function Promise.try(callback, ...)
+        return Promise._try(debug.traceback(nil, 2), callback, ...)
+    end
+
+--[[
+	Returns a new promise that:
+		* is resolved when all input promises resolve
+		* is rejected if ANY input promises reject
+]]
+    function Promise._all(traceback, promises, amount)
+        if type(promises) ~= "table" then
+            error(string.format(ERROR_NON_LIST, "Promise.all"), 3)
+        end
+
+        -- We need to check that each value is a promise here so that we can produce
+        -- a proper error rather than a rejected promise with our error.
+        for i, promise in pairs(promises) do
+            if not Promise.is(promise) then
+                error(string.format(ERROR_NON_PROMISE_IN_LIST, "Promise.all", tostring(i)), 3)
+            end
+        end
+
+        -- If there are no values then return an already resolved promise.
+        if #promises == 0 or amount == 0 then
+            return Promise.resolve({})
+        end
+
+        return Promise._new(traceback, function(resolve, reject, onCancel)
+            -- An array to contain our resolved values from the given promises.
+            local resolvedValues ,newPromises ,resolvedCount ,rejectedCount ,done = {}
+,{}
+,0
+,0
+,false
+
+            local function cancel()
+                for _, promise in ipairs(newPromises) do
+                    promise:cancel()
+                end
+            end
+
+            -- Called when a single value is resolved and resolves if all are done.
+            local function resolveOne(i, ...)
+                if done then
+                    return
+                end
+
+                resolvedCount = resolvedCount + 1
+
+                if amount == nil then
+                    resolvedValues[i] = ...
+                else
+                    resolvedValues[resolvedCount] = ...
+                end
+
+                if resolvedCount >= (amount or #promises) then
+                    done = true
+                    resolve(resolvedValues)
+                    cancel()
+                end
+            end
+
+            onCancel(cancel)
+
+            -- We can assume the values inside `promises` are all promises since we
+            -- checked above.
+            for i, promise in ipairs(promises) do
+                newPromises[i] = promise:andThen(function(...)
+                    resolveOne(i, ...)
+                end, function(...)
+                    rejectedCount = rejectedCount + 1
+
+                    if amount == nil or #promises - rejectedCount < amount then
+                        cancel()
+                        done = true
+
+                        reject(...)
+                    end
+                end)
+            end
+
+            if done then
+                cancel()
+            end
+        end)
+    end
+
+--[=[
+	Accepts an array of Promises and returns a new promise that:
+	* is resolved after all input promises resolve.
+	* is rejected if *any* input promises reject.
+
+	:::info
+	Only the first return value from each promise will be present in the resulting array.
+	:::
+
+	After any input Promise rejects, all other input Promises that are still pending will be cancelled if they have no other consumers.
+
+	```lua
+	local promises = {
+		returnsAPromise("example 1"),
+		returnsAPromise("example 2"),
+		returnsAPromise("example 3"),
+	}
+
+	return Promise.all(promises)
+	```
+
+	@param promises {Promise<T>}
+	@return Promise<{T}>
+]=]
+    function Promise.all(promises)
+        return Promise._all(debug.traceback(nil, 2), promises)
+    end
+
+--[=[
+	Folds an array of values or promises into a single value. The array is traversed sequentially.
+
+	The reducer function can return a promise or value directly. Each iteration receives the resolved value from the previous, and the first receives your defined initial value.
+
+	The folding will stop at the first rejection encountered.
+	```lua
+	local basket = {"blueberry", "melon", "pear", "melon"}
+	Promise.fold(basket, function(cost, fruit)
+		if fruit == "blueberry" then
+			return cost -- blueberries are free!
+		else
+			-- call a function that returns a promise with the fruit price
+			return fetchPrice(fruit):andThen(function(fruitCost)
+				return cost + fruitCost
+			end)
+		end
+	end, 0)
+	```
+
+	@since v3.1.0
+	@param list {T | Promise<T>}
+	@param reducer (accumulator: U, value: T, index: number) -> U | Promise<U>
+	@param initialValue U
+]=]
+    function Promise.fold(list, reducer, initialValue)
+        assert(type(list) == "table", "Bad argument #1 to Promise.fold: must be a table")
+        assert(isCallable(reducer), "Bad argument #2 to Promise.fold: must be a function")
+
+        local accumulator = Promise.resolve(initialValue)
+        return Promise.each(list, function(resolvedElement, i)
+            accumulator = accumulator:andThen(function(previousValueResolved)
+                return reducer(previousValueResolved, resolvedElement, i)
+            end)
+        end):andThen(function()
+            return accumulator
+        end)
+    end
+
+--[=[
+	Accepts an array of Promises and returns a Promise that is resolved as soon as `count` Promises are resolved from the input array. The resolved array values are in the order that the Promises resolved in. When this Promise resolves, all other pending Promises are cancelled if they have no other consumers.
+
+	`count` 0 results in an empty array. The resultant array will never have more than `count` elements.
+
+	```lua
+	local promises = {
+		returnsAPromise("example 1"),
+		returnsAPromise("example 2"),
+		returnsAPromise("example 3"),
+	}
+
+	return Promise.some(promises, 2) -- Only resolves with first 2 promises to resolve
+	```
+
+	@param promises {Promise<T>}
+	@param count number
+	@return Promise<{T}>
+]=]
+    function Promise.some(promises, count)
+        assert(type(count) == "number", "Bad argument #2 to Promise.some: must be a number")
+
+        return Promise._all(debug.traceback(nil, 2), promises, count)
+    end
+
+--[=[
+	Accepts an array of Promises and returns a Promise that is resolved as soon as *any* of the input Promises resolves. It will reject only if *all* input Promises reject. As soon as one Promises resolves, all other pending Promises are cancelled if they have no other consumers.
+
+	Resolves directly with the value of the first resolved Promise. This is essentially [[Promise.some]] with `1` count, except the Promise resolves with the value directly instead of an array with one element.
+
+	```lua
+	local promises = {
+		returnsAPromise("example 1"),
+		returnsAPromise("example 2"),
+		returnsAPromise("example 3"),
+	}
+
+	return Promise.any(promises) -- Resolves with first value to resolve (only rejects if all 3 rejected)
+	```
+
+	@param promises {Promise<T>}
+	@return Promise<T>
+]=]
+    function Promise.any(promises)
+        return Promise._all(debug.traceback(nil, 2), promises, 1):andThen(function(values)
+            return values[1]
+        end)
+    end
+
+--[=[
+	Accepts an array of Promises and returns a new Promise that resolves with an array of in-place Statuses when all input Promises have settled. This is equivalent to mapping `promise:finally` over the array of Promises.
+
+	```lua
+	local promises = {
+		returnsAPromise("example 1"),
+		returnsAPromise("example 2"),
+		returnsAPromise("example 3"),
+	}
+
+	return Promise.allSettled(promises)
+	```
+
+	@param promises {Promise<T>}
+	@return Promise<{Status}>
+]=]
+    function Promise.allSettled(promises)
+        if type(promises) ~= "table" then
+            error(string.format(ERROR_NON_LIST, "Promise.allSettled"), 2)
+        end
+
+        -- We need to check that each value is a promise here so that we can produce
+        -- a proper error rather than a rejected promise with our error.
+        for i, promise in pairs(promises) do
+            if not Promise.is(promise) then
+                error(string.format(ERROR_NON_PROMISE_IN_LIST, "Promise.allSettled", tostring(i)), 2)
+            end
+        end
+
+        -- If there are no values then return an already resolved promise.
+        if #promises == 0 then
+            return Promise.resolve({})
+        end
+
+        return Promise._new(debug.traceback(nil, 2), function(resolve, _, onCancel)
+            -- An array to contain our resolved values from the given promises.
+            local fates ,newPromises ,finishedCount = {}
+,{}
+,0
+
+            -- Called when a single value is resolved and resolves if all are done.
+            local function resolveOne(i, ...)
+                finishedCount = finishedCount + 1
+
+                fates[i] = ...
+
+                if finishedCount >= #promises then
+                    resolve(fates)
+                end
+            end
+
+            onCancel(function()
+                for _, promise in ipairs(newPromises) do
+                    promise:cancel()
+                end
+            end)
+
+            -- We can assume the values inside `promises` are all promises since we
+            -- checked above.
+            for i, promise in ipairs(promises) do
+                newPromises[i] = promise:finally(function(...)
+                    resolveOne(i, ...)
+                end)
+            end
+        end)
+    end
+
+--[=[
+	Accepts an array of Promises and returns a new promise that is resolved or rejected as soon as any Promise in the array resolves or rejects.
+
+	:::warning
+	If the first Promise to settle from the array settles with a rejection, the resulting Promise from `race` will reject.
+
+	If you instead want to tolerate rejections, and only care about at least one Promise resolving, you should use [Promise.any](#any) or [Promise.some](#some) instead.
+	:::
+
+	All other Promises that don't win the race will be cancelled if they have no other consumers.
+
+	```lua
+	local promises = {
+		returnsAPromise("example 1"),
+		returnsAPromise("example 2"),
+		returnsAPromise("example 3"),
+	}
+
+	return Promise.race(promises) -- Only returns 1st value to resolve or reject
+	```
+
+	@param promises {Promise<T>}
+	@return Promise<T>
+]=]
+    function Promise.race(promises)
+        assert(type(promises) == "table", string.format(ERROR_NON_LIST, "Promise.race"))
+
+        for i, promise in pairs(promises) do
+            assert(Promise.is(promise), string.format(ERROR_NON_PROMISE_IN_LIST, "Promise.race", tostring(i)))
+        end
+
+        return Promise._new(debug.traceback(nil, 2), function(resolve, reject, onCancel)
+            local newPromises ,finished = {}
+,false
+
+            local function cancel()
+                for _, promise in ipairs(newPromises) do
+                    promise:cancel()
+                end
+            end
+
+            local function finalize(callback)
+                return function(...)
+                    cancel()
+                    finished = true
+                    return callback(...)
+                end
+            end
+
+            if onCancel(finalize(reject)) then
+                return
+            end
+
+            for i, promise in ipairs(promises) do
+                newPromises[i] = promise:andThen(finalize(resolve), finalize(reject))
+            end
+
+            if finished then
+                cancel()
+            end
+        end)
+    end
+
+--[=[
+	Iterates serially over the given an array of values, calling the predicate callback on each value before continuing.
+
+	If the predicate returns a Promise, we wait for that Promise to resolve before moving on to the next item
+	in the array.
+
+	:::info
+	`Promise.each` is similar to `Promise.all`, except the Promises are ran in order instead of all at once.
+
+	But because Promises are eager, by the time they are created, they're already running. Thus, we need a way to defer creation of each Promise until a later time.
+
+	The predicate function exists as a way for us to operate on our data instead of creating a new closure for each Promise. If you would prefer, you can pass in an array of functions, and in the predicate, call the function and return its return value.
+	:::
+
+	```lua
+	Promise.each({
+		"foo",
+		"bar",
+		"baz",
+		"qux"
+	}, function(value, index)
+		return Promise.delay(1):andThen(function()
+		print(("%d) Got %s!"):format(index, value))
+		end)
+	end)
+
+	--[[
+		(1 second passes)
+		> 1) Got foo!
+		(1 second passes)
+		> 2) Got bar!
+		(1 second passes)
+		> 3) Got baz!
+		(1 second passes)
+		> 4) Got qux!
+	]]
+	```
+
+	If the Promise a predicate returns rejects, the Promise from `Promise.each` is also rejected with the same value.
+
+	If the array of values contains a Promise, when we get to that point in the list, we wait for the Promise to resolve before calling the predicate with the value.
+
+	If a Promise in the array of values is already Rejected when `Promise.each` is called, `Promise.each` rejects with that value immediately (the predicate callback will never be called even once). If a Promise in the list is already Cancelled when `Promise.each` is called, `Promise.each` rejects with `Promise.Error(Promise.Error.Kind.AlreadyCancelled`). If a Promise in the array of values is Started at first, but later rejects, `Promise.each` will reject with that value and iteration will not continue once iteration encounters that value.
+
+	Returns a Promise containing an array of the returned/resolved values from the predicate for each item in the array of values.
+
+	If this Promise returned from `Promise.each` rejects or is cancelled for any reason, the following are true:
+	- Iteration will not continue.
+	- Any Promises within the array of values will now be cancelled if they have no other consumers.
+	- The Promise returned from the currently active predicate will be cancelled if it hasn't resolved yet.
+
+	@since 3.0.0
+	@param list {T | Promise<T>}
+	@param predicate (value: T, index: number) -> U | Promise<U>
+	@return Promise<{U}>
+]=]
+    function Promise.each(list, predicate)
+        assert(type(list) == "table", string.format(ERROR_NON_LIST, "Promise.each"))
+        assert(isCallable(predicate), string.format(ERROR_NON_FUNCTION, "Promise.each"))
+
+        return Promise._new(debug.traceback(nil, 2), function(resolve, reject, onCancel)
+            local results ,promisesToCancel ,cancelled = {}
+,{}
+,false
+
+            local function cancel()
+                for _, promiseToCancel in ipairs(promisesToCancel) do
+                    promiseToCancel:cancel()
+                end
+            end
+
+            onCancel(function()
+                cancelled = true
+
+                cancel()
+            end)
+
+            -- We need to preprocess the list of values and look for Promises.
+            -- If we find some, we must register our andThen calls now, so that those Promises have a consumer
+            -- from us registered. If we don't do this, those Promises might get cancelled by something else
+            -- before we get to them in the series because it's not possible to tell that we plan to use it
+            -- unless we indicate it here.
+
+            local preprocessedList = {}
+
+            for index, value in ipairs(list) do
+                if Promise.is(value) then
+                    if value:getStatus() == Promise.Status.Cancelled then
+                        cancel()
+                        return reject(Error.new({
+                            error = "Promise is cancelled",
+                            kind = Error.Kind.AlreadyCancelled,
+                            context = string.format(
+                                "The Promise that was part of the array at index %d passed into Promise.each was already cancelled when Promise.each began.\n\nThat Promise was created at:\n\n%s",
+                                index,
+                                value._source
+                            ),
+                        }))
+                    elseif value:getStatus() == Promise.Status.Rejected then
+                        cancel()
+                        return reject(select(2, value:await()))
+                    end
+
+                    -- Chain a new Promise from this one so we only cancel ours
+                    local ourPromise = value:andThen(function(...)
+                        return ...
+                    end)
+
+                    table.insert(promisesToCancel, ourPromise)
+                    preprocessedList[index] = ourPromise
+                else
+                    preprocessedList[index] = value
+                end
+            end
+
+            for index, value in ipairs(preprocessedList) do
+                if Promise.is(value) then
+                    local success
+                    success, value = value:await()
+
+                    if not success then
+                        cancel()
+                        return reject(value)
+                    end
+                end
+
+                if cancelled then
+                    return
+                end
+
+                local predicatePromise = Promise.resolve(predicate(value, index))
+
+                table.insert(promisesToCancel, predicatePromise)
+
+                local success, result = predicatePromise:await()
+
+                if not success then
+                    cancel()
+                    return reject(result)
+                end
+
+                results[index] = result
+            end
+
+            resolve(results)
+        end)
+    end
+
+--[=[
+	Checks whether the given object is a Promise via duck typing. This only checks if the object is a table and has an `andThen` method.
+
+	@param object any
+	@return boolean -- `true` if the given `object` is a Promise.
+]=]
+    function Promise.is(object)
+        if type(object) ~= "table" then
+            return false
+        end
+
+        local objectMetatable = getmetatable(object)
+
+        if objectMetatable == Promise then
+            -- The Promise came from this library.
+            return true
+        elseif objectMetatable == nil then
+            -- No metatable, but we should still chain onto tables with andThen methods
+            return isCallable(object.andThen)
+        elseif
+            type(objectMetatable) == "table"
+            and type(rawget(objectMetatable, "__index")) == "table"
+            and isCallable(rawget(rawget(objectMetatable, "__index"), "andThen"))
+        then
+            -- Maybe this came from a different or older Promise library.
+            return true
+        end
+
+        return false
+    end
+
+--[=[
+	Wraps a function that yields into one that returns a Promise.
+
+	Any errors that occur while executing the function will be turned into rejections.
+
+	:::info
+	`Promise.promisify` is similar to [Promise.try](#try), except the callback is returned as a callable function instead of being invoked immediately.
+	:::
+
+	```lua
+	local sleep = Promise.promisify(wait)
+
+	sleep(1):andThen(print)
+	```
+
+	```lua
+	local isPlayerInGroup = Promise.promisify(function(player, groupId)
+		return player:IsInGroup(groupId)
+	end)
+	```
+
+	@param callback (...: any) -> ...any
+	@return (...: any) -> Promise
+]=]
+    function Promise.promisify(callback)
+        return function(...)
+            return Promise._try(debug.traceback(nil, 2), callback, ...)
+        end
+    end
+
+--[=[
+	Returns a Promise that resolves after `seconds` seconds have passed. The Promise resolves with the actual amount of time that was waited.
+
+	This function is **not** a wrapper around `wait`. `Promise.delay` uses a custom scheduler which provides more accurate timing. As an optimization, cancelling this Promise instantly removes the task from the scheduler.
+
+	:::warning
+	Passing `NaN`, infinity, or a number less than 1/60 is equivalent to passing 1/60.
+	:::
+
+	```lua
+		Promise.delay(5):andThenCall(print, "This prints after 5 seconds")
+	```
+
+	@function delay
+	@within Promise
+	@param seconds number
+	@return Promise<number>
+]=]
+    do
+        -- uses a sorted doubly linked list (queue) to achieve O(1) remove operations and O(n) for insert
+
+        -- the initial node in the linked list
+        local first
+,connection
+
+        function Promise.delay(seconds)
+            assert(type(seconds) == "number", "Bad argument #1 to Promise.delay, must be a number.")
+            -- If seconds is -INF, INF, NaN, or less than 1 / 60, assume seconds is 1 / 60.
+            -- This mirrors the behavior of wait()
+            if not (seconds >= 1.6666666666666665E-2) or seconds == math.huge then
+                seconds = 1.6666666666666665E-2            end
+
+            return Promise._new(debug.traceback(nil, 2), function(resolve, _, onCancel)
+                local startTime = Promise._getTime()
+                local endTime = startTime + seconds
+
+                local node = {
+                    resolve = resolve,
+                    startTime = startTime,
+                    endTime = endTime,
+                }
+
+                if connection == nil then -- first is nil when connection is nil
+                    first = node
+                    connection = Promise._timeEvent:Connect(function()
+                        local threadStart = Promise._getTime()
+
+                        while first ~= nil and first.endTime < threadStart do
+                            local current = first
+                            first = current.next
+
+                            if first == nil then
+                                connection:Disconnect()
+                                connection = nil
+                            else
+                                first.previous = nil
+                            end
+
+                            current.resolve(Promise._getTime() - current.startTime)
+                        end
+                    end)
+                else -- first is non-nil
+                    if first.endTime < endTime then -- if `node` should be placed after `first`
+                        -- we will insert `node` between `current` and `next`
+                        -- (i.e. after `current` if `next` is nil)
+                        local current = first
+                        local next = current.next
+
+                        while next ~= nil and next.endTime < endTime do
+                            current = next
+                            next = current.next
+                        end
+
+                        -- `current` must be non-nil, but `next` could be `nil` (i.e. last item in list)
+                        current.next = node
+                        node.previous = current
+
+                        if next ~= nil then
+                            node.next = next
+                            next.previous = node
+                        end
+                    else
+                        -- set `node` to `first`
+                        node.next = first
+                        first.previous = node
+                        first = node
+                    end
+                end
+
+                onCancel(function()
+                    -- remove node from queue
+                    local next = node.next
+
+                    if first == node then
+                        if next == nil then -- if `node` is the first and last
+                            connection:Disconnect()
+                            connection = nil
+                        else -- if `node` is `first` and not the last
+                            next.previous = nil
+                        end
+                        first = next
+                    else
+                        local previous = node.previous
+                        -- since `node` is not `first`, then we know `previous` is non-nil
+                        previous.next = next
+
+                        if next ~= nil then
+                            next.previous = previous
+                        end
+                    end
+                end)
+            end)
+        end
+    end
+
+--[=[
+	Returns a new Promise that resolves if the chained Promise resolves within `seconds` seconds, or rejects if execution time exceeds `seconds`. The chained Promise will be cancelled if the timeout is reached.
+
+	Rejects with `rejectionValue` if it is non-nil. If a `rejectionValue` is not given, it will reject with a `Promise.Error(Promise.Error.Kind.TimedOut)`. This can be checked with [[Error.isKind]].
+
+	```lua
+	getSomething():timeout(5):andThen(function(something)
+		-- got something and it only took at max 5 seconds
+	end):catch(function(e)
+		-- Either getting something failed or the time was exceeded.
+
+		if Promise.Error.isKind(e, Promise.Error.Kind.TimedOut) then
+			warn("Operation timed out!")
+		else
+			warn("Operation encountered an error!")
+		end
+	end)
+	```
+
+	Sugar for:
+
+	```lua
+	Promise.race({
+		Promise.delay(seconds):andThen(function()
+			return Promise.reject(
+				rejectionValue == nil
+				and Promise.Error.new({ kind = Promise.Error.Kind.TimedOut })
+				or rejectionValue
+			)
+		end),
+		promise
+	})
+	```
+
+	@param seconds number
+	@param rejectionValue? any -- The value to reject with if the timeout is reached
+	@return Promise
+]=]
+    function Promise.prototype:timeout(seconds, rejectionValue)
+        local traceback = debug.traceback(nil, 2)
+
+        return Promise.race({
+            Promise.delay(seconds):andThen(function()
+                return Promise.reject(rejectionValue == nil and Error.new({
+                    kind = Error.Kind.TimedOut,
+                    error = "Timed out",
+                    context = string.format(
+                        "Timeout of %d seconds exceeded.\n:timeout() called at:\n\n%s",
+                        seconds,
+                        traceback
+                    ),
+                }) or rejectionValue)
+            end),
+            self,
+        })
+    end
+
+--[=[
+	Returns the current Promise status.
+
+	@return Status
+]=]
+    function Promise.prototype:getStatus()
+        return self._status
+    end
+
+--[[
+	Creates a new promise that receives the result of this promise.
+
+	The given callbacks are invoked depending on that result.
+]]
+    function Promise.prototype:_andThen(traceback, successHandler, failureHandler)
+        self._unhandledRejection = false
+
+        -- If we are already cancelled, we return a cancelled Promise
+        if self._status == Promise.Status.Cancelled then
+            local promise = Promise.new(function() end)
+            promise:cancel()
+
+            return promise
+        end
+
+        -- Create a new promise to follow this part of the chain
+        return Promise._new(traceback, function(resolve, reject, onCancel)
+            -- Our default callbacks just pass values onto the next promise.
+            -- This lets success and failure cascade correctly!
+
+            local successCallback = resolve
+            if successHandler then
+                successCallback = createAdvancer(traceback, successHandler, resolve, reject)
+            end
+
+            local failureCallback = reject
+            if failureHandler then
+                failureCallback = createAdvancer(traceback, failureHandler, resolve, reject)
+            end
+
+            if self._status == Promise.Status.Started then
+                -- If we haven't resolved yet, put ourselves into the queue
+                table.insert(self._queuedResolve, successCallback)
+                table.insert(self._queuedReject, failureCallback)
+
+                onCancel(function()
+                    -- These are guaranteed to exist because the cancellation handler is guaranteed to only
+                    -- be called at most once
+                    if self._status == Promise.Status.Started then
+                        table.remove(self._queuedResolve, table.find(self._queuedResolve, successCallback))
+                        table.remove(self._queuedReject, table.find(self._queuedReject, failureCallback))
+                    end
+                end)
+            elseif self._status == Promise.Status.Resolved then
+                -- This promise has already resolved! Trigger success immediately.
+                successCallback(unpack(self._values, 1, self._valuesLength))
+            elseif self._status == Promise.Status.Rejected then
+                -- This promise died a terrible death! Trigger failure immediately.
+                failureCallback(unpack(self._values, 1, self._valuesLength))
+            end
+        end, self)
+    end
+
+--[=[
+	Chains onto an existing Promise and returns a new Promise.
+
+	:::warning
+	Within the failure handler, you should never assume that the rejection value is a string. Some rejections within the Promise library are represented by [[Error]] objects. If you want to treat it as a string for debugging, you should call `tostring` on it first.
+	:::
+
+	You can return a Promise from the success or failure handler and it will be chained onto.
+
+	Calling `andThen` on a cancelled Promise returns a cancelled Promise.
+
+	:::tip
+	If the Promise returned by `andThen` is cancelled, `successHandler` and `failureHandler` will not run.
+
+	To run code no matter what, use [Promise:finally].
+	:::
+
+	@param successHandler (...: any) -> ...any
+	@param failureHandler? (...: any) -> ...any
+	@return Promise<...any>
+]=]
+    function Promise.prototype:andThen(successHandler, failureHandler)
+        assert(successHandler == nil or isCallable(successHandler), string.format(ERROR_NON_FUNCTION, "Promise:andThen"))
+        assert(failureHandler == nil or isCallable(failureHandler), string.format(ERROR_NON_FUNCTION, "Promise:andThen"))
+
+        return self:_andThen(debug.traceback(nil, 2), successHandler, failureHandler)
+    end
+
+--[=[
+	Shorthand for `Promise:andThen(nil, failureHandler)`.
+
+	Returns a Promise that resolves if the `failureHandler` worked without encountering an additional error.
+
+	:::warning
+	Within the failure handler, you should never assume that the rejection value is a string. Some rejections within the Promise library are represented by [[Error]] objects. If you want to treat it as a string for debugging, you should call `tostring` on it first.
+	:::
+
+	Calling `catch` on a cancelled Promise returns a cancelled Promise.
+
+	:::tip
+	If the Promise returned by `catch` is cancelled,  `failureHandler` will not run.
+
+	To run code no matter what, use [Promise:finally].
+	:::
+
+	@param failureHandler (...: any) -> ...any
+	@return Promise<...any>
+]=]
+    function Promise.prototype:catch(failureHandler)
+        assert(failureHandler == nil or isCallable(failureHandler), string.format(ERROR_NON_FUNCTION, "Promise:catch"))
+        return self:_andThen(debug.traceback(nil, 2), nil, failureHandler)
+    end
+
+--[=[
+	Similar to [Promise.andThen](#andThen), except the return value is the same as the value passed to the handler. In other words, you can insert a `:tap` into a Promise chain without affecting the value that downstream Promises receive.
+
+	```lua
+		getTheValue()
+		:tap(print)
+		:andThen(function(theValue)
+			print("Got", theValue, "even though print returns nil!")
+		end)
+	```
+
+	If you return a Promise from the tap handler callback, its value will be discarded but `tap` will still wait until it resolves before passing the original value through.
+
+	@param tapHandler (...: any) -> ...any
+	@return Promise<...any>
+]=]
+    function Promise.prototype:tap(tapHandler)
+        assert(isCallable(tapHandler), string.format(ERROR_NON_FUNCTION, "Promise:tap"))
+        return self:_andThen(debug.traceback(nil, 2), function(...)
+            local callbackReturn = tapHandler(...)
+
+            if Promise.is(callbackReturn) then
+                local length, values = pack(...)
+                return callbackReturn:andThen(function()
+                    return unpack(values, 1, length)
+                end)
+            end
+
+            return ...
+        end)
+    end
+
+--[=[
+	Attaches an `andThen` handler to this Promise that calls the given callback with the predefined arguments. The resolved value is discarded.
+
+	```lua
+		promise:andThenCall(someFunction, "some", "arguments")
+	```
+
+	This is sugar for
+
+	```lua
+		promise:andThen(function()
+		return someFunction("some", "arguments")
+		end)
+	```
+
+	@param callback (...: any) -> any
+	@param ...? any -- Additional arguments which will be passed to `callback`
+	@return Promise
+]=]
+    function Promise.prototype:andThenCall(callback, ...)
+        assert(isCallable(callback), string.format(ERROR_NON_FUNCTION, "Promise:andThenCall"))
+        local length, values = pack(...)
+        return self:_andThen(debug.traceback(nil, 2), function()
+            return callback(unpack(values, 1, length))
+        end)
+    end
+
+--[=[
+	Attaches an `andThen` handler to this Promise that discards the resolved value and returns the given value from it.
+
+	```lua
+		promise:andThenReturn("some", "values")
+	```
+
+	This is sugar for
+
+	```lua
+		promise:andThen(function()
+			return "some", "values"
+		end)
+	```
+
+	:::caution
+	Promises are eager, so if you pass a Promise to `andThenReturn`, it will begin executing before `andThenReturn` is reached in the chain. Likewise, if you pass a Promise created from [[Promise.reject]] into `andThenReturn`, it's possible that this will trigger the unhandled rejection warning. If you need to return a Promise, it's usually best practice to use [[Promise.andThen]].
+	:::
+
+	@param ... any -- Values to return from the function
+	@return Promise
+]=]
+    function Promise.prototype:andThenReturn(...)
+        local length, values = pack(...)
+        return self:_andThen(debug.traceback(nil, 2), function()
+            return unpack(values, 1, length)
+        end)
+    end
+
+--[=[
+	Cancels this promise, preventing the promise from resolving or rejecting. Does not do anything if the promise is already settled.
+
+	Cancellations will propagate upwards and downwards through chained promises.
+
+	Promises will only be cancelled if all of their consumers are also cancelled. This is to say that if you call `andThen` twice on the same promise, and you cancel only one of the child promises, it will not cancel the parent promise until the other child promise is also cancelled.
+
+	```lua
+		promise:cancel()
+	```
+]=]
+    function Promise.prototype:cancel()
+        if self._status ~= Promise.Status.Started then
+            return
+        end
+
+        self._status = Promise.Status.Cancelled
+
+        if self._cancellationHook then
+            self._cancellationHook()
+        end
+
+        coroutine.close(self._thread)
+
+        if self._parent then
+            self._parent:_consumerCancelled(self)
+        end
+
+        for child in pairs(self._consumers) do
+            child:cancel()
+        end
+
+        self:_finalize()
+    end
+
+--[[
+	Used to decrease the number of consumers by 1, and if there are no more,
+	cancel this promise.
+]]
+    function Promise.prototype:_consumerCancelled(consumer)
+        if self._status ~= Promise.Status.Started then
+            return
+        end
+
+        self._consumers[consumer] = nil
+
+        if next(self._consumers) == nil then
+            self:cancel()
+        end
+    end
+
+--[[
+	Used to set a handler for when the promise resolves, rejects, or is
+	cancelled.
+]]
+    function Promise.prototype:_finally(traceback, finallyHandler)
+        self._unhandledRejection = false
+
+        local promise = Promise._new(traceback, function(resolve, reject, onCancel)
+            local handlerPromise
+
+            onCancel(function()
+                -- The finally Promise is not a proper consumer of self. We don't care about the resolved value.
+                -- All we care about is running at the end. Therefore, if self has no other consumers, it's safe to
+                -- cancel. We don't need to hold out cancelling just because there's a finally handler.
+                self:_consumerCancelled(self)
+
+                if handlerPromise then
+                    handlerPromise:cancel()
+                end
+            end)
+
+            local finallyCallback = resolve
+            if finallyHandler then
+                finallyCallback = function(...)
+                    local callbackReturn = finallyHandler(...)
+
+                    if Promise.is(callbackReturn) then
+                        handlerPromise = callbackReturn
+
+                        callbackReturn
+                            :finally(function(status)
+                                if status ~= Promise.Status.Rejected then
+                                    resolve(self)
+                                end
+                            end)
+                            :catch(function(...)
+                                reject(...)
+                            end)
+                    else
+                        resolve(self)
+                    end
+                end
+            end
+
+            if self._status == Promise.Status.Started then
+                -- The promise is not settled, so queue this.
+                table.insert(self._queuedFinally, finallyCallback)
+            else
+                -- The promise already settled or was cancelled, run the callback now.
+                finallyCallback(self._status)
+            end
+        end)
+
+        return promise
+    end
+
+--[=[
+	Set a handler that will be called regardless of the promise's fate. The handler is called when the promise is
+	resolved, rejected, *or* cancelled.
+
+	Returns a new Promise that:
+	- resolves with the same values that this Promise resolves with.
+	- rejects with the same values that this Promise rejects with.
+	- is cancelled if this Promise is cancelled.
+
+	If the value you return from the handler is a Promise:
+	- We wait for the Promise to resolve, but we ultimately discard the resolved value.
+	- If the returned Promise rejects, the Promise returned from `finally` will reject with the rejected value from the
+	*returned* promise.
+	- If the `finally` Promise is cancelled, and you returned a Promise from the handler, we cancel that Promise too.
+
+	Otherwise, the return value from the `finally` handler is entirely discarded.
+
+	:::note Cancellation
+	As of Promise v4, `Promise:finally` does not count as a consumer of the parent Promise for cancellation purposes.
+	This means that if all of a Promise's consumers are cancelled and the only remaining callbacks are finally handlers,
+	the Promise is cancelled and the finally callbacks run then and there.
+
+	Cancellation still propagates through the `finally` Promise though: if you cancel the `finally` Promise, it can cancel
+	its parent Promise if it had no other consumers. Likewise, if the parent Promise is cancelled, the `finally` Promise
+	will also be cancelled.
+	:::
+
+	```lua
+	local thing = createSomething()
+
+	doSomethingWith(thing)
+		:andThen(function()
+			print("It worked!")
+			-- do something..
+		end)
+		:catch(function()
+			warn("Oh no it failed!")
+		end)
+		:finally(function()
+			-- either way, destroy thing
+
+			thing:Destroy()
+		end)
+
+	```
+
+	@param finallyHandler (status: Status) -> ...any
+	@return Promise<...any>
+]=]
+    function Promise.prototype:finally(finallyHandler)
+        assert(finallyHandler == nil or isCallable(finallyHandler), string.format(ERROR_NON_FUNCTION, "Promise:finally"))
+        return self:_finally(debug.traceback(nil, 2), finallyHandler)
+    end
+
+--[=[
+	Same as `andThenCall`, except for `finally`.
+
+	Attaches a `finally` handler to this Promise that calls the given callback with the predefined arguments.
+
+	@param callback (...: any) -> any
+	@param ...? any -- Additional arguments which will be passed to `callback`
+	@return Promise
+]=]
+    function Promise.prototype:finallyCall(callback, ...)
+        assert(isCallable(callback), string.format(ERROR_NON_FUNCTION, "Promise:finallyCall"))
+        local length, values = pack(...)
+        return self:_finally(debug.traceback(nil, 2), function()
+            return callback(unpack(values, 1, length))
+        end)
+    end
+
+--[=[
+	Attaches a `finally` handler to this Promise that discards the resolved value and returns the given value from it.
+
+	```lua
+		promise:finallyReturn("some", "values")
+	```
+
+	This is sugar for
+
+	```lua
+		promise:finally(function()
+			return "some", "values"
+		end)
+	```
+
+	@param ... any -- Values to return from the function
+	@return Promise
+]=]
+    function Promise.prototype:finallyReturn(...)
+        local length, values = pack(...)
+        return self:_finally(debug.traceback(nil, 2), function()
+            return unpack(values, 1, length)
+        end)
+    end
+
+--[=[
+	Yields the current thread until the given Promise completes. Returns the Promise's status, followed by the values that the promise resolved or rejected with.
+
+	@yields
+	@return Status -- The Status representing the fate of the Promise
+	@return ...any -- The values the Promise resolved or rejected with.
+]=]
+    function Promise.prototype:awaitStatus()
+        self._unhandledRejection = false
+
+        if self._status == Promise.Status.Started then
+            local thread = coroutine.running()
+
+            self
+                :finally(function()
+                    task.spawn(thread)
+                end)
+                -- The finally promise can propagate rejections, so we attach a catch handler to prevent the unhandled
+                -- rejection warning from appearing
+                :catch(
+                    function() end
+                )
+
+            coroutine.yield()
+        end
+
+        if self._status == Promise.Status.Resolved then
+            return self._status, unpack(self._values, 1, self._valuesLength)
+        elseif self._status == Promise.Status.Rejected then
+            return self._status, unpack(self._values, 1, self._valuesLength)
+        end
+
+        return self._status
+    end
+
+    local function awaitHelper(status, ...)
+        return status == Promise.Status.Resolved, ...
+    end
+
+--[=[
+	Yields the current thread until the given Promise completes. Returns true if the Promise resolved, followed by the values that the promise resolved or rejected with.
+
+	:::caution
+	If the Promise gets cancelled, this function will return `false`, which is indistinguishable from a rejection. If you need to differentiate, you should use [[Promise.awaitStatus]] instead.
+	:::
+
+	```lua
+		local worked, value = getTheValue():await()
+
+	if worked then
+		print("got", value)
+	else
+		warn("it failed")
+	end
+	```
+
+	@yields
+	@return boolean -- `true` if the Promise successfully resolved
+	@return ...any -- The values the Promise resolved or rejected with.
+]=]
+    function Promise.prototype:await()
+        return awaitHelper(self:awaitStatus())
+    end
+
+    local function expectHelper(status, ...)
+        if status ~= Promise.Status.Resolved then
+            error((...) == nil and "Expected Promise rejected with no value." or (...), 3)
+        end
+
+        return ...
+    end
+
+--[=[
+	Yields the current thread until the given Promise completes. Returns the values that the promise resolved with.
+
+	```lua
+	local worked = pcall(function()
+		print("got", getTheValue():expect())
+	end)
+
+	if not worked then
+		warn("it failed")
+	end
+	```
+
+	This is essentially sugar for:
+
+	```lua
+	select(2, assert(promise:await()))
+	```
+
+	**Errors** if the Promise rejects or gets cancelled.
+
+	@error any -- Errors with the rejection value if this Promise rejects or gets cancelled.
+	@yields
+	@return ...any -- The values the Promise resolved with.
+]=]
+    function Promise.prototype:expect()
+        return expectHelper(self:awaitStatus())
+    end
+
+    -- Backwards compatibility
+    Promise.prototype.awaitValue = Promise.prototype.expect
+
+--[[
+	Intended for use in tests.
+
+	Similar to await(), but instead of yielding if the promise is unresolved,
+	_unwrap will throw. This indicates an assumption that a promise has
+	resolved.
+]]
+    function Promise.prototype:_unwrap()
+        if self._status == Promise.Status.Started then
+            error("Promise has not resolved or rejected.", 2)
+        end
+
+        local success = self._status == Promise.Status.Resolved
+
+        return success, unpack(self._values, 1, self._valuesLength)
+    end
+
+    function Promise.prototype:_resolve(...)
+        if self._status ~= Promise.Status.Started then
+            if Promise.is((...)) then
+                (...):_consumerCancelled(self)
+            end
+            return
+        end
+
+        -- If the resolved value was a Promise, we chain onto it!
+        if Promise.is((...)) then
+            -- Without this warning, arguments sometimes mysteriously disappear
+            if select("#", ...) > 1 then
+                local message = string.format(
 [[When returning a Promise from andThen, extra arguments are discarded! See:
 
-%s]]
-,ar._source)warn(as)end local as=...local at=as:andThen(function(...)ar:
-_resolve(...)end,function(...)local at=as._values[1]if as._error then at=ah.new{
-error=as._error,kind=ah.Kind.ExecutionError,context=
-[=[[No stack trace available as this Promise originated from an older version of the Promise library (< v2)]]=]
-}end if ah.isKind(at,ah.Kind.ExecutionError)then return ar:_reject(at:extend{
-error='This Promise was chained to a Promise that errored.',trace='',context=
-string.format(
-[[The Promise at:
+%s]],
+                    self._source
+                )
+                warn(message)
+            end
 
-%s
-...Rejected because it was chained to the following Promise, which encountered an error:
+            local chainedPromise = ...
+
+            local promise = chainedPromise:andThen(function(...)
+                self:_resolve(...)
+            end, function(...)
+                local maybeRuntimeError = chainedPromise._values[1]
+
+                -- Backwards compatibility < v2
+                if chainedPromise._error then
+                    maybeRuntimeError = Error.new({
+                        error = chainedPromise._error,
+                        kind = Error.Kind.ExecutionError,
+                        context = "[No stack trace available as this Promise originated from an older version of the Promise library (< v2)]",
+                    })
+                end
+
+                if Error.isKind(maybeRuntimeError, Error.Kind.ExecutionError) then
+                    return self:_reject(maybeRuntimeError:extend({
+                        error = "This Promise was chained to a Promise that errored.",
+                        trace = "",
+                        context = string.format(
+                            "The Promise at:\n\n%s\n...Rejected because it was chained to the following Promise, which encountered an error:\n",
+                            self._source
+                        ),
+                    }))
+                end
+
+                self:_reject(...)
+            end)
+
+            if promise._status == Promise.Status.Cancelled then
+                self:cancel()
+            elseif promise._status == Promise.Status.Started then
+                -- Adopt ourselves into promise for cancellation propagation.
+                self._parent = promise
+                promise._consumers[self] = true
+            end
+
+            return
+        end
+
+        self._status = Promise.Status.Resolved
+        self._valuesLength, self._values = pack(...)
+
+        -- We assume that these callbacks will not throw errors.
+        for _, callback in ipairs(self._queuedResolve) do
+            coroutine.wrap(callback)(...)
+        end
+
+        self:_finalize()
+    end
+
+    function Promise.prototype:_reject(...)
+        if self._status ~= Promise.Status.Started then
+            return
+        end
+
+        self._status = Promise.Status.Rejected
+        self._valuesLength, self._values = pack(...)
+
+        -- If there are any rejection handlers, call those!
+        if not isEmpty(self._queuedReject) then
+            -- We assume that these callbacks will not throw errors.
+            for _, callback in ipairs(self._queuedReject) do
+                coroutine.wrap(callback)(...)
+            end
+        else
+            -- At this point, no one was able to observe the error.
+            -- An error handler might still be attached if the error occurred
+            -- synchronously. We'll wait one tick, and if there are still no
+            -- observers, then we should put a message in the console.
+
+            local err = tostring((...))
+
+            coroutine.wrap(function()
+                Promise._timeEvent:Wait()
+
+                -- Someone observed the error, hooray!
+                if not self._unhandledRejection then
+                    return
+                end
+
+                -- Build a reasonable message
+                local message = string.format("Unhandled Promise rejection:\n\n%s\n\n%s", err, self._source)
+
+                for _, callback in ipairs(Promise._unhandledRejectionCallbacks) do
+                    task.spawn(callback, self, unpack(self._values, 1, self._valuesLength))
+                end
+
+                if Promise.TEST then
+                    -- Don't spam output when we're running tests.
+                    return
+                end
+
+                warn(message)
+            end)()
+        end
+
+        self:_finalize()
+    end
+
+--[[
+	Calls any :finally handlers. We need this to be a separate method and
+	queue because we must call all of the finally callbacks upon a success,
+	failure, *and* cancellation.
 ]]
-,ar._source)})end ar:_reject(...)end)if at._status==ao.Status.Cancelled then ar:
-cancel()elseif at._status==ao.Status.Started then ar._parent=at at._consumers[ar
-]=true end return end ar._status=ao.Status.Resolved ar._valuesLength,ar._values=
-ai(...)for as,at in ipairs(ar._queuedResolve)do coroutine.wrap(at)(...)end ar:
-_finalize()end ao.prototype._reject=function(ar,...)if ar._status~=ao.Status.
-Started then return end ar._status=ao.Status.Rejected ar._valuesLength,ar.
-_values=ai(...)if not an(ar._queuedReject)then for as,at in ipairs(ar.
-_queuedReject)do coroutine.wrap(at)(...)end else local as=tostring((...))
-coroutine.wrap(function()ao._timeEvent:Wait()if not ar._unhandledRejection then
-return end local at=string.format('Unhandled Promise rejection:\n\n%s\n\n%s',as,
-ar._source)for au,av in ipairs(ao._unhandledRejectionCallbacks)do task.spawn(av,
-ar,unpack(ar._values,1,ar._valuesLength))end if ao.TEST then return end warn(at)
-end)()end ar:_finalize()end ao.prototype._finalize=function(ar)for as,at in
-ipairs(ar._queuedFinally)do coroutine.wrap(at)(ar._status)end ar._queuedFinally=
-nil ar._queuedReject=nil ar._queuedResolve=nil if not ao.TEST then ar._parent=
-nil ar._consumers=nil end task.defer(coroutine.close,ar._thread)end ao.prototype
-.now=function(ar,as)local at=debug.traceback(nil,2)if ar._status==ao.Status.
-Resolved then return ar:_andThen(at,function(...)return...end)else return ao.
-reject(as==nil and ah.new{kind=ah.Kind.NotResolvedInTime,error=
-'This Promise was not resolved in time for :now()',context=
-':now() was called at:\n\n'..at}or as)end end ao.retry=function(ar,as,...)
-assert(af(ar),'Parameter #1 to Promise.retry must be a function')assert(type(as)
-=='number','Parameter #2 to Promise.retry must be a number')local at,au={...},
-select('#',...)return ao.resolve(ar(...)):catch(function(...)if as>0 then return
-ao.retry(ar,as-1,unpack(at,1,au))else return ao.reject(...)end end)end ao.
-retryWithDelay=function(ar,as,at,...)assert(af(ar),
-'Parameter #1 to Promise.retry must be a function')assert(type(as)=='number',
-'Parameter #2 (times) to Promise.retry must be a number')assert(type(at)==
-'number','Parameter #3 (seconds) to Promise.retry must be a number')local au,av=
-{...},select('#',...)return ao.resolve(ar(...)):catch(function(...)if as>0 then
-ao.delay(at):await()return ao.retryWithDelay(ar,as-1,at,unpack(au,1,av))else
-return ao.reject(...)end end)end ao.fromEvent=function(ar,as)as=as or function()
-return true end return ao._new(debug.traceback(nil,2),function(at,au,av)local aw
-,ax=false local ay=function()ax:Disconnect()ax=nil end ax=ar:Connect(function(
-...)local az=as(...)if az==true then at(...)if ax then ay()else aw=true end
-elseif type(az)~='boolean'then error
-'Promise.fromEvent predicate should always return a boolean'end end)if aw and ax
-then return ay()end av(ay)end)end ao.onUnhandledRejection=function(ar)table.
-insert(ao._unhandledRejectionCallbacks,ar)return function()local as=table.find(
-ao._unhandledRejectionCallbacks,ar)if as then table.remove(ao.
-_unhandledRejectionCallbacks,as)end end end return ao end end)()end,[25]=
-function()a(25)return(function(...)return function(aa)local ab={}ab.Paths=
-setmetatable({},{__mode='k'})local ac,ad,ae,af,ag={Delimiter='/'},game.
-WaitForChild,game.FindFirstChild,function(ac,ad)local ae=ab.Paths[ac]if not ae
-then return nil end local af=ae[ad]return((af~=nil and af.Parent==ac)and{af}or{
-nil})[1]end,function(ac,ad,ae)local af=ab.Paths[ac]if not af then ab.Paths[ac]={
-}af=ab.Paths[ac]end af[ad]=ae end local ah=function(ah,ai,aj)local ak=af(ai,ah)
-if ak then return ak end local al,am=string.split(ah,ac.Delimiter),ai for an,ao
-in al do am=ae(am,ao)or(aj and ad(am,ao,aj))or nil if not am then return nil end
-end ag(ai,ah,am)return am end ac.Find=function(ai,aj)return ah(aj,ai)end ac.
-Await=function(ai,aj,ak)return ah(aj,ai,ak)end return ac end end)()end,[26]=
-function()a(26)return(function(...)local aa=game:GetService'RunService'local ab,
-ac,ad=newproxy(),newproxy(),table.freeze{'Destroy','Disconnect','destroy',
-'disconnect'}local ae,af,ag,ah=function(ae,af)local ag=typeof(ae)if ag==
-'function'then return ab elseif ag=='thread'then return ac end if af then return
-af end if ag=='Instance'then return'Destroy'elseif ag=='RBXScriptConnection'then
-return'Disconnect'elseif ag=='table'then for ah,ai in ad do if typeof(ae[ai])==
-'function'then return ai end end end error(string.format(
-'failed to get cleanup function for object %s: %s',tostring(ag),tostring(ae)),3)
-end,function(ae)if typeof(ae)~='table'or typeof(ae.getStatus)~='function'or
-typeof(ae.finally)~='function'or typeof(ae.cancel)~='function'then error(
-'did not receive a promise as an argument',3)end end,function(ae)if typeof(ae)~=
-'RBXScriptSignal'and(typeof(ae)~='table'or typeof(ae.Connect)~='function'or
-typeof(ae.Once)~='function')then error('did not receive a signal as an argument'
-,3)end end,{}ah.__index=ah ah.new=function()local ai=setmetatable({},ah)ai.
-_objects={}ai._cleaning=false return(ai)end ah.Add=function(ai,aj,ak)if ai.
-_cleaning then error('cannot call trove:Add() while cleaning',2)end local al=ae(
-aj,ak)table.insert(ai._objects,{aj,al})return aj end ah.Clone=function(ai,aj)if
-ai._cleaning then error('cannot call trove:Clone() while cleaning',2)end return
-ai:Add(aj:Clone())end ah.Construct=function(ai,aj,...)if ai._cleaning then
-error('Cannot call trove:Construct() while cleaning',2)end local ak,al=(type(aj)
-)if ak=='table'then al=(aj).new(...)elseif ak=='function'then al=(aj)(...)end
-return ai:Add(al)end ah.Connect=function(ai,aj,ak)if ai._cleaning then error(
-'Cannot call trove:Connect() while cleaning',2)end ag(aj)local al=aj return ai:
-Add(al:Connect(ak))end ah.Once=function(ai,aj,ak)if ai._cleaning then error(
-'Cannot call trove:Connect() while cleaning',2)end ag(aj)local al,am=aj am=al:
-Once(function(...)ak(...)ai:Pop(am)end)return ai:Add(am)end ah.BindToRenderStep=
-function(ai,aj,ak,al)if ai._cleaning then error(
-'cannot call trove:BindToRenderStep() while cleaning',2)end aa:BindToRenderStep(
-aj,ak,al)ai:Add(function()aa:UnbindFromRenderStep(aj)end)end ah.AddPromise=
-function(ai,aj)if ai._cleaning then error(
-'cannot call trove:AddPromise() while cleaning',2)end af(aj)local ak=aj if ak:
-getStatus()=='Started'then ak:finally(function()if ai._cleaning then return end
-ai:_findAndRemoveFromObjects(ak,false)end)ai:Add(ak,'cancel')end return ak end
-ah.Remove=function(ai,aj)if ai._cleaning then error(
-'cannot call trove:Remove() while cleaning',2)end return ai:
-_findAndRemoveFromObjects(aj,true)end ah.Pop=function(ai,aj)if ai._cleaning then
-error('cannot call trove:Pop() while cleaning',2)end return ai:
-_findAndRemoveFromObjects(aj,false)end ah.Extend=function(ai)if ai._cleaning
-then error('cannot call trove:Extend() while cleaning',2)end return ai:
-Construct(ah)end ah.Clean=function(ai)if ai._cleaning then return end ai.
-_cleaning=true for aj,ak in ai._objects do ai:_cleanupObject(ak[1],ak[2])end
-table.clear(ai._objects)ai._cleaning=false end ah.WrapClean=function(ai)return
-function()ai:Clean()end end ah._findAndRemoveFromObjects=function(ai,aj,ak)local
-al=ai._objects for am,an in al do if an[1]==aj then local ao=#al al[am]=al[ao]al
-[ao]=nil if ak then ai:_cleanupObject(an[1],an[2])end return true end end return
-false end ah._cleanupObject=function(ai,aj,ak)if ak==ab then task.spawn(aj)
-elseif ak==ac then pcall(task.cancel,aj)else aj[ak](aj)end end ah.
-AttachToInstance=function(ai,aj)if ai._cleaning then error(
-'cannot call trove:AttachToInstance() while cleaning',2)elseif not aj:
-IsDescendantOf(game)then error(
-'instance is not a descendant of the game hierarchy',2)end return ai:Connect(aj.
-Destroying,function()ai:Destroy()end)end ah.Destroy=function(ai)ai:Clean()end
-return{new=ah.new}end)()end,[27]=function()local aa,ab=a(27)return(function(...)
-return function(ac)return ac.new(ac):Extend(ac.Extensions.Children(ab))end end)(
-)end,[28]=function()a(28)return(function(...)return function(aa)local ab=aa.
-Services local ac=ab.HttpService return function()return(ac:GenerateGUID(false):
-gsub('-','')):lower()end end end)()end,[29]=function()a(29)return(function(...)
-return function(aa)local ab=aa.Services local ac,ad,ae,af=ab.Workspace,aa:Get
-'Modules/t',aa:Get'RBXUtil/TableUtil',aa:Get'Functions/Numbers'local ag,ah,ai,aj
-=ad.numberMin(0),ad.tuple(ad.numberMin(0),ad.string),math.floor,{}aj.Constants={
-Second=1,Minute=60,Hour=3600,Day=86400,Month=2592000,Year=31536000}local ak={}
-for al,am in pairs(aj.Constants)do table.insert(ak,{Name=al,Value=am})end table.
-sort(ak,function(al,am)return al.Value>am.Value end)aj.now=function()return ac:
-GetServerTimeNow()end aj.FormatTime=function(al,am)assert(ah(al,am))return
-DateTime.fromUnixTimestamp(al):FormatLocalTime(am,'en-us')end aj.FormatDuration=
-function(al,am,an)assert(ah(al,am))local ao,ap,aq,ar,as=ai(al/86400),ai(al%86400
-/3600),ai(al%3600/60),ai(al%60),an and'%02d'or'%d'return(am:gsub('%%d',string.
-format(as,ao)):gsub('%%h',string.format(as,ap)):gsub('%%m',string.format(as,aq))
-:gsub('%%s',string.format(as,ar)))end aj.CompressTime=function(al)assert(ag(al))
-al=ai(al)for am,an in ak do local ao,ap=an.Name,an.Value local aq=ai(al/ap)if aq
-==0 then continue end return string.format('%s %s',tostring(af.Comma(aq)),
-tostring(ao..(aq>1 and's'or'')))end return'0 Seconds'end return aj end end)()end
-,[30]=function()a(30)return(function(...)return function(aa)local ab=aa:Get
-'Modules/t'local ac,ad=ab.tuple(ab.number,ab.numberConstrained(0,8)),{}ad.Comma=
-function(ae)assert(ab.integer(ae))local af=tostring(ae)local ag,ah,ai=af:match
-'^([^%d]*%d)(%d*)(.-)$'return ag..ah:reverse():gsub('(%d%d%d)','%1,'):reverse()
-..ai end ad.DecimalRound=function(ae,af)assert(ac(ae,af))if ae%1==0 then return
-ae end return string.format(string.format('%%.%sf',tostring(af)),ae)end return
-ad end end)()end,[31]=function()a(31)return(function(...)return function(aa)
-local ab=aa:Get'Modules/t'local ac,ad,ae=ab.tuple(ab.string,ab.numberMin(0),ab.
-optional(ab.string)),string.rep,{}ae.Truncate=function(af,ag,ah)assert(ac(af,ag,
-ah))return af:sub(1,ag)..(ah or'')end ae.LeadingSpace=function(af)assert(ab.
-numberPositive(af))return ad(' ',af)end return ae end end)()end,[32]=function()
-a(32)return(function(...)return function(aa)local ab,ac=(request or(http and
-http.request)or httprequest),aa.Services local ad=ac.HttpService return function
-(ae,af)if af then setclipboard('https://www.discord.gg/'..ae)end if(not ab)then
-return false end ab{Url='http://127.0.0.1:6463/rpc?v=1',Method='POST',Headers={[
-'Content-Type']='application/json',Origin='https://discord.com'},Body=ad:
-JSONEncode{cmd='INVITE_BROWSER',args={code=ae},nonce=ad:GenerateGUID(false)}}
-return true end end end)()end,[33]=function()a(33)return(function(...)return
-function(aa)local ab={Info='\u{1f535}',Warn='\u{1f7e0}',Success='\u{1f7e2}',
-Error='\u{1f534}'}local ac=function(ac,ad)local ae=os.date'*t'string.format(
-'%s:%s:%s',ae.hour,ae.min,ae.sec)print(string.format('%s | [Library]: %s',ab[ac]
-,ad))end return ac end end)()end,[34]=function()a(34)return(function(...)return
-function(aa)local ab=aa.Services.Stats local ac=ab.Network.ServerStatsItem[
-'Data Ping']return function()return ac:GetValue()/1000 end end end)()end,[35]=
-function()a(35)return(function(...)return function(aa)local ab=aa:Get'Modules/t'
-local ac,ad=ab.tuple(ab.string,ab['function'],ab['function']),{List={}}ad.Add=
-function(ae,af,ag)assert(ac(ae,af,ag))if ad.List[ae]then ad.Release(ae)end local
-ah=hookfunction(af,newcclosure(ag))ad.List[ae]={af,ah}return ah end ad.Release=
-function(ae)assert(ab.string(ae))local af=ad.List[ae]if(not af)then return false
-end hookfunction(af[1],af[2])ad.List[ae]=nil return true end ad.Cleanup=function
-()for ae in ad.List do ad.Release(ae)end end return ad end end)()end,[36]=
-function()a(36)return(function(...)return function(aa)local ab=aa.Services local
-ac,ad,ae=ab.VirtualUser,ab.Players,ab.Workspace local af,ag,ah,ai=ad.LocalPlayer
-,Random.new(),Vector2.zero,{Connection=nil}ai.IsEnabled=function()return ai.
-Connection~=nil end ai.Enable=function()if ai.IsEnabled()then return true end ai
-.Connection=af.Idled:Connect(function(aj)local ak=ae.CurrentCamera ac:
-Button2Down(ah,ak.CFrame)task.wait(ag:NextNumber(0,1))ac:Button2Up(ah,ak.CFrame)
-end)return true end ai.Disable=function()if(not ai.IsEnabled())then return true
-end ai.Connection:Disconnect()ai.Connection=nil return true end return ai end
-end)()end,[37]=function()a(37)return(function(...)return function(aa)local ab={}
-ab.Find=function(ac,ad,ae)local af,ag=1,#ac while af<=ag do local ah=math.floor(
-(af+ag)/2)local ai=(ae and{(ae(ac[ah]))}or{(ac[ah])})[1]if ai==ad then return ah
-,ac[ah]elseif ai<ad then af=ah+1 else ag=ah-1 end end return nil end ab.Nearest=
-function(ac,ad,ae)local af,ag,ah,ai=1,#ac,(math.huge)while af<=ag do local aj=
-math.floor((af+ag)/2)local ak=(ae and{(ae(ac[aj]))}or{(ac[aj])})[1]local al=math
-.abs(ak-ad)if al<ah then ai=aj ah=al end if ak==ad then break elseif ak<ad then
-af=aj+1 else ag=aj-1 end end if ai then return ai,ac[ai]end return nil end
-return ab end end)()end,[38]=function()a(38)return(function(...)return function(
-aa)local ab=aa.Services local ac,ad,ae=ab.Players,ab.Workspace,ab.RunService
-local af,ag=(ac.LocalPlayer)local ah,ai=function(ah)local ai=af.Character if(not
-ai)then return end for aj,ak in ai:QueryDescendants'BasePart'do ak.CanCollide=ah
-end end,{}ai.Noclip=function()if ag then return end ag=ae.Stepped:Connect(
-function()ah(false)end)end ai.Clip=function()if ag then ag:Disconnect()ag=nil
-end ah(true)end return ai end end)()end,[39]=function()a(39)return(function(...)
-return function(aa)local ab,ac,ad,ae=aa:Get'RBXUtil/TableUtil',aa:Get
-'Functions/Time',aa:Get'Modules/t',utf8.char local af=ac.Constants local ag={
-DiscordInviteCode='mkPHtrSyWy',Characters={Invisible=10240,BulletPoint=8226},
-Emojis={Unknown='<:letter_x:1305284794044776622>',Person=
-'<:person:1305298114265219094>'},LRM_Constants={Premium=LRM_IsUserPremium or
-false,DiscordUserId=LRM_LinkedDiscordID or 0,ScriptName=LRM_ScriptName or
-'generic',TotalExecutions=LRM_TotalExecutions or 1337,SecondsLeft=
-LRM_SecondsLeft or 60,UserNote=LRM_UserNote or'user note',ScriptVersion=
-LRM_ScriptVersion or'0001'},KeySystemAdProviders={{Name='Lootlabs',KeyLength=af.
-Hour*12,CompletionTime=af.Minute*2,Identifier='LootLabs-buIsuhTFBCaf'},{Name=
-'Linkvertise (premium only)',KeyLength=af.Hour*24,CompletionTime=af.Minute*1,
-Identifier='Linkvertise-EsllfgSWtQqg'}},ProductionRoleInfo={developer={Color=
-Color3.fromRGB(2,116,255)},contributor={Color=Color3.fromRGB(255,255,127)},
-generic={Color=Color3.new(1,1,1)}}}for ah,ai in ag.Characters do if typeof(ai)~=
-'number'then continue end ag.Characters[ah]=ae(ai)end setmetatable(ag.Emojis,{
-__index=function(ah,ai)local aj=rawget(ah,'Unknown')rawset(ah,ai,aj)return aj
-end})return ag end end)()end,[40]=function()local aa,ab,ac=a(40)return(function(
-...)local ad={}ad.__index=ad ad.Extensions={Children=function(ae)local af={}for
-ag,ah in ae:GetChildren()do af[ah.Name]=ah end return af end}local ae=cloneref
-or function(ae)return ae end ad.Services=setmetatable({},{__index=function(af,ag
-)local ah,ai=pcall(game.GetService,game,ag)if ah and ai then ai=ae(ai)rawset(af,
-ag,ai)return ai end return nil end})ad.new=function(af)local ag=setmetatable({
-__vinca=true,Loaded={},Loading={},Container={}},ad)ag.Root=af or ag return ag
-end ad.is=function(af)return af and typeof(af)=='table'and rawget(af,'__vinca')
-end ad.Add=function(af,ag,ah)assert(not af.Container[ag],'Index already exists')
-af.Container[ag]=ah return af end ad.Load=function(af,ag)if af.Loaded[ag]~=nil
-then return af.Loaded[ag]end local ah=af.Container[ag]assert(ah~=nil,string.
-format('Unknown dependency "%s"',tostring(ag)))assert(not af.Loading[ag],string.
-format('Circular dependency at "%s"',tostring(ag)))af.Loading[ag]=true if
-typeof(ah)=='table'and ah.ClassName=='ModuleScript'then ah=ac(ah)elseif typeof(
-ah)=='Instance'and ah.ClassName=='ModuleScript'then ah=ac(ah)end if typeof(ah)==
-'function'then ah=ah(af.Root)end af.Loading[ag]=nil af.Loaded[ag]=ah return ah
-end ad.Extend=function(af,ag)for ah,ai in ag do af:Add(ah,ai)end return af end
-ad.Get=function(af,ag)local ah=af for ai in string.gmatch(ag,'[^/]+')do if ad.
-is(ah)then ah=ah:Load(ai)else ah=ah[ai]end assert(ah~=nil,string.format(
-'Invalid path "%s" at "%s"',tostring(ag),tostring(ai)))end return ah end return
-ad end)()end},{{1,2,{'Shared'},{{21,2,{'RBXUtil'},{{23,2,{'Signal'}},{24,2,{
-'Promise'}},{26,2,{'Trove'}},{25,2,{'Tree'}},{22,2,{'TableUtil'}}}},{40,2,{
-'Vinca'}},{27,2,{'Functions'},{{32,2,{'PromptDiscord'}},{34,2,{'GetPing'}},{37,2
-,{'BinarySearch'}},{29,2,{'Time'}},{28,2,{'CreateGUID'}},{35,2,{'Hooks'}},{33,2,
-{'OutputMessage'}},{38,2,{'Noclip'}},{30,2,{'Numbers'}},{36,2,{'AntiAFK'}},{31,2
-,{'Strings'}}}},{2,2,{'Modules'},{{7,2,{'t'}},{6,2,{'Color'}},{3,2,{
-'TaskManager'},{{4,2,{'Task'}},{5,2,{'Lock'}}}},{8,2,{'Interface'},{{9,1,{'List'
-},{{10,1,{'Obsidian'},{{16,2,{'ThemeManager'}},{12,2,{'SaveManager'}},{11,2,{
-'Main'}},{13,2,{'Tabs'},{{14,2,{'Home'}},{15,2,{'Settings'}}}}}}}}}},{20,2,{
-'Preference'}},{17,2,{'Places'},{{19,2,{'Kick a Lucky Block'}},{18,2,{
-'Slime RNG'}}}}}},{39,2,{'Constants'}}}}},'0.4.2','strelizia.cc',string,task,
-setmetatable,error,next,table,unpack,coroutine,script,type,require,pcall,
-tostring,tonumber,_VERSION local au,av,aw,ax,ay,az,aA=aj.insert,aj.remove,aj.
-freeze or function(au)return au end,al.wrap,ae.sub,ae.match,ae.gmatch if as and
-ay(as,1,4)=='Lune'then local aB,aC=ap(ao,'@lune/task')if aB and aC then af=aC
-end end local aB=af and af.defer local aC,aD,aE,aF,aG,aH,aI,aJ,aK=aB or function
-(aC,...)ax(aC)(...)end,{[1]='Folder',[2]='ModuleScript',[3]='Script',[4]=
-'LocalScript',[5]='StringValue'},{},{},{},{},{},{},{}local aL,aM={GetFullName={{
-},function(aL)local aM,aN=aL.Name,aL.Parent while aN do aM=aN.Name..'.'..aM aN=
-aN.Parent end return aM end},GetChildren={{},function(aL)local aM={}for aN in ai
-,aK[aL]do au(aM,aN)end return aM end},GetDescendants={{},function(aL)local aM={}
-for aN in ai,aK[aL]do au(aM,aN)for aO,aP in ai,aN:GetDescendants()do au(aM,aP)
-end end return aM end},FindFirstChild={{'string','boolean?'},function(aL,aM,aN)
-local aO=aK[aL]for aP in ai,aO do if aP.Name==aM then return aP end end if aN
-then for aP in ai,aO do return aP:FindFirstChild(aM,true)end end end},
-FindFirstAncestor={{'string'},function(aL,aM)local aN=aL.Parent while aN do if
-aN.Name==aM then return aN end aN=aN.Parent end end},WaitForChild={{'string',
-'number?'},function(aL,aM)return aL:FindFirstChild(aM)end}},{}for aN,aO in ai,aL
-do local aP,aQ,aR=aO[1],aO[2],{}for aS,aT in ai,aP do local aU,aV=az(aT,
-'^([^%?]+)(%??)')aR[aS]={aU,aV}end aM[aN]=function(aS,...)if not aK[aS]then ah(
-"Expected ':' not '.' calling member function "..aN,2)end local aT={...}for aU,
-aV in ai,aR do local aW=aT[aU]local aX,aY,aZ=an(aW),aV[1],aV[2]if aW==nil and
-not aZ then ah('Argument '..aW..' missing or nil',3)end if aY~='any'and aX~=aY
-and not(aX=='nil'and aZ)then ah('Argument '..aU..' expects type "'..aY..
-'", got "'..aX..'"',2)end end return aQ(aS,...)end end local aN=function(aN,aO,
-aP)local aQ,aR,aS,aT,aU,aV=ag({},{__mode='k'}),function(aQ)ah(aQ..
-' is not a valid (virtual) member of '..aN..' "'..aO..'"',3)end,function(aQ)ah(
-'Unable to assign (virtual) property '..aQ..'. Property is read only',3)end,{},{
-}aU.__metatable=false aU.__index=function(aW,aX)if aX=='ClassName'then return aN
-elseif aX=='Name'then return aO elseif aX=='Parent'then return aP elseif aN==
-'StringValue'and aX=='Value'then return aV else local aY=aM[aX]if aY then return
-aY end end for aY in ai,aQ do if aY.Name==aX then return aY end end aR(aX)end aU
-.__newindex=function(aW,aX,aY)if aX=='ClassName'then aS(aX)elseif aX=='Name'then
-aO=aY elseif aX=='Parent'then if aY==aT then return end if aP~=nil then aK[aP][
-aT]=nil end aP=aY if aY~=nil then aK[aY][aT]=true end elseif aN=='StringValue'
-and aX=='Value'then aV=aY else aR(aX)end end aU.__tostring=function()return aO
-end ag(aT,aU)aK[aT]=aQ if aP~=nil then aK[aP][aT]=true end return aT end
-local function CreateRefFromObject(aO,aP)local aQ,aR,aS,aT=aO[1],aO[2],aO[3],aO[
-4]local aU=aD[aR]local aV=aS and av(aS,1)or aU local aW=aN(aU,aV,aP)aE[aQ]=aW if
-aS then for aX,aY in ai,aS do aW[aX]=aY end end if aT then for aX,aY in ai,aT do
-CreateRefFromObject(aY,aW)end end return aW end local aO=aN('Folder','['..ad..
-']')for aP,aQ in ai,ab do CreateRefFromObject(aQ,aO)end for aP,aQ in ai,aa do
-local aR=aE[aP]aF[aR]=aQ aG[aR]=aP local aS=aR.ClassName if aS=='LocalScript'or
-aS=='Script'then au(aI,aR)end end local aP=function(aP)local aQ,aR=aP.ClassName,
-aH[aP]if aR and aQ=='ModuleScript'then return ak(aR)end local aS,aT=aF[aP],
-function(aS)aS=aq(aS)local aT,aU,aV=aP:GetFullName(),az(aS,'[^:]+:(%d+): (.+)')
-if not aU or not at then return aT..':*: '..(aV or aS)end aU=ar(aU)local aW=aG[
-aP]local aX=at[aW]local aY=aU-aX+1 if aY<0 then aY='?'end return aT..':'..aY..
-': '..aV end if aQ=='LocalScript'or aQ=='Script'then local aU,aV=ap(aS)if not aU
-then ah(aT(aV),0)end else local aU={ap(aS)}local aV=av(aU,1)if not aV then local
-aW=av(aU,1)ah(aT(aW),0)end aH[aP]=aU return ak(aU)end end a=function(aQ)local aR
-,aS,aT=aE[aQ],function(aR,...)local aS={ap(aR,...)}local aT=av(aS,1)if not aT
-then ah(aS[1],3)end return ak(aS)end,aw(ag({},{__index=aJ,__newindex=function(aR
-,aS,aT)aJ[aS]=aT end,__len=function()return#aJ end,__iter=function()return ai,aJ
-end}))local aU,aV,aW=aw{version=ac,envname=ad,shared=aT,script=am,require=ao},aR
-,function(aU,...)local aV,aW,aX=an(aU),
-'Attempted to call require with a non-ModuleScript',
-'Attempted to call require with self'if aV=='table'and aK[aU]then if aU.
-ClassName~='ModuleScript'then ah(aW,2)elseif aU==aR then ah(aX,2)end return aP(
-aU)elseif aV=='string'and ay(aU,1,1)~='@'then if#aU==0 then ah(
-'Attempted to call require with empty string',2)end local aY=aR if ay(aU,1,1)==
-'/'then aY=aO elseif ay(aU,1,2)=='./'then aU=ay(aU,3)end local aZ for a_ in aA(
-aU,'([^/]*)/?')do local a0=a_ if a_=='..'then a0='Parent'end if a0~=''then local
-a1=aY:FindFirstChild(a0)if not a1 then local a2=aY.Parent if a2 then a1=a2:
-FindFirstChild(a0)end end if a1 then aY=a1 elseif a_~=aZ and a_~='init'and a_~=
-'init.server'and a_~='init.client'then ah('Virtual script path "'..aU..
-'" not found',2)end end aZ=a_ end if aY.ClassName~='ModuleScript'then ah(aW,2)
-elseif aY==aR then ah(aX,2)end return aP(aY)end return aS(ao,aU,...)end return
-aU,aV,aW end for aQ,aR in ai,aI do aC(aP,aR)end return aP(aO:GetChildren()[1])
+    function Promise.prototype:_finalize()
+        for _, callback in ipairs(self._queuedFinally) do
+            -- Purposefully not passing values to callbacks here, as it could be the
+            -- resolved values, or rejected errors. If the developer needs the values,
+            -- they should use :andThen or :catch explicitly.
+            coroutine.wrap(callback)(self._status)
+        end
+
+        self._queuedFinally = nil
+        self._queuedReject = nil
+        self._queuedResolve = nil
+
+        -- Clear references to other Promises to allow gc
+        if not Promise.TEST then
+            self._parent = nil
+            self._consumers = nil
+        end
+
+        task.defer(coroutine.close, self._thread)
+    end
+
+--[=[
+	Chains a Promise from this one that is resolved if this Promise is already resolved, and rejected if it is not resolved at the time of calling `:now()`. This can be used to ensure your `andThen` handler occurs on the same frame as the root Promise execution.
+
+	```lua
+	doSomething()
+		:now()
+		:andThen(function(value)
+			print("Got", value, "synchronously.")
+		end)
+	```
+
+	If this Promise is still running, Rejected, or Cancelled, the Promise returned from `:now()` will reject with the `rejectionValue` if passed, otherwise with a `Promise.Error(Promise.Error.Kind.NotResolvedInTime)`. This can be checked with [[Error.isKind]].
+
+	@param rejectionValue? any -- The value to reject with if the Promise isn't resolved
+	@return Promise
+]=]
+    function Promise.prototype:now(rejectionValue)
+        local traceback = debug.traceback(nil, 2)
+        if self._status == Promise.Status.Resolved then
+            return self:_andThen(traceback, function(...)
+                return ...
+            end)
+        else
+            return Promise.reject(rejectionValue == nil and Error.new({
+                kind = Error.Kind.NotResolvedInTime,
+                error = "This Promise was not resolved in time for :now()",
+                context = ":now() was called at:\n\n" .. traceback,
+            }) or rejectionValue)
+        end
+    end
+
+--[=[
+	Repeatedly calls a Promise-returning function up to `times` number of times, until the returned Promise resolves.
+
+	If the amount of retries is exceeded, the function will return the latest rejected Promise.
+
+	```lua
+	local function canFail(a, b, c)
+		return Promise.new(function(resolve, reject)
+			-- do something that can fail
+
+			local failed, thing = doSomethingThatCanFail(a, b, c)
+
+			if failed then
+				reject("it failed")
+			else
+				resolve(thing)
+			end
+		end)
+	end
+
+	local MAX_RETRIES = 10
+	local value = Promise.retry(canFail, MAX_RETRIES, "foo", "bar", "baz") -- args to send to canFail
+	```
+
+	@since 3.0.0
+	@param callback (...: P) -> Promise<T>
+	@param times number
+	@param ...? P
+	@return Promise<T>
+]=]
+    function Promise.retry(callback, times, ...)
+        assert(isCallable(callback), "Parameter #1 to Promise.retry must be a function")
+        assert(type(times) == "number", "Parameter #2 to Promise.retry must be a number")
+
+        local args, length = { ... }, select("#", ...)
+
+        return Promise.resolve(callback(...)):catch(function(...)
+            if times > 0 then
+                return Promise.retry(callback, times - 1, unpack(args, 1, length))
+            else
+                return Promise.reject(...)
+            end
+        end)
+    end
+
+--[=[
+	Repeatedly calls a Promise-returning function up to `times` number of times, waiting `seconds` seconds between each
+	retry, until the returned Promise resolves.
+
+	If the amount of retries is exceeded, the function will return the latest rejected Promise.
+
+	@since v3.2.0
+	@param callback (...: P) -> Promise<T>
+	@param times number
+	@param seconds number
+	@param ...? P
+	@return Promise<T>
+]=]
+    function Promise.retryWithDelay(callback, times, seconds, ...)
+        assert(isCallable(callback), "Parameter #1 to Promise.retry must be a function")
+        assert(type(times) == "number", "Parameter #2 (times) to Promise.retry must be a number")
+        assert(type(seconds) == "number", "Parameter #3 (seconds) to Promise.retry must be a number")
+
+        local args, length = { ... }, select("#", ...)
+
+        return Promise.resolve(callback(...)):catch(function(...)
+            if times > 0 then
+                Promise.delay(seconds):await()
+
+                return Promise.retryWithDelay(callback, times - 1, seconds, unpack(args, 1, length))
+            else
+                return Promise.reject(...)
+            end
+        end)
+    end
+
+--[=[
+	Converts an event into a Promise which resolves the next time the event fires.
+
+	The optional `predicate` callback, if passed, will receive the event arguments and should return `true` or `false`, based on if this fired event should resolve the Promise or not. If `true`, the Promise resolves. If `false`, nothing happens and the predicate will be rerun the next time the event fires.
+
+	The Promise will resolve with the event arguments.
+
+	:::tip
+	This function will work given any object with a `Connect` method. This includes all Roblox events.
+	:::
+
+	```lua
+	-- Creates a Promise which only resolves when `somePart` is touched
+	-- by a part named `"Something specific"`.
+	return Promise.fromEvent(somePart.Touched, function(part)
+		return part.Name == "Something specific"
+	end)
+	```
+
+	@since 3.0.0
+	@param event Event -- Any object with a `Connect` method. This includes all Roblox events.
+	@param predicate? (...: P) -> boolean -- A function which determines if the Promise should resolve with the given value, or wait for the next event to check again.
+	@return Promise<P>
+]=]
+    function Promise.fromEvent(event, predicate)
+        predicate = predicate or function()
+            return true
+        end
+
+        return Promise._new(debug.traceback(nil, 2), function(resolve, _, onCancel)
+            local shouldDisconnect ,connection
+=false
+
+            local function disconnect()
+                connection:Disconnect()
+                connection = nil
+            end
+
+            -- We use shouldDisconnect because if the callback given to Connect is called before
+            -- Connect returns, connection will still be nil. This happens with events that queue up
+            -- events when there's nothing connected, such as RemoteEvents
+
+            connection = event:Connect(function(...)
+                local callbackValue = predicate(...)
+
+                if callbackValue == true then
+                    resolve(...)
+
+                    if connection then
+                        disconnect()
+                    else
+                        shouldDisconnect = true
+                    end
+                elseif type(callbackValue) ~= "boolean" then
+                    error("Promise.fromEvent predicate should always return a boolean")
+                end
+            end)
+
+            if shouldDisconnect and connection then
+                return disconnect()
+            end
+
+            onCancel(disconnect)
+        end)
+    end
+
+--[=[
+	Registers a callback that runs when an unhandled rejection happens. An unhandled rejection happens when a Promise
+	is rejected, and the rejection is not observed with `:catch`.
+
+	The callback is called with the actual promise that rejected, followed by the rejection values.
+
+	@since v3.2.0
+	@param callback (promise: Promise, ...: any) -- A callback that runs when an unhandled rejection happens.
+	@return () -> () -- Function that unregisters the `callback` when called
+]=]
+    function Promise.onUnhandledRejection(callback)
+        table.insert(Promise._unhandledRejectionCallbacks, callback)
+
+        return function()
+            local index = table.find(Promise._unhandledRejectionCallbacks, callback)
+
+            if index then
+                table.remove(Promise._unhandledRejectionCallbacks, index)
+            end
+        end
+    end
+
+    return Promise
+end
+end)() end,[25]=function()ImportGlobals(25)return (function(...)return function(Root)
+    local TreeCache = {}
+    TreeCache.Paths = setmetatable({}, {__mode = "k"})
+
+    local Tree ,WaitForChild ,FindFirstChild = {Delimiter = "/"},game.WaitForChild
+,game.FindFirstChild
+
+    local function GetCache(Parent, Path)
+        local ParentCache = TreeCache.Paths[Parent]        if not ParentCache then return nil end
+        local TargetCache = ParentCache[Path]
+
+        return if (TargetCache ~= nil and TargetCache.Parent == Parent) then TargetCache else nil    end
+
+    local function StoreCache(Parent, Path, Resolved)
+        local ParentCache = TreeCache.Paths[Parent]        if not ParentCache then 
+            TreeCache.Paths[Parent] = {}
+            ParentCache = TreeCache.Paths[Parent]
+        end
+
+        ParentCache[Path] = Resolved
+    end
+
+    local function ResolvePath(Path, InitialParent, YieldTimeout)
+        local Read = GetCache(InitialParent, Path)        if Read then return Read end 
+
+        local Parts ,Resolved = string.split(Path, Tree.Delimiter),InitialParent
+
+        for _, v in Parts do 
+            Resolved = FindFirstChild(Resolved, v) or (YieldTimeout and WaitForChild(Resolved, v, YieldTimeout)) or nil            if not Resolved then return nil end
+        end
+
+        StoreCache(InitialParent, Path, Resolved)
+
+        return Resolved
+    end
+    
+    function Tree.Find(Parent, Path)
+        return ResolvePath(Path, Parent)    end
+
+    function Tree.Await(Parent, Path, YieldTimeout)
+        return ResolvePath(Path, Parent, YieldTimeout)    end
+
+    return Tree
+end
+end)() end,[26]=function()ImportGlobals(26)return (function(...)--!strict
+
+local RunService ,FN_MARKER ,THREAD_MARKER ,GENERIC_OBJECT_CLEANUP_METHODS = game:GetService("RunService")
+,newproxy()
+,newproxy()
+,table.freeze({ "Destroy", "Disconnect", "destroy", "disconnect" })
+
+local function getObjectCleanupFunction(object, cleanupMethod)
+    local t = typeof(object)
+
+    if t == "function" then
+        return FN_MARKER
+    elseif t == "thread" then
+        return THREAD_MARKER
+    end
+
+    if cleanupMethod then
+        return cleanupMethod
+    end
+
+    if t == "Instance" then
+        return "Destroy"
+    elseif t == "RBXScriptConnection" then
+        return "Disconnect"
+    elseif t == "table" then
+        for _, genericCleanupMethod in GENERIC_OBJECT_CLEANUP_METHODS do
+            if typeof(object[genericCleanupMethod]) == "function" then
+                return genericCleanupMethod
+            end
+        end
+    end
+
+    error(`failed to get cleanup function for object {t}: {object}`, 3)
+end
+
+local function assertPromiseLike(object)
+    if
+        typeof(object) ~= "table"
+        or typeof(object.getStatus) ~= "function"
+        or typeof(object.finally) ~= "function"
+        or typeof(object.cancel) ~= "function"
+    then
+        error("did not receive a promise as an argument", 3)
+    end
+end
+
+local function assertSignalLike(object)
+    if
+        typeof(object) ~= "RBXScriptSignal"
+        and (typeof(object) ~= "table" or typeof(object.Connect) ~= "function" or typeof(object.Once) ~= "function")
+    then
+        error("did not receive a signal as an argument", 3)
+    end
+end
+
+--[=[
+	@class Trove
+	A Trove is helpful for tracking any sort of object during
+	runtime that needs to get cleaned up at some point.
+]=]
+local Trove = {}
+Trove.__index = Trove
+
+--[=[
+	@return Trove
+	Constructs a Trove object.
+
+	```lua
+	local trove = Trove.new()
+	```
+]=]
+function Trove.new()    local self = setmetatable({}, Trove)
+
+    self._objects = {}
+    self._cleaning = false
+
+    return (self ) end
+
+--[=[
+	@method Add
+	@within Trove
+	@param object any -- Object to track
+	@param cleanupMethod string? -- Optional cleanup name override
+	@return object: any
+	Adds an object to the trove. Once the trove is cleaned or
+	destroyed, the object will also be cleaned up.
+
+	The following types are accepted (e.g. `typeof(object)`):
+
+	| Type | Cleanup |
+	| ---- | ------- |
+	| `Instance` | `object:Destroy()` |
+	| `RBXScriptConnection` | `object:Disconnect()` |
+	| `function` | `object()` |
+	| `thread` | `task.cancel(object)` |
+	| `table` | `object:Destroy()` _or_ `object:Disconnect()` _or_ `object:destroy()` _or_ `object:disconnect()` |
+	| `table` with `cleanupMethod` | `object:<cleanupMethod>()` |
+
+	Returns the object added.
+
+	```lua
+	-- Add a part to the trove, then destroy the trove,
+	-- which will also destroy the part:
+	local part = Instance.new("Part")
+	trove:Add(part)
+	trove:Destroy()
+
+	-- Add a function to the trove:
+	trove:Add(function()
+		print("Cleanup!")
+	end)
+	trove:Destroy()
+
+	-- Standard cleanup from table:
+	local tbl = {}
+	function tbl:Destroy()
+		print("Cleanup")
+	end
+	trove:Add(tbl)
+
+	-- Custom cleanup from table:
+	local tbl = {}
+	function tbl:DoSomething()
+		print("Do something on cleanup")
+	end
+	trove:Add(tbl, "DoSomething")
+	```
+]=]
+function Trove.Add(self, object, cleanupMethod)    if self._cleaning then
+        error("cannot call trove:Add() while cleaning", 2)
+    end
+
+    local cleanup = getObjectCleanupFunction(object, cleanupMethod)
+    table.insert(self._objects, { object, cleanup })
+
+    return object
+end
+
+--[=[
+	@method Clone
+	@within Trove
+	@return Instance
+	Clones the given instance and adds it to the trove. Shorthand for
+	`trove:Add(instance:Clone())`.
+
+	```lua
+	local clonedPart = trove:Clone(somePart)
+	```
+]=]
+function Trove.Clone(self, instance)    if self._cleaning then
+        error("cannot call trove:Clone() while cleaning", 2)
+    end
+
+    return self:Add(instance:Clone())
+end
+
+--[=[
+	@method Construct
+	@within Trove
+	@param class { new(Args...) -> T } | (Args...) -> T
+	@param ... Args...
+	@return T
+	Constructs a new object from either the
+	table or function given.
+
+	If a table is given, the table's `new`
+	function will be called with the given
+	arguments.
+
+	If a function is given, the function will
+	be called with the given arguments.
+
+	The result from either of the two options
+	will be added to the trove.
+
+	This is shorthand for `trove:Add(SomeClass.new(...))`
+	and `trove:Add(SomeFunction(...))`.
+
+	```lua
+	local Signal = require(somewhere.Signal)
+
+	-- All of these are identical:
+	local s = trove:Construct(Signal)
+	local s = trove:Construct(Signal.new)
+	local s = trove:Construct(function() return Signal.new() end)
+	local s = trove:Add(Signal.new())
+
+	-- Even Roblox instances can be created:
+	local part = trove:Construct(Instance, "Part")
+	```
+]=]
+function Trove.Construct(self, class, ...)
+    if self._cleaning then
+        error("Cannot call trove:Construct() while cleaning", 2)
+    end
+
+    local t ,object =(type(class)
+)    if t == "table" then
+        object = (class ).new(...)
+    elseif t == "function" then
+        object = (class )(...)
+    end
+
+    return self:Add(object)
+end
+
+--[=[
+	@method Connect
+	@within Trove
+	@param signal RBXScriptSignal
+	@param fn (...: any) -> ()
+	@return RBXScriptConnection
+	Connects the function to the signal, adds the connection
+	to the trove, and then returns the connection.
+
+	This is shorthand for `trove:Add(signal:Connect(fn))`.
+
+	```lua
+	trove:Connect(workspace.ChildAdded, function(instance)
+		print(instance.Name .. " added to workspace")
+	end)
+	```
+]=]
+function Trove.Connect(
+    self,
+    signal,
+    fn)
+    if self._cleaning then
+        error("Cannot call trove:Connect() while cleaning", 2)
+    end
+    assertSignalLike(signal)
+
+    local confirmedSignal = signal 
+    return self:Add(confirmedSignal:Connect(fn))
+end
+
+--[=[
+	@method Once
+	@within Trove
+	@param signal RBXScriptSignal
+	@param fn (...: any) -> ()
+	@return RBXScriptConnection
+	Connects the function to the signal using the `Once`
+	method, adds the connection to the trove, and then
+	returns the connection.
+
+	This is shorthand for `trove:Add(signal:Once(fn))`.
+
+	```lua
+	trove:Connect(workspace.ChildAdded, function(instance)
+		print(instance.Name .. " added to workspace")
+	end)
+	```
+]=]
+function Trove.Once(
+    self,
+    signal,
+    fn)
+    if self._cleaning then
+        error("Cannot call trove:Connect() while cleaning", 2)
+    end
+    assertSignalLike(signal)
+
+    local confirmedSignal ,conn
+= signal     conn = confirmedSignal:Once(function(...)
+        fn(...)
+        self:Pop(conn)
+    end)
+
+    return self:Add(conn)
+end
+
+--[=[
+	@method BindToRenderStep
+	@within Trove
+	@param name string
+	@param priority number
+	@param fn (dt: number) -> ()
+	Calls `RunService:BindToRenderStep` and registers a function in the
+	trove that will call `RunService:UnbindFromRenderStep` on cleanup.
+
+	```lua
+	trove:BindToRenderStep("Test", Enum.RenderPriority.Last.Value, function(dt)
+		-- Do something
+	end)
+	```
+]=]
+function Trove.BindToRenderStep(self, name, priority, fn)
+    if self._cleaning then
+        error("cannot call trove:BindToRenderStep() while cleaning", 2)
+    end
+
+    RunService:BindToRenderStep(name, priority, fn)
+
+    self:Add(function()
+        RunService:UnbindFromRenderStep(name)
+    end)
+end
+
+--[=[
+	@method AddPromise
+	@within Trove
+	@param promise Promise
+	@return Promise
+	Gives the promise to the trove, which will cancel the promise if the trove is cleaned up or if the promise
+	is removed. The exact promise is returned, thus allowing chaining.
+
+	```lua
+	trove:AddPromise(doSomethingThatReturnsAPromise())
+		:andThen(function()
+			print("Done")
+		end)
+	-- Will cancel the above promise (assuming it didn't resolve immediately)
+	trove:Clean()
+
+	local p = trove:AddPromise(doSomethingThatReturnsAPromise())
+	-- Will also cancel the promise
+	trove:Remove(p)
+	```
+
+	:::caution Promise v4 Only
+	This is only compatible with the [roblox-lua-promise](https://eryn.io/roblox-lua-promise/) library, version 4.
+	:::
+]=]
+function Trove.AddPromise(self, promise)
+    if self._cleaning then
+        error("cannot call trove:AddPromise() while cleaning", 2)
+    end
+    assertPromiseLike(promise)
+    local confirmedPromise = promise 
+    if confirmedPromise:getStatus() == "Started" then
+        confirmedPromise:finally(function()
+            if self._cleaning then
+                return
+            end
+            self:_findAndRemoveFromObjects(confirmedPromise, false)
+        end)
+
+        self:Add(confirmedPromise, "cancel")
+    end
+
+    return confirmedPromise
+end
+
+--[=[
+	@method Remove
+	@within Trove
+	@param object any
+	Removes the object from the Trove and cleans it up. To remove without
+	cleaning, use the `Pop` method instead.
+
+	```lua
+	local part = Instance.new("Part")
+	trove:Add(part)
+	trove:Remove(part) -- Part is destroyed
+	```
+]=]
+function Trove.Remove(self, object)    if self._cleaning then
+        error("cannot call trove:Remove() while cleaning", 2)
+    end
+
+    return self:_findAndRemoveFromObjects(object, true)
+end
+
+--[=[
+	@method Pop
+	@within Trove
+	@param object any
+	Removes the object from the Trove, but does _not_ clean it up. To
+	clean up the object on removal, use the `Remove` method instead.
+
+	```lua
+	local part = Instance.new("Part")
+	trove:Add(part)
+	trove:Pop(part)
+	trove:Clean() -- Part is NOT destroyed
+	```
+]=]
+function Trove.Pop(self, object)    if self._cleaning then
+        error("cannot call trove:Pop() while cleaning", 2)
+    end
+
+    return self:_findAndRemoveFromObjects(object, false)
+end
+
+--[=[
+	@method Extend
+	@within Trove
+	@return Trove
+	Creates and adds another trove to itself. This is just shorthand
+	for `trove:Construct(Trove)`. This is useful for contexts where
+	the trove object is present, but the class itself isn't.
+
+	:::note
+	This does _not_ clone the trove. In other words, the objects in the
+	trove are not given to the new constructed trove. This is simply to
+	construct a new Trove and add it as an object to track.
+	:::
+
+	```lua
+	local trove = Trove.new()
+	local subTrove = trove:Extend()
+
+	trove:Clean() -- Cleans up the subTrove too
+	```
+]=]
+function Trove.Extend(self)
+    if self._cleaning then
+        error("cannot call trove:Extend() while cleaning", 2)
+    end
+
+    return self:Construct(Trove)
+end
+
+--[=[
+	@method Clean
+	@within Trove
+	Cleans up all objects in the trove. This is
+	similar to calling `Remove` on each object
+	within the trove. The ordering of the objects
+	removed is _not_ guaranteed.
+
+	```lua
+	trove:Clean()
+	```
+]=]
+function Trove.Clean(self)
+    if self._cleaning then
+        return
+    end
+
+    self._cleaning = true
+
+    for _, obj in self._objects do
+        self:_cleanupObject(obj[1], obj[2])
+    end
+
+    table.clear(self._objects)
+    self._cleaning = false
+end
+
+--[=[
+	@method WrapClean
+	@within Trove
+	Returns a function that wraps the trove's `Clean()`
+	method. Calling the returned function will clean up
+	the trove.
+
+	This is often useful in contexts where functions
+	are the primary mode for cleaning up an environment,
+	such as in many "observer" patterns.
+
+	```lua
+	local cleanup = trove:WrapClean()
+
+	-- Sometime later...
+	cleanup()
+	```
+
+	```lua
+	-- Common observer pattern example:
+	someObserver(function()
+		local trove = Trove.new()
+		-- Foo
+		return trove:WrapClean()
+	end)
+	```
+]=]
+function Trove.WrapClean(self)
+    return function()
+        self:Clean()
+    end
+end
+
+function Trove._findAndRemoveFromObjects(self, object, cleanup)    local objects = self._objects
+
+    for i, obj in objects do
+        if obj[1] == object then
+            local n = #objects
+            objects[i] = objects[n]
+            objects[n] = nil
+
+            if cleanup then
+                self:_cleanupObject(obj[1], obj[2])
+            end
+
+            return true
+        end
+    end
+
+    return false
+end
+
+function Trove._cleanupObject(_self, object, cleanupMethod)
+    if cleanupMethod == FN_MARKER then
+        task.spawn(object)
+    elseif cleanupMethod == THREAD_MARKER then
+        pcall(task.cancel, object)
+    else
+        object[cleanupMethod](object)
+    end
+end
+
+--[=[
+	@method AttachToInstance
+	@within Trove
+	@param instance Instance
+	@return RBXScriptConnection
+	Attaches the trove to a Roblox instance. Once this
+	instance is removed from the game (parent or ancestor's
+	parent set to `nil`), the trove will automatically
+	clean up.
+
+	This inverses the ownership of the Trove object, and should
+	only be used when necessary. In other words, the attached
+	instance dictates when the trove is cleaned up, rather than
+	the trove dictating the cleanup of the instance.
+
+	:::caution
+	Will throw an error if `instance` is not a descendant
+	of the game hierarchy.
+	:::
+
+	```lua
+	trove:AttachToInstance(somePart)
+	trove:Add(function()
+		print("Cleaned")
+	end)
+
+	-- Destroying the part will cause the trove to clean up, thus "Cleaned" printed:
+	somePart:Destroy()
+	```
+]=]
+function Trove.AttachToInstance(self, instance)
+    if self._cleaning then
+        error("cannot call trove:AttachToInstance() while cleaning", 2)
+    elseif not instance:IsDescendantOf(game) then
+        error("instance is not a descendant of the game hierarchy", 2)
+    end
+
+    return self:Connect(instance.Destroying, function()
+        self:Destroy()
+    end)
+end
+
+--[=[
+	@method Destroy
+	@within Trove
+	Alias for `trove:Clean()`.
+
+	```lua
+	trove:Destroy()
+	```
+]=]
+function Trove.Destroy(self)
+    self:Clean()
+end
+
+return {
+    new = Trove.new,
+}
+end)() end,[27]=function()local wax, script=ImportGlobals(27)return (function(...)return function(Root)
+	return Root.new(Root):Extend(Root.Extensions.Children(script))
+end
+end)() end,[28]=function()ImportGlobals(28)return (function(...)return function(Root)
+	local Services = Root.Services	
+	local HttpService= Services.HttpService	
+	return function()
+		return (HttpService:GenerateGUID(false):gsub('-', '')):lower()
+	end
+end
+end)() end,[29]=function()ImportGlobals(29)return (function(...)return function(Root)
+    local Services = Root.Services
+local Workspace , t , TableUtil , Numbers =Services.Workspace 
+, Root:Get('Modules/t'), Root:Get('RBXUtil/TableUtil'), Root:Get('Functions/Numbers')
+
+    -- // Variables
+    local CompressAssert ,FormatAssert ,floor ,Time = t.numberMin(0),t.tuple(t.numberMin(0), t.string),math.floor,{}
+
+    Time.Constants = {
+        Second = 1,
+        Minute = 60,
+        Hour = 3600,
+        Day = 86_400,
+        Month = 2_592_000,
+        Year = 31_536_000
+    }
+    
+    local SortedUnits = {}
+
+    for Name, Value in pairs(Time.Constants) do
+        table.insert(SortedUnits, {Name = Name, Value = Value})
+    end
+
+    table.sort(SortedUnits, function(a, b) return a.Value > b.Value end)
+
+    function Time.now()
+        return Workspace:GetServerTimeNow()
+    end
+
+    function Time.FormatTime(Unix, Format)
+        assert(FormatAssert(Unix, Format))        
+        return DateTime.fromUnixTimestamp(Unix):FormatLocalTime(Format, 'en-us')
+    end
+
+    function Time.FormatDuration(Duration, Format, Padding)
+        assert(FormatAssert(Duration, Format)) -- we can re-use format assertion since they are fundementally same
+        
+        local Days ,Hours ,Minutes ,Seconds ,Padded = floor(Duration / 86400)
+,floor(Duration % 86400 / 3600)
+,floor(Duration % 3600  / 60)
+,floor(Duration % 60)
+,if Padding then "%02d" else "%d"
+
+        return (
+            Format
+                :gsub('%%d', string.format(Padded, Days))
+                :gsub('%%h', string.format(Padded, Hours))
+                :gsub('%%m', string.format(Padded, Minutes))
+                :gsub('%%s', string.format(Padded, Seconds))
+        )
+    end
+
+    function Time.CompressTime(Seconds)
+        assert(CompressAssert(Seconds))
+        Seconds = floor(Seconds)        
+        for _, Pair in SortedUnits do 
+            local Name ,Value = Pair.Name,Pair.Value
+
+            local Amount = floor(Seconds / Value)            if Amount == 0 then continue end 
+
+            return `{Numbers.Comma(Amount)} {Name .. (Amount > 1 and 's' or '')}`        end
+
+        return '0 Seconds'
+    end
+
+    return Time
+end
+end)() end,[30]=function()ImportGlobals(30)return (function(...)return function(Root)
+	-- // Modules
+	local t = Root:Get('Modules/t')	
+	-- // Variables
+    local DecimalRoundAssert ,Numbers = t.tuple(t.number, t.numberConstrained(0, 8)),{}	
+	function Numbers.Comma(Number)
+		assert(t.integer(Number))		
+		local String = tostring(Number)
+		local Left, Num, Right = String:match('^([^%d]*%d)(%d*)(.-)$')
+
+		return Left .. Num:reverse():gsub('(%d%d%d)', '%1,'):reverse() .. Right
+	end
+	
+	function Numbers.DecimalRound(Number, Decimals)
+		assert(DecimalRoundAssert(Number, Decimals))
+
+		if Number % 1 == 0 then
+			return Number
+		end
+
+		return string.format(`%.{Decimals}f`, Number)
+	end
+	
+	return Numbers
+end
+end)() end,[31]=function()ImportGlobals(31)return (function(...)return function(Root)
+	-- // Modules
+	local t = Root:Get('Modules/t')	
+	-- // Variables
+    local TruncateAssert ,rep ,Strings = t.tuple(t.string, t.numberMin(0), t.optional(t.string)),string.rep,{}	
+	function Strings.Truncate(String, Cutoff, Suffix)
+		assert(TruncateAssert(String, Cutoff, Suffix))		
+		return String:sub(1, Cutoff) .. (Suffix or '')    end
+    
+    function Strings.LeadingSpace(Amount)
+        assert(t.numberPositive(Amount))        
+        return rep(" ", Amount)
+    end
+	
+	return Strings
+end
+end)() end,[32]=function()ImportGlobals(32)return (function(...)return function(Root)
+	local HttpRequest ,Services = (request or (http and http.request) or httprequest)
+,Root.Services
+
+	local HttpService= Services.HttpService
+
+	return function(invite_code, clipboard)
+		if clipboard then 
+			setclipboard("https://www.discord.gg/"..invite_code)
+		end
+
+		if (not HttpRequest) then
+			return false
+		end
+
+		HttpRequest({
+			Url = "http://127.0.0.1:6463/rpc?v=1",
+			Method = "POST",
+			Headers = {
+				["Content-Type"] = "application/json",
+Origin="https://discord.com"
+			},
+			Body = HttpService:JSONEncode({
+				cmd = "INVITE_BROWSER",
+				args = {
+					code = invite_code
+				},
+				nonce = HttpService:GenerateGUID(false)
+			})
+		})
+
+		return true
+	end
+end
+end)() end,[33]=function()ImportGlobals(33)return (function(...)return function(Root)
+	local types = {
+		Info = '🔵',
+		Warn = '🟠',
+		Success = '🟢',
+		Error = '🔴'
+	}
+
+	local function Message(Type, Text)
+		local _time = os.date("*t")
+string.format("%s:%s:%s", _time.hour, _time.min, _time.sec)
+
+		print(string.format("%s | [Library]: %s", types[Type], Text))
+	end
+
+	return Message
+end
+end)() end,[34]=function()ImportGlobals(34)return (function(...)return function(Root)
+    local Stats = Root.Services.Stats    
+    local DataPing = Stats.Network.ServerStatsItem["Data Ping"]    
+    return function()
+        return DataPing:GetValue() / 1000    end
+end
+end)() end,[35]=function()ImportGlobals(35)return (function(...)return function(Root)
+    local t = Root:Get("Modules/t")    
+    -- // Variables
+    local AddAssertion ,Hooks = t.tuple(t.string, t['function'], t['function']),{List = {}}    
+    function Hooks.Add(Index, Original, Callback)
+        assert(AddAssertion(Index, Original, Callback))        
+        if Hooks.List[Index] then 
+            Hooks.Release(Index)        end
+        
+        local OriginalEnv = getfenv(Original)
+        local NewEnv = setmetatable({
+            _STRELIZIA_ReplacementFunction = Callback,
+        }, {
+            __index = OriginalEnv,
+            __newindex = OriginalEnv,
+        })
+        
+        local Old = hookfunction(Original, setfenv(function(...)
+            return _STRELIZIA_ReplacementFunction(...)
+        end, NewEnv))
+        
+        Hooks.List[Index] = {Original, Old}        
+        return Old 
+    end
+    
+    function Hooks.Release(Index)
+        assert(t.string(Index))        
+        local Function = Hooks.List[Index]        if (not Function) then
+            return false
+        end 
+        
+        hookfunction(Function[1], Function[2])        
+        Hooks.List[Index] = nil
+        
+        return true
+    end
+    
+    function Hooks.Cleanup()
+        for Hook in Hooks.List do
+            Hooks.Release(Hook)
+        end
+    end
+    
+    return Hooks
+end
+end)() end,[36]=function()ImportGlobals(36)return (function(...)return function(Root)
+    local Services = Root.Services    
+    local VirtualUser,Players,Workspace= Services.VirtualUser
+,Services.Players
+,Services.Workspace
+    
+    -- // Variables
+    local LocalPlayer ,NewRandom ,Zero ,AntiAFK = Players.LocalPlayer
+,Random.new(),Vector2.zero
+,{Connection = nil}    
+    function AntiAFK.IsEnabled()
+        return AntiAFK.Connection ~= nil
+    end
+    
+    function AntiAFK.Enable()
+        if AntiAFK.IsEnabled() then
+            return true
+        end
+        
+        AntiAFK.Connection = LocalPlayer.Idled:Connect(function(Time)
+            local CurrentCamera = Workspace.CurrentCamera
+
+            VirtualUser:Button2Down(Zero, CurrentCamera.CFrame)
+            task.wait(NewRandom:NextNumber(0, 1))
+            VirtualUser:Button2Up(Zero, CurrentCamera.CFrame)
+        end)
+        
+        return true
+    end
+    
+    function AntiAFK.Disable()
+        if (not AntiAFK.IsEnabled()) then
+            return true
+        end
+        
+        AntiAFK.Connection:Disconnect()        AntiAFK.Connection = nil        
+        return true
+    end
+    
+    return AntiAFK
+end
+end)() end,[37]=function()ImportGlobals(37)return (function(...)return function(Root)
+    local BinarySearch = {}    
+    function BinarySearch.Find(Array, Target, Predicator)
+        local Low, High = 1, #Array
+
+        while Low <= High do
+            local Mid = math.floor((Low + High) / 2)
+            local Value = if Predicator then Predicator(Array[Mid]) else Array[Mid]
+
+            if Value == Target then
+                return Mid, Array[Mid]
+            elseif Value < Target then
+                Low = Mid + 1
+            else
+                High = Mid - 1
+            end
+        end
+
+        return nil
+    end
+
+    function BinarySearch.Nearest(Array, Target, Predicator)
+        local Low, High ,BestDelta ,Best= 1, #Array
+,(math.huge
+)
+        while Low <= High do
+            local Mid = math.floor((Low + High) / 2)
+            local Value = if Predicator then Predicator(Array[Mid]) else Array[Mid]
+            local Delta = math.abs(Value - Target)
+
+            if Delta < BestDelta then
+                Best = Mid
+                BestDelta = Delta
+            end
+
+            if Value == Target then
+                break
+            elseif Value < Target then
+                Low = Mid + 1
+            else
+                High = Mid - 1
+            end
+        end
+
+        if Best then return Best, Array[Best] end
+        return nil
+    end
+
+    return BinarySearch
+end
+end)() end,[38]=function()ImportGlobals(38)return (function(...)return function(Root)
+    local Services = Root.Services local Players, Workspace, RunService=Services.Players, Services.Workspace, Services.RunService    
+    local LocalPlayer ,CurrentConnection=(Players.LocalPlayer)    
+    local function Set(State)
+        local Character = LocalPlayer.Character        if (not Character) then return end
+        for _, BasePart in Character:QueryDescendants("BasePart") do 
+            BasePart.CanCollide = State        end
+    end
+    
+    local Noclip = {}    
+    function Noclip.Noclip()
+        if CurrentConnection then
+            return
+        end
+        
+        CurrentConnection = RunService.Stepped:Connect(function()
+            Set(false)        end)    end
+    
+    function Noclip.Clip()
+        if CurrentConnection then
+            CurrentConnection:Disconnect()            CurrentConnection = nil        end
+        
+        Set(true)    end
+    
+    return Noclip
+end
+end)() end,[39]=function()ImportGlobals(39)return (function(...)return function(Root)
+local TableUtil , Time , t , char =Root:Get('RBXUtil/TableUtil'), Root:Get('Functions/Time'), Root:Get('Modules/t')
+, utf8.char    local TimeConstants = Time.Constants	
+	-- // Constants
+	local Constants = {
+        DiscordInviteCode = 'mkPHtrSyWy',
+		Characters = {
+			Invisible = 10240,
+			BulletPoint = 8226
+		},
+		Emojis = {
+			Unknown = '<:letter_x:1305284794044776622>',
+			Person = '<:person:1305298114265219094>',
+		},
+        LRM_Constants = {
+            Premium = LRM_IsUserPremium or false,
+            DiscordUserId = LRM_LinkedDiscordID or 0,
+            ScriptName = LRM_ScriptName or 'generic',
+            TotalExecutions = LRM_TotalExecutions or 1337,
+            SecondsLeft = LRM_SecondsLeft or 60,
+            UserNote = LRM_UserNote or 'user note',
+            ScriptVersion = LRM_ScriptVersion or '0001',
+        },
+        KeySystemAdProviders = {
+            {
+                Name = 'Lootlabs',
+                KeyLength = TimeConstants.Hour * 12, 
+                CompletionTime = TimeConstants.Minute * 2,
+                Identifier = "LootLabs-buIsuhTFBCaf"
+            },
+            {
+                Name = 'Linkvertise (premium only)',
+                KeyLength = TimeConstants.Hour * 24, 
+                CompletionTime = TimeConstants.Minute * 1, 
+                Identifier = "Linkvertise-EsllfgSWtQqg",
+            },
+        },
+        ProductionRoleInfo = {
+developer={Color = Color3.fromRGB(2, 116, 255)},
+contributor={Color = Color3.fromRGB(255, 255, 127)},
+generic={Color = Color3.new(1, 1, 1)}
+        }
+	}
+	
+	for Index, Character in Constants.Characters do 
+		if typeof(Character) ~= 'number' then continue end		
+		Constants.Characters[Index] = char(Character)	end
+	
+    setmetatable(Constants.Emojis, {
+        __index = function(self, Key)
+    		local Unknown = rawget(self, 'Unknown')    		
+            rawset(self, Key, Unknown)
+            
+            return Unknown
+        end
+    })
+	
+	return Constants
+end
+end)() end,[40]=function()local wax, script, require=ImportGlobals(40)return (function(...)local Vinca = {}Vinca.__index = Vinca
+Vinca.Extensions = {
+    Children = function(Script)
+        local Result = {}
+        for _, Child in Script:GetChildren() do
+            Result[Child.Name] = Child
+        end
+
+        return Result    end,
+}
+
+local cloneref = cloneref or function(Service)
+    return Service
+end
+
+Vinca.Services = setmetatable(
+    {},
+    {
+        __index = function(self, Key)
+            local Success, Service = pcall(game.GetService, game, Key)
+            if Success and Service then
+                Service = cloneref(Service)
+                rawset(self, Key, Service)
+
+                return Service
+            end
+
+            return nil        end,
+    }
+)
+
+function Vinca.new(Root)
+    local self = setmetatable({
+        __vinca = true,
+        Loaded = {},
+        Loading = {},
+        Container = {}, 
+    }, Vinca)
+
+    self.Root = Root or self
+    return self end
+
+function Vinca.is(Object)
+    return Object and typeof(Object) == "table" and rawget(Object, '__vinca')end
+
+function Vinca:Add(Index, Object)
+    assert(not self.Container[Index], 'Index already exists')
+    self.Container[Index] = Object
+
+    return self 
+end
+
+function Vinca:Load(Index)
+    if self.Loaded[Index] ~= nil then
+        return self.Loaded[Index]
+    end
+
+    local Object = self.Container[Index]    assert(Object ~= nil, `Unknown dependency "{Index}"`)    assert(not self.Loading[Index], `Circular dependency at "{Index}"`)
+    self.Loading[Index] = true
+    -- wax support
+    if typeof(Object) == 'table' and Object.ClassName == 'ModuleScript' then
+        Object = require(Object)        -- studio support
+    elseif typeof(Object) == 'Instance' and Object.ClassName == 'ModuleScript' then
+        Object = require(Object)    end
+
+    if typeof(Object) == 'function' then
+        Object = Object(self.Root)    end
+
+    self.Loading[Index] = nil    self.Loaded[Index] = Object
+    return Object
+end
+
+function Vinca:Extend(Objects)
+    for Name, Object in Objects do
+        self:Add(Name, Object)
+    end
+
+    return self
+end
+
+function Vinca:Get(Path)
+    local Current = self
+    for Part in string.gmatch(Path, '[^/]+') do 
+        if Vinca.is(Current) then
+            Current = Current:Load(Part)
+        else
+            Current = Current[Part]
+        end
+
+        assert(Current ~= nil, `Invalid path "{Path}" at "{Part}"`)
+    end
+
+    return Current
+end
+
+return Vinca end)() end} -- [RefId] = Closure
+,{{1,2,{"Shared"},{{27,2,{"Functions"},{{31,2,{"Strings"}},{35,2,{"Hooks"}},{32,2,{"PromptDiscord"}},{30,2,{"Numbers"}},{34,2,{"GetPing"}},{28,2,{"CreateGUID"}},{33,2,{"OutputMessage"}},{29,2,{"Time"}},{37,2,{"BinarySearch"}},{36,2,{"AntiAFK"}},{38,2,{"Noclip"}}}},{21,2,{"RBXUtil"},{{26,2,{"Trove"}},{25,2,{"Tree"}},{22,2,{"TableUtil"}},{24,2,{"Promise"}},{23,2,{"Signal"}}}},{2,2,{"Modules"},{{7,2,{"t"}},{6,2,{"Color"}},{8,2,{"Interface"},{{9,1,{"List"},{{10,1,{"Obsidian"},{{12,2,{"SaveManager"}},{13,2,{"Tabs"},{{14,2,{"Home"}},{15,2,{"Settings"}}}},{16,2,{"ThemeManager"}},{11,2,{"Main"}}}}}}}},{17,2,{"Places"},{{19,2,{"Kick a Lucky Block"}},{18,2,{"Slime RNG"}}}},{20,2,{"Preference"}},{3,2,{"TaskManager"},{{4,2,{"Task"}},{5,2,{"Lock"}}}}}},{40,2,{"Vinca"}},{39,2,{"Constants"}}}}}
+,"0.4.2"
+,"strelizia.cc"
+,      string,task,setmetatable,error,next,table,unpack,coroutine,script,type,require,pcall,tostring,tonumber,_VERSION
+
+local table_insert ,table_remove ,table_freeze ,coroutine_wrap ,string_sub ,string_match ,string_gmatch = table.insert
+,table.remove
+,table.freeze or function(t) return t end -- lol
+,coroutine.wrap
+,string.sub
+,string.match
+,string.gmatch
+
+-- The Lune runtime has its own `task` impl, but it must be imported by its builtin
+-- module path, "@lune/task"
+if _VERSION and string_sub(_VERSION, 1, 4) == "Lune" then
+    local RequireSuccess, LuneTaskLib = pcall(require, "@lune/task")
+    if RequireSuccess and LuneTaskLib then
+        task = LuneTaskLib
+    end
+end
+
+local task_defer = task and task.defer
+
+-- If we're not running on the Roblox engine, we won't have a `task` global
+local Defer ,ClassNameIdBindings ,RefBindings ,ScriptClosures ,ScriptClosureRefIds ,StoredModuleValues ,ScriptsToRun ,SharedEnvironment ,RefChildren = task_defer or function(f, ...)
+    coroutine_wrap(f)(...)
+end
+,{
+    [1] = "Folder",
+    [2] = "ModuleScript",
+    [3] = "Script",
+    [4] = "LocalScript",
+    [5] = "StringValue",
+}
+,{} -- [RefId] = RealObject
+,{}
+,{} -- [ScriptClosure] = RefId
+,{}
+,{}
+,{}
+,{} -- [Ref] = {ChildrenRef, ...}
+
+-- Implemented instance methods
+local InstanceMethods ,InstanceMethodProxies = {
+    GetFullName = { {}, function(self)
+        local Path ,ObjectPointer = self.Name
+,self.Parent
+
+        while ObjectPointer do
+            Path = ObjectPointer.Name .. "." .. Path
+
+            -- Move up the DOM (parent will be nil at the end, and this while loop will stop)
+            ObjectPointer = ObjectPointer.Parent
+        end
+
+        return Path
+    end},
+
+    GetChildren = { {}, function(self)
+        local ReturnArray = {}
+
+        for Child in next, RefChildren[self] do
+            table_insert(ReturnArray, Child)
+        end
+
+        return ReturnArray
+    end},
+
+    GetDescendants = { {}, function(self)
+        local ReturnArray = {}
+
+        for Child in next, RefChildren[self] do
+            table_insert(ReturnArray, Child)
+
+            for _, Descendant in next, Child:GetDescendants() do
+                table_insert(ReturnArray, Descendant)
+            end
+        end
+
+        return ReturnArray
+    end},
+
+    FindFirstChild = { {"string", "boolean?"}, function(self, name, recursive)
+        local Children = RefChildren[self]
+
+        for Child in next, Children do
+            if Child.Name == name then
+                return Child
+            end
+        end
+
+        if recursive then
+            for Child in next, Children do
+                -- Yeah, Roblox follows this behavior- instead of searching the entire base of a
+                -- ref first, the engine uses a direct recursive call
+                return Child:FindFirstChild(name, true)
+            end
+        end
+    end},
+
+    FindFirstAncestor = { {"string"}, function(self, name)
+        local RefPointer = self.Parent
+        while RefPointer do
+            if RefPointer.Name == name then
+                return RefPointer
+            end
+
+            RefPointer = RefPointer.Parent
+        end
+    end},
+
+    -- Just to implement for traversal usage
+    WaitForChild = { {"string", "number?"}, function(self, name)
+        return self:FindFirstChild(name)
+    end},
+}
+,{}
+for MethodName, MethodObject in next, InstanceMethods do
+    local Types ,Method ,EvaluatedTypeInfo = MethodObject[1]
+,MethodObject[2]
+,{}
+    for ArgIndex, TypeInfo in next, Types do
+        local ExpectedType, IsOptional = string_match(TypeInfo, "^([^%?]+)(%??)")
+        EvaluatedTypeInfo[ArgIndex] = {ExpectedType, IsOptional}
+    end
+
+    InstanceMethodProxies[MethodName] = function(self, ...)
+        if not RefChildren[self] then
+            error("Expected ':' not '.' calling member function " .. MethodName, 2)
+        end
+
+        local Args = {...}
+        for ArgIndex, TypeInfo in next, EvaluatedTypeInfo do
+            local RealArg = Args[ArgIndex]
+            local RealArgType ,ExpectedType,IsOptional = type(RealArg)
+,TypeInfo[1],TypeInfo[2]
+
+            if RealArg == nil and not IsOptional then
+                error("Argument " .. RealArg .. " missing or nil", 3)
+            end
+
+            if ExpectedType ~= "any" and RealArgType ~= ExpectedType and not (RealArgType == "nil" and IsOptional) then
+                error("Argument " .. ArgIndex .. " expects type \"" .. ExpectedType .. "\", got \"" .. RealArgType .. "\"", 2)
+            end
+        end
+
+        return Method(self, ...)
+    end
+end
+
+local function CreateRef(className, name, parent)
+    -- `name` and `parent` can also be set later by the init script if they're absent
+
+    -- Extras
+    local Children ,StringValue_Value
+=(setmetatable({}, {__mode = "k"})
+)
+    -- Err funcs
+    local function InvalidMember(member)
+        error(member .. " is not a valid (virtual) member of " .. className .. " \"" .. name .. "\"", 3)
+    end
+    local function ReadOnlyProperty(property)
+        error("Unable to assign (virtual) property " .. property .. ". Property is read only", 3)
+    end
+
+    local Ref ,RefMetatable = {}
+,{}
+
+    RefMetatable.__metatable = false
+
+    RefMetatable.__index = function(_, index)
+        if index == "ClassName" then -- First check "properties"
+            return className
+        elseif index == "Name" then
+            return name
+        elseif index == "Parent" then
+            return parent
+        elseif className == "StringValue" and index == "Value" then
+            -- Supporting StringValue.Value for Rojo .txt file conv
+            return StringValue_Value
+        else -- Lastly, check "methods"
+            local InstanceMethod = InstanceMethodProxies[index]
+
+            if InstanceMethod then
+                return InstanceMethod
+            end
+        end
+
+        -- Next we'll look thru child refs
+        for Child in next, Children do
+            if Child.Name == index then
+                return Child
+            end
+        end
+
+        -- At this point, no member was found; this is the same err format as Roblox
+        InvalidMember(index)
+    end
+
+    RefMetatable.__newindex = function(_, index, value)
+        -- __newindex is only for props fyi
+        if index == "ClassName" then
+            ReadOnlyProperty(index)
+        elseif index == "Name" then
+            name = value
+        elseif index == "Parent" then
+            -- We'll just ignore the process if it's trying to set itself
+            if value == Ref then
+                return
+            end
+
+            if parent ~= nil then
+                -- Remove this ref from the CURRENT parent
+                RefChildren[parent][Ref] = nil
+            end
+
+            parent = value
+
+            if value ~= nil then
+                -- And NOW we're setting the new parent
+                RefChildren[value][Ref] = true
+            end
+        elseif className == "StringValue" and index == "Value" then
+            -- Supporting StringValue.Value for Rojo .txt file conv
+            StringValue_Value = value
+        else
+            -- Same err as __index when no member is found
+            InvalidMember(index)
+        end
+    end
+
+    RefMetatable.__tostring = function()
+        return name
+    end
+
+    setmetatable(Ref, RefMetatable)
+
+    RefChildren[Ref] = Children
+
+    if parent ~= nil then
+        RefChildren[parent][Ref] = true
+    end
+
+    return Ref
+end
+
+-- Create real ref DOM from object tree
+local function CreateRefFromObject(object, parent)
+    local RefId ,ClassNameId ,Properties ,Children = object[1]
+,object[2]
+,object[3] -- Optional
+,object[4] -- Optional
+
+    local ClassName = ClassNameIdBindings[ClassNameId]
+
+    local Name = Properties and table_remove(Properties, 1) or ClassName
+
+    local Ref = CreateRef(ClassName, Name, parent) -- 3rd arg may be nil if this is from root
+    RefBindings[RefId] = Ref
+
+    if Properties then
+        for PropertyName, PropertyValue in next, Properties do
+            Ref[PropertyName] = PropertyValue
+        end
+    end
+
+    if Children then
+        for _, ChildObject in next, Children do
+            CreateRefFromObject(ChildObject, Ref)
+        end
+    end
+
+    return Ref
+end
+
+local RealObjectRoot = CreateRef("Folder", "[" .. EnvName .. "]")
+for _, Object in next, ObjectTree do
+    CreateRefFromObject(Object, RealObjectRoot)
+end
+
+-- Now we'll set script closure refs and check if they should be ran as a BaseScript
+for RefId, Closure in next, ClosureBindings do
+    local Ref = RefBindings[RefId]
+
+    ScriptClosures[Ref] = Closure
+    ScriptClosureRefIds[Ref] = RefId
+
+    local ClassName = Ref.ClassName
+    if ClassName == "LocalScript" or ClassName == "Script" then
+        table_insert(ScriptsToRun, Ref)
+    end
+end
+
+local function LoadScript(scriptRef)
+    local ScriptClassName ,StoredModuleValue = scriptRef.ClassName
+,StoredModuleValues[scriptRef]
+    if StoredModuleValue and ScriptClassName == "ModuleScript" then
+        return unpack(StoredModuleValue)
+    end
+
+    local Closure = ScriptClosures[scriptRef]
+
+    local function FormatError(originalErrorMessage)
+        originalErrorMessage = tostring(originalErrorMessage)
+
+        local VirtualFullName ,OriginalErrorLine,BaseErrorMessage = scriptRef:GetFullName()
+,string_match(originalErrorMessage, "[^:]+:(%d+): (.+)")
+
+        if not OriginalErrorLine or not LineOffsets then
+            return VirtualFullName .. ":*: " .. (BaseErrorMessage or originalErrorMessage)
+        end
+
+        OriginalErrorLine = tonumber(OriginalErrorLine)
+
+        local RefId = ScriptClosureRefIds[scriptRef]
+        local LineOffset = LineOffsets[RefId]
+
+        local RealErrorLine = OriginalErrorLine - LineOffset + 1
+        if RealErrorLine < 0 then
+            RealErrorLine = "?"
+        end
+
+        return VirtualFullName .. ":" .. RealErrorLine .. ": " .. BaseErrorMessage
+    end
+
+    -- If it's a BaseScript, we'll just run it directly!
+    if ScriptClassName == "LocalScript" or ScriptClassName == "Script" then
+        local RunSuccess, ErrorMessage = pcall(Closure)
+        if not RunSuccess then
+            error(FormatError(ErrorMessage), 0)
+        end
+    else
+        local PCallReturn = {pcall(Closure)}
+
+        local RunSuccess = table_remove(PCallReturn, 1)
+        if not RunSuccess then
+            local ErrorMessage = table_remove(PCallReturn, 1)
+            error(FormatError(ErrorMessage), 0)
+        end
+
+        StoredModuleValues[scriptRef] = PCallReturn
+        return unpack(PCallReturn)
+    end
+end
+
+-- We'll assign the actual func from the top of this output for flattening user globals at runtime
+-- Returns (in a tuple order): wax, script, require
+function ImportGlobals(refId)
+    local ScriptRef = RefBindings[refId]
+
+    local function RealCall(f, ...)
+        local PCallReturn = {pcall(f, ...)}
+
+        local CallSuccess = table_remove(PCallReturn, 1)
+        if not CallSuccess then
+            error(PCallReturn[1], 3)
+        end
+
+        return unpack(PCallReturn)
+    end
+
+    -- `wax.shared` index
+    local WaxShared = table_freeze(setmetatable({}, {
+        __index = SharedEnvironment,
+        __newindex = function(_, index, value)
+            SharedEnvironment[index] = value
+        end,
+        __len = function()
+            return #SharedEnvironment
+        end,
+        __iter = function()
+            return next, SharedEnvironment
+        end,
+    }))
+
+    local Global_wax ,Global_script = table_freeze({
+        -- From AOT variable imports
+        version = WaxVersion,
+        envname = EnvName,
+
+        shared = WaxShared,
+
+        -- "Real" globals instead of the env set ones
+        script = script,
+        require = require,
+    })
+,ScriptRef
+
+    local function Global_require(module, ...)
+        local ModuleArgType ,ErrorNonModuleScript ,ErrorSelfRequire = type(module)
+,"Attempted to call require with a non-ModuleScript"
+,"Attempted to call require with self"
+
+        if ModuleArgType == "table" and RefChildren[module]  then
+            if module.ClassName ~= "ModuleScript" then
+                error(ErrorNonModuleScript, 2)
+            elseif module == ScriptRef then
+                error(ErrorSelfRequire, 2)
+            end
+
+            return LoadScript(module)
+        elseif ModuleArgType == "string" and string_sub(module, 1, 1) ~= "@" then
+            -- The control flow on this SUCKS
+
+            if #module == 0 then
+                error("Attempted to call require with empty string", 2)
+            end
+
+            local CurrentRefPointer = ScriptRef
+
+            if string_sub(module, 1, 1) == "/" then
+                CurrentRefPointer = RealObjectRoot
+            elseif string_sub(module, 1, 2) == "./" then
+                module = string_sub(module, 3)
+            end
+
+            local PreviousPathMatch
+            for PathMatch in string_gmatch(module, "([^/]*)/?") do
+                local RealIndex = PathMatch
+                if PathMatch == ".." then
+                    RealIndex = "Parent"
+                end
+
+                -- Don't advance dir if it's just another "/" either
+                if RealIndex ~= "" then
+                    local ResultRef = CurrentRefPointer:FindFirstChild(RealIndex)
+                    if not ResultRef then
+                        local CurrentRefParent = CurrentRefPointer.Parent
+                        if CurrentRefParent then
+                            ResultRef = CurrentRefParent:FindFirstChild(RealIndex)
+                        end
+                    end
+
+                    if ResultRef then
+                        CurrentRefPointer = ResultRef
+                    elseif PathMatch ~= PreviousPathMatch and PathMatch ~= "init" and PathMatch ~= "init.server" and PathMatch ~= "init.client" then
+                        error("Virtual script path \"" .. module .. "\" not found", 2)
+                    end
+                end
+
+                -- For possible checks next cycle
+                PreviousPathMatch = PathMatch
+            end
+
+            if CurrentRefPointer.ClassName ~= "ModuleScript" then
+                error(ErrorNonModuleScript, 2)
+            elseif CurrentRefPointer == ScriptRef then
+                error(ErrorSelfRequire, 2)
+            end
+
+            return LoadScript(CurrentRefPointer)
+        end
+
+        return RealCall(require, module, ...)
+    end
+
+    -- Now, return flattened globals ready for direct runtime exec
+    return Global_wax, Global_script, Global_require
+end
+
+for _, ScriptRef in next, ScriptsToRun do
+    Defer(LoadScript, ScriptRef)
+end
+
+-- AoT adjustment: Load init module (MainModule behavior)
+return LoadScript(RealObjectRoot:GetChildren()[1])
